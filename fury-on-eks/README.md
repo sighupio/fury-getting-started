@@ -12,9 +12,9 @@ This tutorial covers the following steps:
 6. Teardown of the environment.
 
 > ⚠️ AWS **will charge you** to provision the resources used in this tutorial. You should be charged only a few dollars, but we are not responsible for any charges that may incur.
-
+> 
 > ❗️ **Remember to stop all the instances by following all the steps listed in the teardown phase.**
-
+> 
 > 💻 If you prefer trying Fury in a local environment, check out the [Fury on Minikube][fury-on-minikube] tutorial.
 
 ## Prerequisites
@@ -138,8 +138,8 @@ Open the `bootstrap.yml` file with a text editor of your choice and:
 
 
 > ⚠️ The bootstrap provisioner does not create the S3 bucket for you. You can manually create it using the AWS CLI:
-
-```bash
+>
+> ```bash
 aws s3api create-bucket --bucket <S3_BUCKET> --region <S3_BUCKET_REGION> --create-bucket-configuration LocationConstraint=<S3_BUCKET_REGION>
 ```
 
@@ -166,8 +166,8 @@ furyctl bootstrap init --reset
 furyctl bootstrap apply
 ```
 
-
-> 📝 This phase may take some minutes. You can inspect the logs at: `infrastructure/bootstrap/bootstrap/logs/terraform.logs`.
+> 📝 This phase may take some minutes. 
+> You can inspect the logs at: `infrastructure/bootstrap/bootstrap/logs/terraform.logs`.
 
 3. When the `furyctl bootstrap apply` completes, inspect the output:
 
@@ -295,7 +295,8 @@ furyctl cluster apply
 ```
 
 
-> 📝 This phase may take some minutes. You can inspect the logs at: `infrastructure/bootstrap/bootstrap/logs/terraform.logs`.
+> 📝 This phase may take some minutes. 
+> You can inspect the logs at: `infrastructure/bootstrap/bootstrap/logs/terraform.logs`.
 
 When the `furyctl cluster apply` is complete, inspect the output and find the command to retrieve the `KUBECONFIG`.
 
@@ -489,7 +490,7 @@ Now, you can reach the ingresses directly from your browser.
 
 Navigate to <http://forecastle.fury.info> to see all the other ingresses deployed, grouped by namespace.
 
-![Forecastle](../../static/img/fury-demo-eks-forecastle.png)
+![Forecastle][forecastle-screenshot]
 
 ### Kibana
 
@@ -512,7 +513,7 @@ Select `@timestamp` as time field and create the index.
 
 Based on our index, now we can read and query the logs. Let's navigate through the menu again, and select `Discover`.
 
-![Kibana](../../static/img/fury-demo-eks-kibana.png)
+![Kibana][kibana-screenshot]
 
 ### Grafana
 
@@ -524,7 +525,7 @@ Fury provides some dashboard already configured to use.
 
 Let's examine an example dashboard. Write `pods` and select the `Kubernetes/Pods` dashboard. This is what you should see:
 
-![Grafana](../../static/img/fury-demo-eks-grafana.png)
+![Grafana][grafana-screenshot]
 
 ## Step 5 (optional) - Deploy additional modules
 
@@ -655,11 +656,14 @@ I hope you enjoyed the tutorial... TBC
 [fury-on-eks]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-eks
 [fury-on-gke]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-gke
 
-[fury-modules]: 🔥🔥🔥
-
 [furyagent-repository]: https://github.com/sighupio/furyagent
 
 [provisioner-bootstrap-aws-reference]: https://docs.kubernetesfury.com/docs/cli-reference/furyctl/provisioners/aws-bootstrap/
 
 [tunnelblick]: https://tunnelblick.net/downloads.html
 [openvpn-connect]: https://openvpn.net/vpn-client/
+
+[kibana-screenshoot]: ../utils/images/kibana.png
+[grafana-screenshoot]: ../utils/images/grafana.png
+[cerebro-screenshoot]: ../utils/images/cerebro.png
+[forecastle-screenshoot]: ../utils/images/forecastle.png
