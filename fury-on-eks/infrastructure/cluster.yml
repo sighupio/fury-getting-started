@@ -1,0 +1,28 @@
+kind: Cluster
+metadata:
+  name: fury-eks-demo
+spec:
+  version: 1.18
+  network: <VPC_ID>
+  subnetworks:
+  - <PRIVATE_SUBNET1_ID>
+  - <PRIVATE_SUBNET2_ID>
+  - <PRIVATE_SUBNET3_ID>
+  dmzCIDRRange:
+  - 10.0.0.0/16
+  sshPublicKey: example-ssh-key
+  nodePools:
+  - name: fury
+    version: null
+    minSize: 3
+    maxSize: 3 
+    instanceType: t3.large
+    volumeSize: 50
+executor:
+  # state:
+  #   backend: s3
+  #   config:
+  #     bucket: <S3_BUCKET>
+  #     key: <MY_KEY> 
+  #     region: <S3_BUCKET_REGION>
+provisioner: eks
