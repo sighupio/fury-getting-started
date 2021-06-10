@@ -1,0 +1,80 @@
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    forecastle.stakater.com/expose: "true"
+    forecastle.stakater.com/appName: "Forecastle"
+    forecastle.stakater.com/icon: "https://raw.githubusercontent.com/stakater/Forecastle/master/assets/web/forecastle-round-100px.png"
+  name: forecastle
+  namespace: ingress-nginx
+spec:
+  rules:
+  - host: forecastle.fury.info
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: forecastle
+          servicePort: 80
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    forecastle.stakater.com/expose: "true"
+    forecastle.stakater.com/appName: "Cerebro"
+    forecastle.stakater.com/icon: "https://github.com/stakater/ForecastleIcons/raw/master/cerebro.png"
+  name: cerebro
+  namespace: logging
+spec:
+  rules:
+  - host: cerebro.fury.info
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: cerebro
+          servicePort: http
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    forecastle.stakater.com/expose: "true"
+    forecastle.stakater.com/appName: "Kibana"
+    forecastle.stakater.com/icon: "https://github.com/stakater/ForecastleIcons/raw/master/kibana.png"
+  name: kibana
+  namespace: logging
+spec:
+  rules:
+  - host: kibana.fury.info
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: kibana
+          servicePort: http
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    forecastle.stakater.com/expose: "true"
+    forecastle.stakater.com/appName: "Grafana"
+    forecastle.stakater.com/icon: "https://github.com/stakater/ForecastleIcons/raw/master/grafana.png"
+  name: grafana
+  namespace: monitoring
+spec:
+  rules:
+    - host: grafana.fury.info
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: grafana
+              servicePort: http

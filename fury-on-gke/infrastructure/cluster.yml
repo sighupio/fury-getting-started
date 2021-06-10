@@ -1,0 +1,29 @@
+kind: Cluster
+metadata:
+  name: fury-gcp-demo
+spec:
+  version: 1.18
+  network: fury-gcp-demo
+  subnetworks: 
+  - 'fury-gcp-demo-cluster-subnet'
+  - 'fury-gcp-demo-cluster-pod-subnet'
+  - 'fury-gcp-demo-cluster-service-subnet'
+  dmzCIDRRange: 10.0.0.0/16
+  sshPublicKey: example-ssh-key
+  tags: {} 
+  nodePools: 
+  - name: fury
+    version: null
+    minSize: 3
+    maxSize: 3 
+    subnetworks: 
+    - "europe-west3-c"
+    instanceType: "n1-standard-2"
+    volumeSize: 50
+# executor:
+#   state:
+#     backend: gcs
+#     config:
+#       bucket: <GCS_BUCKET>
+#       prefix: terraform/cluster
+provisioner: gke
