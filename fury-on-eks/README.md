@@ -35,7 +35,7 @@ To follow this tutorial, you need:
 2. Run the `fury-eks` docker image:
 
 ```bash
-docker run -ti -v $PWD:/demo docker run -ti -v $PWD:/demo registry.sighup.io/delivery/fury-eks
+docker run -ti -v $PWD:/demo docker run -ti -v $PWD:/demo registry.sighup.io/delivery/fury-getting-started
 ```
 
 3. Clone the [fury getting started repository][fury-getting-started-repository] containing all the example code used in this tutorial:
