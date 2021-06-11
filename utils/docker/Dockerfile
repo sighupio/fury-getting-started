@@ -3,6 +3,7 @@ FROM alpine:3.10
 LABEL maintainer="niccolo@sighup.io"
 
 ENV AWSCLI_VERSION 1.19
+ENV GCLOUD_VERSION 344.0.0
 ENV TERRAFORM_VERSION 0.15.0
 ENV KUBECTL_VERSION v1.19.2
 ENV KUSTOMIZE_VERSION v3.6.1
@@ -28,6 +29,14 @@ RUN apk --update --no-cache add \
 
 RUN pip3 install --upgrade pip
 RUN pip3 install requests awscli==${AWSCLI_VERSION}
+
+# Install gcloud
+RUN curl -L https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${GCLOUD_VERSION}-linux-x86_64.tar.gz -o /tmp/google-cloud-sdk-${GCLOUD_VERSION}-linux-x86_64.tar.gz && \
+    mkdir -p /usr/local/gcloud && \
+    tar -zxf /tmp/google-cloud-sdk-${GCLOUD_VERSION}-linux-x86_64.tar.gz -C /usr/local/gcloud/ && \
+    rm /tmp/google-cloud-sdk-${GCLOUD_VERSION}-linux-x86_64.tar.gz
+
+ENV PATH $PATH:/usr/local/gcloud/google-cloud-sdk/bin
 
 # Install Terraform
 RUN curl -L https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip -o /tmp/terraform_${TERRAFORM_VERSION}_linux_amd64.zip && \

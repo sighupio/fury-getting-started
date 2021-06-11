@@ -419,6 +419,50 @@ make apply
 
 In this section, we explore some features of the distribution.
 
+### Setup local DNS
+
+1. Get the address of the internal loadbalancer:
+
+```bash
+# Get the Load Balancer endpoint
+kubectl get svc ingress-nginx -n ingress-nginx
+```
+
+Output:
+
+```bash
+NAME                    TYPE           CLUSTER-IP       EXTERNAL-IP                       PORT(S)                      AGE
+ingress-nginx           LoadBalancer   <SOME_IP>        xxx.elb.eu-west-1.amazonaws.com   80:31080/TCP,443:31443/TCP   103m
+```
+
+The address is listed under `EXTERNAL-IP` column, `xxx.elb.eu-west-1.amazonaws.com` in our case.
+
+2. Resolve the address to get the Load Balancer IP
+
+```bash
+dig xxx.elb.eu-west-1.amazonaws.com
+```
+
+Output:
+
+```bash
+...
+
+;; ANSWER SECTION:
+xxx.elb.eu-west-1.amazonaws.com. 77 IN A <FIRST_IP>
+xxx.elb.eu-west-1.amazonaws.com. 77 IN A <SECOND_IP>
+xxx.elb.eu-west-1.amazonaws.com. 77 IN A <THIRD_IP>
+...
+
+```
+
+3. Add the following line to your local `/etc/hosts`:
+
+```bash
+<FIRST_IP> forecastle.fury.info cerebro.fury.info kibana.fury.info grafana.fury.info
+```
+
+Now, you can reach the ingresses directly from your browser.
 
 ### Forecastle
 
