@@ -432,15 +432,15 @@ Output:
 
 ```bash
 NAME                    TYPE           CLUSTER-IP       EXTERNAL-IP                       PORT(S)                      AGE
-ingress-nginx           LoadBalancer   <SOME_IP>        xxx.elb.eu-west-1.amazonaws.com   80:31080/TCP,443:31443/TCP   103m
+ingress-nginx           LoadBalancer   <SOME_IP>        xxx.europe-west3.lb.demo.internal   80:31080/TCP,443:31443/TCP   103m
 ```
 
-The address is listed under `EXTERNAL-IP` column, `xxx.elb.eu-west-1.amazonaws.com` in our case.
+The address is listed under `EXTERNAL-IP` column, `xxx.europe-west3.lb.demo.internal` in our case.
 
 2. Resolve the address to get the Load Balancer IP
 
 ```bash
-dig xxx.elb.eu-west-1.amazonaws.com
+dig xxx.europe-west3.lb.demo.internal
 ```
 
 Output:
@@ -449,9 +449,9 @@ Output:
 ...
 
 ;; ANSWER SECTION:
-xxx.elb.eu-west-1.amazonaws.com. 77 IN A <FIRST_IP>
-xxx.elb.eu-west-1.amazonaws.com. 77 IN A <SECOND_IP>
-xxx.elb.eu-west-1.amazonaws.com. 77 IN A <THIRD_IP>
+xxx.europe-west3.lb.demo.internal. 77 IN A <FIRST_IP>
+xxx.europe-west3.lb.demo.internal. 77 IN A <SECOND_IP>
+xxx.europe-west3.lb.demo.internal. 77 IN A <THIRD_IP>
 ...
 
 ```
