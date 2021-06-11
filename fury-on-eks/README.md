@@ -485,7 +485,7 @@ Now, you can reach the ingresses directly from your browser.
 
 Navigate to <http://forecastle.fury.info> to see all the other ingresses deployed, grouped by namespace.
 
-![Forecastle][forecastle-screenshot]
+![Forecastle](../utils/images/forecastle.png)
 
 ### Kibana
 
@@ -508,7 +508,7 @@ Select `@timestamp` as time field and create the index.
 
 Based on our index, now we can read and query the logs. Let's navigate through the menu again, and select `Discover`.
 
-![Kibana][kibana-screenshot]
+![Kibana](../utils/images/kibana.png)
 
 ### Grafana
 
@@ -520,7 +520,7 @@ Fury provides some dashboard already configured to use.
 
 Let's examine an example dashboard. Write `pods` and select the `Kubernetes/Pods` dashboard. This is what you should see:
 
-![Grafana][grafana-screenshot]
+![Grafana](../utils/images/grafana.png)
 
 ## Step 5 (optional) - Deploy additional modules
 
@@ -660,8 +660,3 @@ I hope you enjoyed the tutorial... TBC
 
 [tunnelblick]: https://tunnelblick.net/downloads.html
 [openvpn-connect]: https://openvpn.net/vpn-client/
-
-[kibana-screenshoot]: ../utils/images/kibana.png
-[grafana-screenshoot]: ../utils/images/grafana.png
-[cerebro-screenshoot]: ../utils/images/cerebro.png
-[forecastle-screenshoot]: ../utils/images/forecastle.png
