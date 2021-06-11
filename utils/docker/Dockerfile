@@ -9,6 +9,7 @@ ENV KUBECTL_VERSION v1.19.2
 ENV KUSTOMIZE_VERSION v3.6.1
 ENV FURYCTL_VERSION v0.5.0
 ENV FURYAGENT_VERSION v0.2.3
+ENV VELERO_VERSION v1.6.0
 
 RUN apk --update --no-cache add \
   bash \
@@ -59,6 +60,12 @@ RUN curl -L https://github.com/sighupio/furyctl/releases/download/${FURYCTL_VERS
 # Install furyagent
 RUN curl -L https://github.com/sighupio/furyagent/releases/download/${FURYAGENT_VERSION}/furyagent-linux-amd64 -o /usr/local/bin/furyagent && \
   chmod +x /usr/local/bin/furyagent
+
+# Install velero cli
+RUN curl -L https://github.com/vmware-tanzu/velero/releases/download/${VELERO_VERSION}/velero-${VELERO_VERSION}-linux-amd64.tar.gz -o /tmp/velero-${VELERO_VERSION}-linux-amd64.tar.gz && \
+    tar -zxf /tmp/velero-${VELERO_VERSION}-linux-amd64.tar.gz -C /tmp/ && \
+    mv /tmp/velero-${VELERO_VERSION}-linux-amd64/velero /usr/local/bin && \
+    rm /tmp/velero-${VELERO_VERSION}-linux-amd64.tar.gz && rm -rf /tmp/velero-${VELERO_VERSION}-linux-amd64
 
 WORKDIR /demo
 
