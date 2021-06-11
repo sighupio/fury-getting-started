@@ -12,9 +12,9 @@ This tutorial covers the following steps:
 6. Teardown of the environment.
 
 > ⚠️ AWS **will charge you** to provision the resources used in this tutorial. You should be charged only a few dollars, but we are not responsible for any charges that may incur.
-> 
+>
 > ❗️ **Remember to stop all the instances by following all the steps listed in the teardown phase.**
-> 
+>
 > 💻 If you prefer trying Fury in a local environment, check out the [Fury on Minikube][fury-on-minikube] tutorial.
 
 ## Prerequisites
@@ -32,16 +32,17 @@ To follow this tutorial, you need:
 
 1. Open a terminal
 
-2. Run the `fury-eks` docker image:
+2. Clone the [fury getting started repository][fury-getting-started-repository] containing all the example code used in this tutorial:
+
+```bash
+git clone https://github.com/sighupio/fury-getting-started/
+cd fury-getting-started/fury-on-eks
+```
+
+3. Run the `fury-getting-started` docker image:
 
 ```bash
 docker run -ti -v $PWD:/demo docker run -ti -v $PWD:/demo registry.sighup.io/delivery/fury-getting-started
-```
-
-3. Clone the [fury getting started repository][fury-getting-started-repository] containing all the example code used in this tutorial:
-
-```bash
-git clone <REPO_LINK>
 ```
 
 4. Setup your AWS credentials by exporting the following environment variables:
@@ -64,9 +65,9 @@ Default output format [None]: json
 
 You are all set ✌️.
 
-## Step 1 - Automatic provisioning of an EKS Cluster
+## Step 1 - Automatic provisioning of an EKS Cluster with furyctl
 
-You will use `furyctl` to automatically provision an EKS cluster. `furyctl` is a command-line tool developed by SIGHUP to support:
+`furyctl` is a command-line tool developed by SIGHUP to support:
 
 - the automatic provisioning of Kubernetes clusters in various environments.
 - the installation of the Fury distribution.
@@ -136,12 +137,9 @@ Open the `bootstrap.yml` file with a text editor of your choice and:
   - `privateSubnetsCIDRs`
 - (optional) Add the details of an **existing** AWS Bucket to hold the Terraform remote state.
 
-
 > ⚠️ The bootstrap provisioner does not create the S3 bucket for you. You can manually create it using the AWS CLI:
 >
-> ```bash
-aws s3api create-bucket --bucket <S3_BUCKET> --region <S3_BUCKET_REGION> --create-bucket-configuration LocationConstraint=<S3_BUCKET_REGION>
-```
+> `aws s3api create-bucket --bucket <S3_BUCKET> --region <S3_BUCKET_REGION> --create-bucket-configuration LocationConstraint=<S3_BUCKET_REGION>`
 
 Leave the rest as configured. More details about each field can be found [here][provisioner-bootstrap-aws-reference].
 
@@ -150,7 +148,7 @@ Leave the rest as configured. More details about each field can be found [here][
 1. Initialize the bootstrap provisioner:
 
 ```bash
-cd infrastructure/bootstrap
+cd /demo/infrastructure/
 furyctl bootstrap init
 ```
 
@@ -166,8 +164,8 @@ furyctl bootstrap init --reset
 furyctl bootstrap apply
 ```
 
-> 📝 This phase may take some minutes. 
-> You can inspect the logs at: `infrastructure/bootstrap/bootstrap/logs/terraform.logs`.
+> 📝 This phase may take some minutes.
+> Real time logs are available at: `infrastructure/bootstrap/bootstrap/logs/terraform.logs`.
 
 3. When the `furyctl bootstrap apply` completes, inspect the output:
 
@@ -203,10 +201,9 @@ In the cluster provisioning phase, `furyctl`  automatically deploys a battle-tes
 ```bash
 furyagent configure openvpn-client \ 
   --client-name fury \
-  --config /demo/infrastructure/bootstrap/bootstrap/secrets/furyagent.yml \
+  --config /demo/infrastructure/bootstrap/secrets/furyagent.yml \
   > fury.ovpn
 ```
-
 
 > 🕵🏻‍♂️ [Furyagent][furyagent-repository] is a tool developed by SIGHUP to manage OpenVPN and SSH user access to the bastion host.
 
@@ -214,12 +211,12 @@ furyagent configure openvpn-client \
 
 ```bash
 furyagent configure openvpn-client --list \
---config /demo/infrastructure/bootstrap/bootstrap/secrets/furyagent.yml
+--config /demo/infrastructure/bootstrap/secrets/furyagent.yml
 ```
 
 Output:
 
-```
+```bash
 2021-06-07 14:37:52.169664 I | storage.go:146: Item pki/vpn-client/fury.crt found [size: 1094]
 2021-06-07 14:37:52.169850 I | storage.go:147: Saving item pki/vpn-client/fury.crt ...
 2021-06-07 14:37:52.265797 I | storage.go:146: Item pki/vpn/ca.crl found [size: 560]
@@ -276,7 +273,7 @@ provisioner: eks
 
 Open the file with a text editor and replace:
 
-- `<VPC_ID>` with the VPC ID of the previous phase (`vpc-0d2fd9bcb4f68379e`) created in the previous phase.
+- `<VPC_ID>` with the VPC ID (`vpc-0d2fd9bcb4f68379e`) created in the previous phase.
 - `<PRIVATE_SUBNET1_ID>` with ID of the first private subnet ID (`subnet-072b1e3405f662c70`) created in the previous phase.
 - `<PRIVATE_SUBNET2_ID>` with ID of the second private subnet ID (`subnet-subnet-0a23db3b19e5a7ed7`) created in the previous phase.
 - `<PRIVATE_SUBNET3_ID>` with ID of the third private subnet ID (`subnet-08f4930148ab5223f`) created in the previous phase.
@@ -285,8 +282,6 @@ Open the file with a text editor and replace:
 Initialize the cluster provisioner and create the cluster:
 
 ```bash
-cd ../infrastructure/cluster
-
 # Initialize cluster provisioner
 furyctl cluster init
 
@@ -294,9 +289,8 @@ furyctl cluster init
 furyctl cluster apply
 ```
 
-
-> 📝 This phase may take some minutes. 
-> You can inspect the logs at: `infrastructure/bootstrap/bootstrap/logs/terraform.logs`.
+> 📝 This phase may take some minutes.
+> Real time logs are available at: `infrastructure/bootstrap/bootstrap/logs/terraform.logs`.
 
 When the `furyctl cluster apply` is complete, inspect the output and find the command to retrieve the `KUBECONFIG`.
 
@@ -312,13 +306,9 @@ kubectl get nodes
 
 ## Step 2 - Download fury modules
 
-`furyctl` can do a lot more than deploying infrastructure. In this section, you will use `furyctl` to download the monitoring, logging, and ingress modules of the Fury distribution.
+`furyctl` can do a lot more than deploying infrastructure. In this section, you will use `furyctl` to download the monitoring, logging, and ingress modules of the Fury distribution. `furyctl` needs a `Furyfile.yml` to know which modules to download.
 
-The Fury distribution has various modules that you can install. Each module provides specific functionality to your cluster. In this section, we download 
-
-To download the modules, A `Furyfile.yml` tells `furyctl` which modules to download.
-
-In this tutorial, you use the following `Furyfile.yml`:
+For this tutorial, you can use the following `Furyfile.yml` which is located at `/demo/Furyfile.yaml`:
 
 ```yaml
 versions:
@@ -351,14 +341,19 @@ resources:
 Download the modules with `furyctl`:
 
 ```bash
+cd /demo/
 furyctl vendor -H
 ```
 
-Inspect the download modules in the `vendor` folder:
+Inspect the downloaded modules in the `vendor` folder:
 
 ```bash
-$ tree -d vendor -L 2
+$ tree -d /demo/vendor -L 2
+```
 
+Output:
+
+```bash
 vendor
 └── katalog
     ├── ingress
@@ -370,7 +365,7 @@ vendor
 
 Each module is a Kustomize project. Kustomize allows to group together related Kubernetes resources and combine them to create more complex deployment. Moreover, it is flexible, and it enables a simple patching mechanism for additional customization.
 
-To deploy the Fury distribution, use the main `manifests/demo-fury/kustomization.yaml` file:
+To deploy the Fury distribution, use the following `/demo/manifests/demo-fury/kustomization.yaml`:
 
 ```yaml
 resources:
@@ -428,7 +423,7 @@ This `kustomization.yaml`:
 Install the modules:
 
 ```bash
-cd manifest/demo-fury
+cd manifest/
 
 make apply
 # You will see some errors related to CRDs creation, apply twice
@@ -556,18 +551,23 @@ modules:
 And download the new vendor:
 
 ```bash
+cd /demo/
 furyctl vendor -H
 ```
 
 Create the resources using Terraform:
 
 ```bash
-cd terraform/demo-fury
+cd demo/terraform/
+
 terraform init
 terraform plan -out terraform.plan
 terraform apply terraform.plan
+```
 
-# Output the resources to yaml files, so we can use them in kustomize
+Output the resources to yaml files, so we can use them in kustomize
+
+```bash
 terraform output -raw velero_patch > ../../manifests/demo-fury/patches/velero.yml
 terraform output -raw velero_backup_storage_location > ../../manifests/demo-fury/resources/velero-backup-storage-location.yml
 terraform output -raw velero_volume_snapshot_location > ../../manifests/demo-fury/resources/velero-volume-snapshot-location.yml
@@ -577,7 +577,6 @@ Let's add the following lines to `kustomization.yaml`:
 
 ```yaml
 resources:
-
 ...
 
 # Disaster Recovery
@@ -599,27 +598,26 @@ patchesStrategicMerge:
 ...
 ```
 
-Istall the modules with:
+Install the modules as before:
 
 ```bash
-cd manifest/demo-fury
+cd manifest/
 
 make apply
 # If you see some errors, apply twice
-
 ```
 
 ## Step 6 - Teardown
 
-To clean up the environment:
+Clean up the demo environment:
 
 ```bash
 # (Required if you performed Disaster Recovery step)
-cd terraform/demo-fury
+cd /demo/terraform/
 terraform destroy
 
 # Destroy cluster
-cd infrastructure/cluster
+cd infrastructure/
 furyctl cluster destroy
 
 # Find and delete the target groups associated with the Fury demo cluster 
