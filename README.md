@@ -1,3 +1,5 @@
+![Fury Logo](./utils/images/fury_logo.png)
+
 # Fury Getting Started
 
 Getting started guides to deploy the Fury distribution in different environments

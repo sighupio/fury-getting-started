@@ -1,3 +1,5 @@
+![Fury Logo](../utils/images/fury_logo.png)
+
 # Fury on EKS
 
 This step-by-step tutorial guides you to deploy the **Kubernetes Fury Distribution** on an EKS cluster on AWS.
@@ -87,7 +89,7 @@ In the bootstrap phase, `furyctl` automatically provisions:
 
 More details about the bootstrap provisioner can be found [here][provisioner-bootstrap-aws-reference].
 
-#### Configuration
+#### Configure the bootstrap provisioner
 
 The bootstrap provisioner takes a `bootstrap.yml` as input. This file instructs the bootstrap provisioner with all the needed parameters to deploy the networking infrastructure.
 
@@ -165,7 +167,7 @@ furyctl bootstrap apply
 ```
 
 > 📝 This phase may take some minutes.
-> Real time logs are available at: `infrastructure/bootstrap/bootstrap/logs/terraform.logs`.
+> Logs are available at `infrastructure/bootstrap/bootstrap/logs/terraform.logs`.
 
 3. When the `furyctl bootstrap apply` completes, inspect the output:
 
@@ -233,11 +235,11 @@ Output:
 
 4. Connect to the OpenVPN Server via the OpenVPN Client.
 
-#### Provision Cluster
+#### Configure the cluster provisioner
 
 The cluster provisioner takes a `cluster.yml` as input. This file instructs the provisioner with all the needed parameters to deploy the EKS cluster.
 
-In the repository, you can find a template for this file at `infrastructure/bootstrap/cluster.yml`:
+In the repository, you can find a template for this file at `/demo/infrastructure/bootstrap/cluster.yml`:
 
 ```yaml
 kind: Cluster
@@ -279,34 +281,37 @@ Open the file with a text editor and replace:
 - `<PRIVATE_SUBNET3_ID>` with ID of the third private subnet ID (`subnet-08f4930148ab5223f`) created in the previous phase.
 - (optional) Add the details of an **existing** AWS Bucket to hold the Terraform remote state. If you are using the same bucket as before, please specify a different **key**.
 
-Initialize the cluster provisioner and create the cluster:
+#### Provision EKS Cluster
+
+1. Initialize the cluster provisioner:
 
 ```bash
-# Initialize cluster provisioner
 furyctl cluster init
+```
 
-# Create cluster
+Create EKS cluster:
+
+```bash
 furyctl cluster apply
 ```
 
 > 📝 This phase may take some minutes.
-> Real time logs are available at: `infrastructure/bootstrap/bootstrap/logs/terraform.logs`.
+> Logs are available at `infrastructure/bootstrap/bootstrap/logs/terraform.logs`.
 
-When the `furyctl cluster apply` is complete, inspect the output and find the command to retrieve the `KUBECONFIG`.
-
-```bash
-export KUBECONFIG=<PATH_TO_KUBECONFIG>
-```
-
-Test the connection with the cluster:
+3. When the `furyctl cluster apply` is complete, test the connection with the cluster:
 
 ```bash
+export KUBECONFIG=/demo/infrastructure/cluster/secrets/kubeconfig
 kubectl get nodes
 ```
 
 ## Step 2 - Download fury modules
 
-`furyctl` can do a lot more than deploying infrastructure. In this section, you will use `furyctl` to download the monitoring, logging, and ingress modules of the Fury distribution. `furyctl` needs a `Furyfile.yml` to know which modules to download.
+`furyctl` can do a lot more than deploying infrastructure. In this section, you use `furyctl` to download the monitoring, logging, and ingress modules of the Fury distribution.
+
+### Inspect the Furyfile
+
+`furyctl` needs a `Furyfile.yml` to know which modules to download.
 
 For this tutorial, you can use the following `Furyfile.yml` which is located at `/demo/Furyfile.yaml`:
 
@@ -338,17 +343,19 @@ resources:
   - name: ingress/forecastle
 ```
 
-Download the modules with `furyctl`:
+### Download modules
+
+1. Download the modules with `furyctl`:
 
 ```bash
 cd /demo/
 furyctl vendor -H
 ```
 
-Inspect the downloaded modules in the `vendor` folder:
+2. Inspect the downloaded modules in the `vendor` folder:
 
 ```bash
-$ tree -d /demo/vendor -L 2
+tree -d /demo/vendor -L 2
 ```
 
 Output:
@@ -365,7 +372,7 @@ vendor
 
 Each module is a Kustomize project. Kustomize allows to group together related Kubernetes resources and combine them to create more complex deployment. Moreover, it is flexible, and it enables a simple patching mechanism for additional customization.
 
-To deploy the Fury distribution, use the following `/demo/manifests/demo-fury/kustomization.yaml`:
+To deploy the Fury distribution, use the following `/demo/manifests/kustomization.yaml`:
 
 ```yaml
 resources:
@@ -432,11 +439,13 @@ make apply
 
 ## Step 4 - Explore the distribution
 
-In this section, we explore some features of the distribution.
+🚀 Now that the distrbution is finally deployed, you can explore some of the features.
 
 ### Setup local DNS
 
-1. Get the address of the internal loadbalancer:
+To access more easily the ingresses, you will configurure your local DNS to resolve the address of the ingresses to the internal loadbalancer IP:
+
+1. Get the address of the internal load balancer:
 
 ```bash
 # Get the Load Balancer endpoint
@@ -452,7 +461,7 @@ ingress-nginx           LoadBalancer   <SOME_IP>        xxx.elb.eu-west-1.amazon
 
 The address is listed under `EXTERNAL-IP` column, `xxx.elb.eu-west-1.amazonaws.com` in our case.
 
-2. Resolve the address to get the Load Balancer IP
+2. Resolve the address to get the IP:
 
 ```bash
 dig xxx.elb.eu-west-1.amazonaws.com
@@ -524,7 +533,7 @@ Let's examine an example dashboard. Write `pods` and select the `Kubernetes/Pods
 
 ## Step 5 (optional) - Deploy additional modules
 
-We now install other modules:
+Install other modules:
 
 - dr
 - opa
@@ -548,7 +557,7 @@ modules:
 - name: dr/eks-velero
 ```
 
-And download the new vendor:
+Download the new modules in the vendor folders with `furyctl`:
 
 ```bash
 cd /demo/
@@ -601,7 +610,7 @@ patchesStrategicMerge:
 Install the modules as before:
 
 ```bash
-cd manifest/
+cd /demo/manifest/
 
 make apply
 # If you see some errors, apply twice
@@ -611,33 +620,44 @@ make apply
 
 Clean up the demo environment:
 
+1. (Required **only** if you performed the optional step) Destroy the additional Terraform resources for Velero:
+
 ```bash
-# (Required if you performed Disaster Recovery step)
 cd /demo/terraform/
 terraform destroy
+```
 
-# Destroy cluster
-cd infrastructure/
+2. Destroy EKS cluster:
+
+```bash
+cd /demo/infrastructure/
 furyctl cluster destroy
+```
 
-# Find and delete the target groups associated with the Fury demo cluster 
-# cluster using AWS CLI (make sure to use the tag corresponding to your cluster)
+3. Delete the target groups and loadbalancer associated with the EKS cluster using AWS CLI:
+
+```bash
+# Make sure to use the tag corresponding to your cluster
 target_groups=$(aws resourcegroupstaggingapi get-resources \
                 --tag-filters Key=kubernetes.io/cluster/fury-eks-demo,Values=owned  \
                 | jq -r ".ResourceTagMappingList[] | .ResourceARN" | grep targetgroup)
 for tg in $target_groups ; do aws elbv2 delete-target-group --target-group-arn $tg ; done
 
-# Similarly delete the loadbalancer associated with the cluster as well
 loadbalancer=$(aws resourcegroupstaggingapi get-resources  \
                --tag-filters Key=kubernetes.io/cluster/fury-eks-demo,Values=owned \
                | jq -r ".ResourceTagMappingList[] | .ResourceARN" | grep loadbalancer)
 for i in $loadbalancer ; do aws elbv2 delete-load-balancer -load-balancer-arn $i ; done
+```
 
-# Destroy network components
-cd infrastructure/bootstrap
+4. Destroy network infrastructure:
+
+```bash
 furyctl bootstrap destroy
+```
 
-#(Optional) Destroy bucket
+5. (Optional) Destroy the S3 bucket holding the Terraform state
+
+```bash
 aws s3api delete-object --bucket <S3_BUCKET> --key furyctl/bootstrap
 aws s3api delete-object --bucket <S3_BUCKET> --key furyctl/cluster
 aws s3api delete-bucket --bucket <S3_BUCKET>
@@ -645,7 +665,24 @@ aws s3api delete-bucket --bucket <S3_BUCKET>
 
 ## Conclusions
 
-I hope you enjoyed the tutorial... TBC
+Congratulations, you made it! 🥳🥳 
+
+We hope you enjoyed this tour of Fury!
+
+### Issues/Feedback
+
+In case your ran into any problems feel free to open a issue here in GitHub.
+
+### Where to go next?
+
+More tutorials:
+
+- [Fury on GKE][fury-on-gke]
+- [Fury on Minikube][fury-on-gke]
+
+More about Fury:
+
+- [Fury Documentation][fury-docs]
 
 [fury-getting-started-repository]: https://github.com/sighupio/fury-getting-started/
 [fury-getting-started-dockerfile]: https://github.com/sighupio/fury-getting-started/blob/main/utils/docker/Dockerfile
@@ -660,3 +697,6 @@ I hope you enjoyed the tutorial... TBC
 
 [tunnelblick]: https://tunnelblick.net/downloads.html
 [openvpn-connect]: https://openvpn.net/vpn-client/
+
+[fury-docs]: https://docs.kubernetesfury.com
+[fury-docs-modules]: https://docs.kubernetesfury.com/docs/overview/modules/
