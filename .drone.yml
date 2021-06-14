@@ -1,0 +1,26 @@
+kind: pipeline
+name: docker-build
+
+platform:
+  os: linux
+  arch: amd64
+
+trigger:
+  ref:
+    include:
+      - refs/tags/**
+
+
+steps:
+  - name: docker-build
+    image: plugins/docker
+    settings:
+      auto_tag: true
+      username:
+        from_secret: DOCKER_USERNAME
+      password:
+        from_secret: DOCKER_PASSWORD
+      repo: nandajavarma/fury-test
+      tags:
+        - ${DRONE_TAG}
+      dockerfile: ./utils/docker/Dockerfile
