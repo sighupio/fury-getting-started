@@ -1,6 +1,6 @@
 # Fury on GKE
 
-This step-by-step tutorial helps you deploy the **Kubernetes Fury Distribution** on a local minikube cluster.
+This step-by-step tutorial helps you deploy the **Kubernetes Fury Distribution** on a GKE cluster on GCP.
 
 This tutorial covers the following steps:
 
@@ -13,6 +13,7 @@ This tutorial covers the following steps:
 > ⚠️ GCP **will charge you** to provision the resources used in this tutorial. You should be charged only a few dollars, but we are not responsible for any charges that may incur.
 >
 > ❗️ **Remember to stop all the instances by following all the steps listed in the teardown phase.**
+>
 > 💻 If you prefer trying Fury in a local environment, check out the [Fury on Minikube][fury-on-minikube] tutorial.
 
 
@@ -129,8 +130,9 @@ Open the `bootstrap.yml` file with a text editor of your choice and:
 > ⚠️ The bootstrap provisioner does not create the GCS bucket for you. You can manually create it using the gcloud cli:
 >
 > ```bash
-# Make bucket
-gsutil mb gs://<GCS_BUCKET>
+> # Make bucket
+> gsutil mb gs://<GCS_BUCKET>
+> ```
 
 # Enable versioning (recommended for terraform state)
 gsutil versioning set on gs://<GCS_BUCKET>
@@ -470,7 +472,7 @@ Now, you can reach the ingresses directly from your browser.
 
 Navigate to <http://forecastle.fury.info> to see all the other ingresses deployed, grouped by namespace.
 
-![Forecastle][forecastle-screenshot]
+![Forecastle](../utils/images/forecastle.png)
 
 ### Kibana
 
@@ -493,7 +495,7 @@ Select `@timestamp` as time field and create the index.
 
 Based on our index, now we can read and query the logs. Let's navigate through the menu again, and select `Discover`.
 
-![Kibana][kibana-screenshot]
+![Kibana](../utils/images/kibana.png)
 
 ### Grafana
 
@@ -505,7 +507,7 @@ Fury provides some dashboard already configured to use.
 
 Let's examine an example dashboard. Write `pods` and select the `Kubernetes/Pods` dashboard. This is what you should see:
 
-![Grafana][grafana-screenshot]
+![Grafana](../utils/images/grafana.png)
 
 ## Step 5 (optional) - Deploy additional modules
 

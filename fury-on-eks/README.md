@@ -141,7 +141,9 @@ Open the `bootstrap.yml` file with a text editor of your choice and:
 
 > ⚠️ The bootstrap provisioner does not create the S3 bucket for you. You can manually create it using the AWS CLI:
 >
-> `aws s3api create-bucket --bucket <S3_BUCKET> --region <S3_BUCKET_REGION> --create-bucket-configuration LocationConstraint=<S3_BUCKET_REGION>`
+> ```bash
+> aws s3api create-bucket --bucket <S3_BUCKET> --region <S3_BUCKET_REGION> --create-bucket-configuration LocationConstraint=<S3_BUCKET_REGION>
+> ```
 
 Leave the rest as configured. More details about each field can be found [here][provisioner-bootstrap-aws-reference].
 
