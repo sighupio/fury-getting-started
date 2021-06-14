@@ -10,7 +10,7 @@ This tutorial covers the following steps:
 4. Explore some features of the distribution.
 5. Teardown the environment.
 
-> ☁️ If you prefer trying Fury in a cloud environment, check out the [Fury on EKS][fury-on-eks] tutorial or the [Fury on GKE][fury-on-gke] tutorial.
+> ☁️ If you prefer trying Fury in a cloud environment, check out the [Fury on EKS](../fury-on-eks) tutorial or the [Fury on GKE](../fury-on-gke) tutorial.
 
 ## Prerequisites
 
@@ -25,11 +25,11 @@ To follow this tutorial, you need:
 
 1. Open a terminal
 
-2. Clone the [fury getting started repository][fury-getting-started-repository] containing all the example code used in this tutorial:
+2. Clone the [fury getting started repository](https://github.com/sighupio/fury-getting-started) containing all the example code used in this tutorial:
 
 ```bash
 git clone https://github.com/sighupio/fury-getting-started/
-cd fury-getting-started/fury-on-eks
+cd fury-getting-started/fury-on-minikube
 ```
 
 3. Start minikube cluster 
@@ -237,3 +237,11 @@ Fury provides some dashboard already configured to use.
 Let's examine an example dashboard. Write `pods` and select the `Kubernetes/Pods` dashboard. This is what you should see:
 
 ![Grafana](../utils/images/grafana.png)
+
+## Step 6 - Tear down
+
+```bash
+# Execute from your local system, outside Docker container
+cd infrastructure
+make delete
+```
