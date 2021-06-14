@@ -19,7 +19,7 @@ steps:
         from_secret: DOCKER_USERNAME
       password:
         from_secret: DOCKER_PASSWORD
-      repo: nandajavarma/fury-test
+      repo: registry.sighup.io/delivery/fury-getting-started
       tags:
         - ${DRONE_TAG}
       dockerfile: ./utils/docker/Dockerfile
