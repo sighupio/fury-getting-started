@@ -49,7 +49,10 @@ make setup
 4. Run the `fury-getting-started` docker image:
 
 ```bash
-docker run -ti -v $PWD:/demo docker run -ti -v $PWD:/demo registry.sighup.io/delivery/fury-getting-started
+docker run -ti -v $PWD:/demo --net=host registry.sighup.io/delivery/fury-getting-started
+
+# Set kubeconfig path to interact with your cluster
+export KUBECONFIG=/demo/infrastructure/kubeconfig
 ```
 
 ## Step 2 - Download fury modules

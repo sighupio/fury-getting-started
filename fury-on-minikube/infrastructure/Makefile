@@ -4,9 +4,10 @@ memory?=4096
 cpu?=4
 cni?=calico
 nodes?=1
+kubeconfig?=$(shell pwd)/kubeconfig
 
 .PHONY: setup
-setup: minikube addons
+setup: kubeconfig minikube addons
 
 .PHONY: minikube
 minikube:
@@ -22,6 +23,10 @@ minikube:
 addons:
 	minikube addons enable metrics-server
 	minikube addons enable ingress
+
+.PHONY: kubeconfig
+kubeconfig:
+	export KUBECONFIG=$(kubeconfig)
 
 .PHONY: delete
 delete:
