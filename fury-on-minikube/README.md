@@ -30,12 +30,16 @@ To follow this tutorial, you need:
 ```bash
 git clone https://github.com/sighupio/fury-getting-started/
 cd fury-getting-started/fury-on-minikube
+export REPO_FOLDER=$PWD
 ```
 
 3. Start minikube cluster 
 
 ```bash
-cd infrastructure
+cd $REPO_FOLDER/infrastructure
+
+# Remember to export kubeconfig environment variable or you won't be able to access the cluster from docker image!
+export KUBECONFIG=$REPO_FOLDER/infrastructure/kubeconfig
 make setup
 ```
 
@@ -49,10 +53,15 @@ make setup
 4. Run the `fury-getting-started` docker image:
 
 ```bash
-docker run -ti -v $PWD:/demo --net=host registry.sighup.io/delivery/fury-getting-started
+docker run -ti -v $REPO_FOLDER:/demo --net=host registry.sighup.io/delivery/fury-getting-started
 
 # Set kubeconfig path to interact with your cluster
 export KUBECONFIG=/demo/infrastructure/kubeconfig
+
+# Test connection
+kubectl get nodes
+NAME       STATUS   ROLES    AGE   VERSION
+minikube   Ready    master   16m   v1.19.4
 ```
 
 ## Step 2 - Download fury modules
