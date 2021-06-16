@@ -14,11 +14,16 @@ trigger:
 steps:
   - name: docker-build
     image: plugins/docker
+    privileged: true
+    environment:
+      HOME: "/tmp"
     settings:
+      debug: true
       username:
-        from_secret: DOCKER_USERNAME
+        from_secret: docker_username
       password:
-        from_secret: DOCKER_PASSWORD
+        from_secret: docker_password
+      registry: registry.sighup.io
       repo: registry.sighup.io/delivery/fury-getting-started
       tags:
         - ${DRONE_TAG}
