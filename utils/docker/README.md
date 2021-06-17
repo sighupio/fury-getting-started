@@ -4,14 +4,14 @@ Docker image containing all the necessary tools to deploy fury on EKS
 
 | Docker image           | Latest Tag |
 |------------------------|------------|
-| `fury-getting-started` | 0.0.1      |
+| `fury-getting-started` | 0.0.2      |
 
 ## Publish new version to Harbor
 
 After having modified the Dockerfile. Select the appropriate tag:
 
 ```bash
-export TAG=0.0.2 # Semantic Versioning: Major.minor.patch
+export TAG=0.0.3 # Semantic Versioning: Major.minor.patch
 ```
 
 Build the image:
@@ -38,6 +38,8 @@ Tag the local image:
 
 ```bash
 docker tag fury-getting-started:$TAG registry.sighup.io/delivery/fury-getting-started:$TAG
+
+docker tag registry.sighup.io/delivery/fury-getting-started:$TAG registry.sighup.io/delivery/fury-getting-started:latest
 ```
 
 Push the image:

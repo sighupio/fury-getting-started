@@ -24,6 +24,8 @@ RUN apk --update --no-cache add \
   tar \
   wget \
   vim \
+  nano \
+  make \
   make \
   tree \
   bind-tools
