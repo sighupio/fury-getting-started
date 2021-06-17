@@ -129,7 +129,7 @@ executor:
   #   backend: s3
   #   config:
   #     bucket: <S3_BUCKET>
-  #     key: fury/boostrap
+  #     key: furyctl/boostrap
   #     region: <S3_BUCKET_REGION>
 provisioner: aws
 ```
@@ -178,7 +178,7 @@ executor:
      region: <S3_BUCKET_REGION>
 ```
 
-4. Replace `<S3_BUCKET>` and `<S3_BUCKET_REGION>` placeholders with the correct values from the previous commands:
+4. Replace the `<S3_BUCKET>` and `<S3_BUCKET_REGION>` placeholders with the correct values from the previous commands:
 
 ```yaml
 ...
@@ -214,7 +214,7 @@ furyctl bootstrap apply
 ```
 
 > 📝 This phase may take some minutes.
-> Logs are available at `infrastructure/bootstrap/bootstrap/logs/terraform.logs`.
+> Logs are available at `/demo/infrastructure/bootstrap/logs/terraform.logs`.
 
 3. When the `furyctl bootstrap apply` completes, inspect the output:
 
@@ -316,7 +316,7 @@ executor:
   #   backend: s3
   #   config:
   #     bucket: <S3_BUCKET>
-  #     key: fury/cluster
+  #     key: furyctl/cluster
   #     region: <S3_BUCKET_REGION>
 provisioner: eks
 ```
@@ -327,7 +327,7 @@ Open the file with a text editor and replace:
 - `<PRIVATE_SUBNET1_ID>` with ID of the first private subnet ID (`subnet-072b1e3405f662c70`) created in the previous phase.
 - `<PRIVATE_SUBNET2_ID>` with ID of the second private subnet ID (`subnet-subnet-0a23db3b19e5a7ed7`) created in the previous phase.
 - `<PRIVATE_SUBNET3_ID>` with ID of the third private subnet ID (`subnet-08f4930148ab5223f`) created in the previous phase.
-- (optional) Add the details of an **existing** AWS Bucket to hold the Terraform remote state. If you are using the same bucket as before, please specify a different **key**.
+- (optional) As before, add the details of an the S3 Bucket that holds the Terraform remote state.
 
 #### Provision EKS Cluster
 
@@ -344,9 +344,9 @@ furyctl cluster apply
 ```
 
 > 📝 This phase may take some minutes.
-> Logs are available at `infrastructure/bootstrap/bootstrap/logs/terraform.logs`.
+> Logs are available at `/demo/infrastructure/cluster/logs/terraform.logs`.
 
-3. When the `furyctl cluster apply` is complete, test the connection with the cluster:
+3. When the `furyctl cluster apply` completes, test the connection with the cluster:
 
 ```bash
 export KUBECONFIG=/demo/infrastructure/cluster/secrets/kubeconfig
@@ -361,7 +361,7 @@ kubectl get nodes
 
 `furyctl` needs a `Furyfile.yml` to know which modules to download.
 
-For this tutorial, you can use the following `Furyfile.yml` which is located at `/demo/Furyfile.yaml`:
+For this tutorial, use the `Furyfile.yml` located at `/demo/Furyfile.yaml`:
 
 ```yaml
 versions:
@@ -391,9 +391,9 @@ resources:
   - name: ingress/forecastle
 ```
 
-### Download modules
+### Download Fury modules
 
-1. Download the modules with `furyctl`:
+1. Download the Fury modules with `furyctl`:
 
 ```bash
 cd /demo/
@@ -420,7 +420,7 @@ vendor
 
 Each module is a Kustomize project. Kustomize allows to group together related Kubernetes resources and combine them to create more complex deployment. Moreover, it is flexible, and it enables a simple patching mechanism for additional customization.
 
-To deploy the Fury distribution, use the following `/demo/manifests/kustomization.yaml`:
+To deploy the Fury distribution, use the following root `kustomization.yaml` located `/demo/manifests/kustomization.yaml`:
 
 ```yaml
 resources:
@@ -471,32 +471,37 @@ patchesStrategicMerge:
 
 This `kustomization.yaml`:
 
-- references the modules downloaded in the previous sections
+- references the modules downloaded in the previous section
 - patches the upstream modules (e.g. `patches/elasticsearch-resources.yml` limits the resources requested by elastic search)
 - deploys some additional custom resources (e.g. `resources/ingress.yml`)
 
 Install the modules:
 
 ```bash
-cd manifest/
+cd /demo/manifests/
 
 make apply
-# You will see some errors related to CRDs creation, apply twice
+# Due to some chicken-egg 🐓🥚 problem with custom resources you have to apply again
 make apply
 ```
 
 ## Step 4 - Explore the distribution
 
-🚀 Now that the distribution is finally deployed, you can explore some of the features.
+🚀 The distribution is finally deployed! In this section you explore some of its features.
 
 ### Setup local DNS
 
-To access the ingresses mmore easily , you can configurure your local DNS to resolve the address of the ingresses to the internal loadbalancer IP:
+In Step 3, alongside the distribution, you have deployed Kubernetes ingresses to expose underlying services at the following HTTP routes:
+
+- `forecastle.fury.info`
+- `grafana.fury.info`
+- `kibana.fury.info`
+
+To access the ingresses more easily via the browser, configure your local DNS to resolve the ingresses to the internal loadbalancer IP:
 
 1. Get the address of the internal load balancer:
 
 ```bash
-# Get the Load Balancer endpoint
 kubectl get svc ingress-nginx -n ingress-nginx
 ```
 
@@ -534,7 +539,7 @@ xxx.elb.eu-west-1.amazonaws.com. 77 IN A <THIRD_IP>
 <FIRST_IP> forecastle.fury.info cerebro.fury.info kibana.fury.info grafana.fury.info
 ```
 
-Now, you can reach the ingresses directly from your browser.
+4. Open a browser and navigate to <http://forecastle.fury.info>
 
 ### Forecastle
 
@@ -546,49 +551,65 @@ Navigate to <http://forecastle.fury.info> to see all the other ingresses deploye
 
 ### Kibana
 
-[Kibana](https://github.com/elastic/kibana) is an open-source analytics and visualization platform for Elasticsearch. Kibana lets you perform advanced data analysis and visualize data in various charts, tables, and maps. You can use it to search, view, and interact with data
-stored in Elasticsearch indices.
+[Kibana](https://github.com/elastic/kibana) is an open-source analytics and visualization platform for Elasticsearch. Kibana lets you perform advanced data analysis and visualize data in various charts, tables, and maps. You can use it to search, view, and interact with data stored in Elasticsearch indices.
 
 Navigate to <http://kibana.fury.info> or click the Kibana icon from Forecastle.
 
-Click on `Explore on my own` and you should see the dashboard.
+Click on `Explore on my own` to see the main dashboard.
 
 #### Create a Kibana index
 
-Open the menu on the right-top corner of the page, and select `Stack Management` (it's on the very bottom of the menu). Then select `Index patterns` and click on `Create index pattern`.
+1. Open the menu on the right-top corner of the page.
 
-Write `kubernetes-*` as index pattern and flag *Include system and hidden indices*, then click `Next step`.
+2. Select `Stack Management` (it's on the very bottom of the menu). 
 
-Select `@timestamp` as time field and create the index.
+3. Select `Index patterns` and click on `Create index pattern`.
+
+4. Write `kubernetes-*` as index pattern and flag *Include system and hidden indices*
+
+5. Click `Next step`.
+
+6. Select `@timestamp` as time field.s
+
+7. Click create the index.
 
 #### Read the logs
 
-Based on our index, now we can read and query the logs. Let's navigate through the menu again, and select `Discover`.
+Based on the index you created, you can read and query the logs.
+Navigate through the menu again, and select `Discover`.
 
 ![Kibana](../utils/images/kibana.png)
 
 ### Grafana
 
-[Grafana](https://github.com/grafana/grafana) is an open-source platform for monitoring and observability. It allows you to query, visualize, alert on and understand your metrics.
+[Grafana](https://github.com/grafana/grafana) is an open-source platform for monitoring and observability. Grafana allows you to query, visualize, alert on and understand your metrics.
 
 Navigate to <http://grafana.fury.info> or click the Grafana icon from Forecastle.
 
-Fury provides some dashboard already configured to use.
+Fury provides some pre-configured dashboard to visualize the state of the cluster. Examine an example dashboard:
 
-Let's examine an example dashboard. Write `pods` and select the `Kubernetes/Pods` dashboard. This is what you should see:
+1. Click on the search icon on the left sidebar.
+
+2. Write `pods` and click enter.
+
+3. Select the `Kubernetes/Pods` dashboard.
+
+This is what you should see:
 
 ![Grafana](../utils/images/grafana.png)
 
 ## Step 5 (optional) - Deploy additional modules
 
-Install other modules:
+The Fury Distribution is a modular distribution. You can install other modules to extend its functionality. A list of all the available modules can be found [here][fury-docs-modules]
 
-- dr
-- opa
+In this section, you deploy the following additional modules:
 
-To deploy Velero as Disaster Recovery solution, we need to have credentials to interact with `aws` volumes.
+- `Fury Disaster Recovery Module` - a Disaster Recovery solution based on Velero.
+- `Fury OPA Module` - a policy engine based on OPA Gatekeeper.
 
-Let's add a module at the bottom of `Furyfile.yml`:
+> The `Fury Disaster Recovery Module` requires additional infrastructure to function. These required resources are deployed via Terraform.
+
+1. Edit the `Furyfile.yml` and add the new modules:
 
 ```yaml
 versions:
@@ -599,20 +620,19 @@ versions:
 bases:
   ...
   - name: dr/velero
-  - name: opa/gatekeeper
 
 modules:
 - name: dr/eks-velero
 ```
 
-Download the new modules in the vendor folders with `furyctl`:
+2. Download the modules in the vendor folders with `furyctl`:
 
 ```bash
 cd /demo/
 furyctl vendor -H
 ```
 
-Create the resources using Terraform:
+3. Create the resources for the Velero module using Terraform:
 
 ```bash
 cd demo/terraform/
@@ -622,7 +642,7 @@ terraform plan -out terraform.plan
 terraform apply terraform.plan
 ```
 
-Output the resources to yaml files, so we can use them in kustomize
+4. Gather some output manifests from Terraform:
 
 ```bash
 terraform output -raw velero_patch > ../../manifests/demo-fury/patches/velero.yml
@@ -630,7 +650,7 @@ terraform output -raw velero_backup_storage_location > ../../manifests/demo-fury
 terraform output -raw velero_volume_snapshot_location > ../../manifests/demo-fury/resources/velero-volume-snapshot-location.yml
 ```
 
-Let's add the following lines to `kustomization.yaml`:
+5. Add the following lines to `kustomization.yaml`:
 
 ```yaml
 resources:
@@ -655,20 +675,36 @@ patchesStrategicMerge:
 ...
 ```
 
-Install the modules as before:
+6. Install the modules as before:
 
 ```bash
 cd /demo/manifest/
-
 make apply
-# If you see some errors, apply twice
 ```
+
+### (optional) Create a backup with Velero
+
+1. Create a backup with the `velero` command-line utility:
+
+```bash
+velero backup create --from-schedule manifests test -n kube-system
+```
+
+2. Check that it ran succesfully:
+
+```bash
+velero backup get -n kube-system
+```
+
+### (optional) Enforce a OPA Policy
+
+T.B.D.
 
 ## Step 6 - Teardown
 
 Clean up the demo environment:
 
-1. (Required **only** if you performed the optional step) Destroy the additional Terraform resources for Velero:
+1. (Required **only** if you performed the optional steps) Destroy the additional Terraform resources used by Velero:
 
 ```bash
 cd /demo/terraform/
@@ -705,9 +741,9 @@ furyctl bootstrap destroy
 5. (Optional) Destroy the S3 bucket holding the Terraform state
 
 ```bash
-aws s3api delete-object --bucket <S3_BUCKET> --key furyctl/bootstrap
-aws s3api delete-object --bucket <S3_BUCKET> --key furyctl/cluster
-aws s3api delete-bucket --bucket <S3_BUCKET>
+aws s3api delete-object --bucket $S3_BUCKET --key furyctl/bootstrap
+aws s3api delete-object --bucket $S3_BUCKET --key furyctl/cluster
+aws s3api delete-bucket --bucket $S3_BUCKET
 ```
 
 6. Exit from the docker container:
