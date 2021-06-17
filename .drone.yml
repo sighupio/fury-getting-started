@@ -23,5 +23,6 @@ steps:
       registry: registry.sighup.io
       repo: registry.sighup.io/delivery/fury-getting-started
       tags:
+        - latest
         - ${DRONE_TAG}
       dockerfile: ./utils/docker/Dockerfile
