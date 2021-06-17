@@ -1,0 +1,28 @@
+kind: pipeline
+name: docker-build
+
+platform:
+  os: linux
+  arch: amd64
+
+trigger:
+  ref:
+    include:
+      - refs/tags/**
+
+
+steps:
+  - name: docker-build
+    image: plugins/docker
+    settings:
+      debug: true
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+      registry: registry.sighup.io
+      repo: registry.sighup.io/delivery/fury-getting-started
+      tags:
+        - latest
+        - ${DRONE_TAG}
+      dockerfile: ./utils/docker/Dockerfile
