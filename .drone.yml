@@ -14,9 +14,6 @@ trigger:
 steps:
   - name: docker-build
     image: plugins/docker
-    privileged: true
-    environment:
-      HOME: "/tmp"
     settings:
       debug: true
       username:
