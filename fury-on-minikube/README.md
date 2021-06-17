@@ -18,10 +18,10 @@ This tutorial assumes some basic familiarity with Kubernetes.
 
 To follow this tutorial, you need:
 
-- **Minikube** on your local system. Follow the [installation guide](https://minikube.sigs.k8s.io/docs/start/).
+- **Minikube** - follow the [installation guide](https://minikube.sigs.k8s.io/docs/start/).
 - **Docker** - a [Docker image]([fury-getting-started]) containing `furyctl` and all the necessary tools is provided.
 
-## Step 1 - Local provisioning of Cluster with minikube
+### Setup and initialize the environment
 
 1. Open a terminal
 
@@ -30,36 +30,44 @@ To follow this tutorial, you need:
 ```bash
 git clone https://github.com/sighupio/fury-getting-started/
 cd fury-getting-started/fury-on-minikube
-export REPO_FOLDER=$PWD
 ```
 
-3. Start minikube cluster 
+## Step 1 - Start minikube cluster
+
+1. Start minikube cluster:
 
 ```bash
-cd $REPO_FOLDER/infrastructure
-
-# Remember to export kubeconfig environment variable or you won't be able to access the cluster from docker image!
-export KUBECONFIG=$REPO_FOLDER/infrastructure/kubeconfig
+export REPO_DIR=$PWD && cd $REPO_DIR/infrastructure
+export KUBECONFIG=$REPO_DIR/infrastructure/kubeconfig
 make setup
 ```
 
-> ⚠️ This command will spin up by default a single-node Kubernetes v1.19.4 cluster, using VirtualBox driver: the node has 4 CPUs, 4096MB RAM and 20,000 MB Disk. Please have a look at [Makefile](infrastructure/Makefile) if you need to change some values.
-> You can also pass custom parameters, for example:
+> ⚠️ This command will spin up by default a single-node Kubernetes v1.19.4 cluster, using VirtualBox driver: the node has 4 CPUs, 4096MB RAM and 20,000 MB Disk. Please have a look at [Makefile](infrastructure/Makefile) to change the default values.
+> You can also pass custom parameters:
 >
 > ```bash
 > make setup cpu=2 memory=2048
 > ```
 
-4. Run the `fury-getting-started` docker image:
+2. Run the `fury-getting-started` docker image:
 
 ```bash
-docker run -ti -v $REPO_FOLDER:/demo --net=host registry.sighup.io/delivery/fury-getting-started
+docker run -ti \
+  -v $REPO_DIR:/demo \
+  --env KUBECONFIG=/demo/infrastructure/kubeconfig \
+  --net=host \
+   registry.sighup.io/delivery/fury-getting-started
+```
 
-# Set kubeconfig path to interact with your cluster
-export KUBECONFIG=/demo/infrastructure/kubeconfig
+5. Test connection:
 
-# Test connection
+```bash
 kubectl get nodes
+```
+
+Output:
+
+```bash
 NAME       STATUS   ROLES    AGE   VERSION
 minikube   Ready    master   16m   v1.19.4
 ```
@@ -106,7 +114,7 @@ cd /demo/
 furyctl vendor -H
 ```
 
-2. Inspect the downloaded modules in the `vendor` folder:
+2. Inspect the downloaded modules in the `vendor` DIR:
 
 ```bash
 tree -d /demo/vendor -L 2
@@ -252,8 +260,9 @@ Let's examine an example dashboard. Write `pods` and select the `Kubernetes/Pods
 
 ## Step 6 - Tear down
 
-```bash
+1. 
 # Execute from your local system, outside Docker container
+```bash
 cd infrastructure
 make delete
 ```

@@ -16,7 +16,6 @@ This tutorial covers the following steps:
 >
 > 💻 If you prefer trying Fury in a local environment, check out the [Fury on Minikube][fury-on-minikube] tutorial.
 
-
 ## Prerequisites
 
 This tutorial assumes some basic familiarity with Kubernetes and GCP. Some experience with Terraform is helpful but not strictly required.

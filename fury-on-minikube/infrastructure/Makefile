@@ -6,7 +6,7 @@ cni?=calico
 nodes?=1
 
 .PHONY: setup
-setup: kubeconfig minikube addons
+setup: minikube addons
 
 .PHONY: minikube
 minikube:
