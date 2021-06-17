@@ -52,7 +52,7 @@ make setup
 2. Run the `fury-getting-started` docker image:
 
 ```bash
-docker run -ti \
+docker run -ti --rm \
   -v $REPO_DIR:/demo \
   --env KUBECONFIG=/demo/infrastructure/kubeconfig \
   --net=host \
@@ -260,9 +260,17 @@ Let's examine an example dashboard. Write `pods` and select the `Kubernetes/Pods
 
 ## Step 6 - Tear down
 
-1. 
-# Execute from your local system, outside Docker container
+1. Stop the docker container:
+
 ```bash
-cd infrastructure
+# Execute the command inside the Docker container
+exit
+```
+
+2. Delete the minikube cluster:
+
+```bash
+# Execute the commands from your local system, outside the Docker container
+cd $REPO_DIR/infrastructure
 make delete
 ```
