@@ -155,7 +155,7 @@ export S3_BUCKET=fury-demo-eks              # Use a different name
 export S3_BUCKET_REGION=$AWS_DEFAULT_REGION # You can use the same region of before
 ```
 
-1. Create S3 bucket using the AWS CLI:
+2. Create S3 bucket using the AWS CLI:
 
 ```bash
 aws s3api create-bucket \
@@ -164,7 +164,7 @@ aws s3api create-bucket \
   --create-bucket-configuration LocationConstraint=$S3_BUCKET_REGION
 ```
 
-2. Once created, uncomment the `spec.executor.state` block in the `/demo/infrastructure/bootstrap.yml` file:
+3. Once created, uncomment the `spec.executor.state` block in the `/demo/infrastructure/bootstrap.yml` file:
 
 ```yaml
 ...
@@ -178,7 +178,7 @@ executor:
      region: <S3_BUCKET_REGION>
 ```
 
-3. Replace `<S3_BUCKET>` and `<S3_BUCKET_REGION>` placeholders with the correct values from the previous commands:
+4. Replace `<S3_BUCKET>` and `<S3_BUCKET_REGION>` placeholders with the correct values from the previous commands:
 
 ```yaml
 ...
@@ -187,9 +187,9 @@ executor:
   state:
    backend: s3
    config:
-     bucket: fury-demo-eks
+     bucket: fury-demo-eks # example value
      key: fury/boostrap
-     region: eu-central-1
+     region: eu-central-1  # example value
 ```
 
 #### Provision networking infrastructure
