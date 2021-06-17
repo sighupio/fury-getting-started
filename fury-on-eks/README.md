@@ -13,8 +13,7 @@ This tutorial covers the following steps:
 5. (optional) Deploy additional modules of the Fury distribution
 6. Teardown of the environment
 
-> ⚠️ AWS **charges you** to provision the resources used in this tutorial. You should be charged only a few dollars.
-> 💸 But we are not responsible for any costs that incur.
+> ⚠️ AWS **charges you** to provision the resources used in this tutorial. You should be charged only a few dollars, but we are not responsible for any costs that incur.
 >
 > ❗️ **Remember to stop all the instances by following all the steps listed in the teardown phase.**
 >
@@ -214,6 +213,7 @@ furyctl bootstrap apply
 ```
 
 > 📝 This phase may take some minutes.
+>
 > Logs are available at `/demo/infrastructure/bootstrap/logs/terraform.logs`.
 
 3. When the `furyctl bootstrap apply` completes, inspect the output:
@@ -337,13 +337,14 @@ Open the file with a text editor and replace:
 furyctl cluster init
 ```
 
-Create EKS cluster:
+2. Create EKS cluster:
 
 ```bash
 furyctl cluster apply
 ```
 
 > 📝 This phase may take some minutes.
+>
 > Logs are available at `/demo/infrastructure/cluster/logs/terraform.logs`.
 
 3. When the `furyctl cluster apply` completes, test the connection with the cluster:
