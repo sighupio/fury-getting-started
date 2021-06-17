@@ -31,7 +31,7 @@ To follow this tutorial, you need:
 
 1. Open a terminal
 
-2. Run the `fury-gke` docker image:
+2. Run the `fury-getting-started` docker image:
 
 ```bash
 docker run -ti -v $PWD:/demo docker run -ti -v $PWD:/demo registry.sighup.io/delivery/fury-getting-started

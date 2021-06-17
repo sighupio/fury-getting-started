@@ -6,14 +6,15 @@ This step-by-step tutorial guides you to deploy the **Kubernetes Fury Distributi
 
 This tutorial covers the following steps:
 
-1. Deploy an EKS Kubernetes cluster on AWS with `furyctl`.
-2. Download the latest version of Fury with `furyctl`.
-3. Install the Fury distribution.
-4. Explore some features of the distribution.
-5. (optional) Deploy additional modules of the distribution.
-6. Teardown of the environment.
+1. Deploy an EKS Kubernetes cluster on AWS with `furyctl`
+2. Download the latest version of Fury with `furyctl`
+3. Install the Fury distribution
+4. Explore some features of the distribution
+5. (optional) Deploy additional modules of the Fury distribution
+6. Teardown of the environment
 
-> ⚠️ AWS **will charge you** to provision the resources used in this tutorial. You should be charged only a few dollars, but we are not responsible for any charges that may incur.
+> ⚠️ AWS **charges you** to provision the resources used in this tutorial. You should be charged only a few dollars.
+> 💸 But we are not responsible for any costs that incur.
 >
 > ❗️ **Remember to stop all the instances by following all the steps listed in the teardown phase.**
 >
@@ -21,7 +22,7 @@ This tutorial covers the following steps:
 
 ## Prerequisites
 
-This tutorial assumes some basic familiarity with Kubernetes and AWS. Some experience with Terraform is helpful but not strictly required.
+This tutorial assumes some basic familiarity with Kubernetes and AWS. Some experience with Terraform is helpful but not required.
 
 To follow this tutorial, you need:
 
@@ -29,12 +30,13 @@ To follow this tutorial, you need:
 - **Docker** - a [Docker image]([fury-on-eks-dockerfile]) containing `furyctl` and all the necessary tools is provided.
 - **OpenVPN Client** - [Tunnelblick][tunnelblick] (on macOS) or [OpenVPN Connect][openvpn-connect] (for other OS) are recommended.
 - **AWS S3 Bucket** (optional) to hold the Terraform state.
+- **Github** account with [SSH key configured][github-ssh-key-setup].
 
 ### Setup and initialize the environment
 
 1. Open a terminal
 
-2. Clone the [fury getting started repository][fury-getting-started-repository] containing all the example code used in this tutorial:
+2. Clone the [fury getting started repository][fury-getting-started-repository] containing the example code used in this tutorial:
 
 ```bash
 git clone https://github.com/sighupio/fury-getting-started/
@@ -44,7 +46,9 @@ cd fury-getting-started/fury-on-eks
 3. Run the `fury-getting-started` docker image:
 
 ```bash
-docker run -ti -v $PWD:/demo docker run -ti -v $PWD:/demo registry.sighup.io/delivery/fury-getting-started
+docker run -ti --rm \
+  -v $PWD:/demo \
+  registry.sighup.io/delivery/fury-getting-started
 ```
 
 4. Setup your AWS credentials by exporting the following environment variables:
@@ -55,7 +59,7 @@ export AWS_SECRET_ACCESS_KEY=<YOUR_AWS_SECRET_ACCESS_KEY>
 export AWS_DEFAULT_REGION=<YOUR_AWS_REGION>
 ```
 
-In alternative, you can authenticate with AWS by running `aws configure` in your terminal. When prompted, enter your AWS Access Key ID, Secret Access Key, region and output format.
+In alternative, authenticate with AWS by running `aws configure` in your terminal. When prompted, enter your AWS Access Key ID, Secret Access Key, region and output format.
 
 ```bash
 $ aws configure
@@ -71,8 +75,8 @@ You are all set ✌️.
 
 `furyctl` is a command-line tool developed by SIGHUP to support:
 
-- the automatic provisioning of Kubernetes clusters in various environments.
-- the installation of the Fury distribution.
+- the automatic provisioning of Kubernetes clusters in various cloud environments
+- the installation of the Fury distribution
 
 The provisioning process is divided into two phases:
 
@@ -83,17 +87,17 @@ The provisioning process is divided into two phases:
 
 In the bootstrap phase, `furyctl` automatically provisions:
 
-- **Virtual Private Cloud (VPC)** in a specified CIDR range with public and private subnets.
-- **EC2 instance** bastion host with an OpenVPN Server.
-- All the required networking gateways and routes.
+- **Virtual Private Cloud (VPC)** in a specified CIDR range with public and private subnets
+- **EC2 instance** bastion host with an OpenVPN Server
+- All the required networking gateways and routes
 
 More details about the bootstrap provisioner can be found [here][provisioner-bootstrap-aws-reference].
 
 #### Configure the bootstrap provisioner
 
-The bootstrap provisioner takes a `bootstrap.yml` as input. This file instructs the bootstrap provisioner with all the needed parameters to deploy the networking infrastructure.
+The bootstrap provisioner takes a `bootstrap.yml` as input. This file, instructs the bootstrap provisioner with all the needed parameters to deploy the networking infrastructure.
 
-In the repository, you can find a template for this file at `infrastructure/bootstrap/bootstrap.yml`:
+For this tutorial, use the `cluster.yml` template located at `/demo/infrastructure/cluster.yml`:
 
 ```yaml
 kind: Bootstrap
@@ -125,27 +129,68 @@ executor:
   #   backend: s3
   #   config:
   #     bucket: <S3_BUCKET>
-  #     key: <S3_BUCKET_KEY>
+  #     key: fury/boostrap
   #     region: <S3_BUCKET_REGION>
 provisioner: aws
 ```
 
-Open the `bootstrap.yml` file with a text editor of your choice and:
+Open the `/demo/infrastructure/bootstrap.yml` file with a text editor of your choice and:
 
-- Replace the field `<GITHUB_USER>` with your actual GitHub username.
-- Make sure that the VPC and subnets ranges are not already in use. If so, specify different values in the fields:
+- Replace the field `<GITHUB_USER>` with your actual GitHub username
+- Ensure that the VPC and subnets ranges are not already in use. If so, specify different values in the fields:
   - `networkCIDR`
   - `publicSubnetsCIDRs`
   - `privateSubnetsCIDRs`
-- (optional) Add the details of an **existing** AWS Bucket to hold the Terraform remote state.
-
-> ⚠️ The bootstrap provisioner does not create the S3 bucket for you. You can manually create it using the AWS CLI:
->
-> ```bash
-> aws s3api create-bucket --bucket <S3_BUCKET> --region <S3_BUCKET_REGION> --create-bucket-configuration LocationConstraint=<S3_BUCKET_REGION>
-> ```
 
 Leave the rest as configured. More details about each field can be found [here][provisioner-bootstrap-aws-reference].
+
+#### (optional) Create S3 Bucket to hold the Terraform remote
+
+Altough it is a tutorial, it is always a better practice to use a remote Terraform state over a local one. In case you are not familiar with Terraform, you can skip this section.
+
+1. Choose a unique name and a AWS region for the S3 Bucket:
+
+```bash
+export S3_BUCKET=fury-demo-eks              # Use a different name
+export S3_BUCKET_REGION=$AWS_DEFAULT_REGION # You can use the same region of before
+```
+
+1. Create S3 bucket using the AWS CLI:
+
+```bash
+aws s3api create-bucket \
+  --bucket $S3_BUCKET \
+  --region $S3_BUCKET_REGION \
+  --create-bucket-configuration LocationConstraint=$S3_BUCKET_REGION
+```
+
+2. Once created, uncomment the `spec.executor.state` block in the `/demo/infrastructure/bootstrap.yml` file:
+
+```yaml
+...
+executor:
+  version: 0.13.6
+  state:
+   backend: s3
+   config:
+     bucket: <S3_BUCKET>
+     key: fury/boostrap
+     region: <S3_BUCKET_REGION>
+```
+
+3. Replace `<S3_BUCKET>` and `<S3_BUCKET_REGION>` placeholders with the correct values from the previous commands:
+
+```yaml
+...
+executor:
+  version: 0.13.6
+  state:
+   backend: s3
+   config:
+     bucket: fury-demo-eks
+     key: fury/boostrap
+     region: eu-central-1
+```
 
 #### Provision networking infrastructure
 
@@ -196,7 +241,7 @@ These values are used in the cluster provisioning phase.
 
 ### Cluster provisioning phase
 
-In the cluster provisioning phase, `furyctl`  automatically deploys a battle-tested private EKS Cluster. To interact with the private EKS cluster, you first need to connect to private network via the bastion host.
+In the cluster provisioning phase, `furyctl`  automatically deploys a battle-tested private EKS Cluster. To interact with the private EKS cluster, connect first to the private network via the OpenVPN server in the bastion host.
 
 #### Connect to private network
 
@@ -214,8 +259,9 @@ furyagent configure openvpn-client \
 2. Check that the `fury` user is now listed:
 
 ```bash
-furyagent configure openvpn-client --list \
---config /demo/infrastructure/bootstrap/secrets/furyagent.yml
+furyagent configure openvpn-client \
+  --list \
+  --config /demo/infrastructure/bootstrap/secrets/furyagent.yml
 ```
 
 Output:
@@ -235,7 +281,7 @@ Output:
 
 3. Open the `fury.ovpn` file with any OpenVPN Client.
 
-4. Connect to the OpenVPN Server via the OpenVPN Client.
+4. Connect to the OpenVPN Server via the chosen OpenVPN Client.
 
 #### Configure the cluster provisioner
 
@@ -270,7 +316,7 @@ executor:
   #   backend: s3
   #   config:
   #     bucket: <S3_BUCKET>
-  #     key: <MY_KEY> 
+  #     key: fury/cluster
   #     region: <S3_BUCKET_REGION>
 provisioner: eks
 ```
@@ -441,11 +487,11 @@ make apply
 
 ## Step 4 - Explore the distribution
 
-🚀 Now that the distrbution is finally deployed, you can explore some of the features.
+🚀 Now that the distribution is finally deployed, you can explore some of the features.
 
 ### Setup local DNS
 
-To access more easily the ingresses, you will configurure your local DNS to resolve the address of the ingresses to the internal loadbalancer IP:
+To access the ingresses mmore easily , you can configurure your local DNS to resolve the address of the ingresses to the internal loadbalancer IP:
 
 1. Get the address of the internal load balancer:
 
@@ -639,7 +685,6 @@ furyctl cluster destroy
 3. Delete the target groups and loadbalancer associated with the EKS cluster using AWS CLI:
 
 ```bash
-# Make sure to use the tag corresponding to your cluster
 target_groups=$(aws resourcegroupstaggingapi get-resources \
                 --tag-filters Key=kubernetes.io/cluster/fury-eks-demo,Values=owned  \
                 | jq -r ".ResourceTagMappingList[] | .ResourceARN" | grep targetgroup)
@@ -665,9 +710,15 @@ aws s3api delete-object --bucket <S3_BUCKET> --key furyctl/cluster
 aws s3api delete-bucket --bucket <S3_BUCKET>
 ```
 
+6. Exit from the docker container:
+
+```bash
+exit
+```
+
 ## Conclusions
 
-Congratulations, you made it! 🥳🥳 
+Congratulations, you made it! 🥳🥳
 
 We hope you enjoyed this tour of Fury!
 
@@ -699,6 +750,7 @@ More about Fury:
 
 [tunnelblick]: https://tunnelblick.net/downloads.html
 [openvpn-connect]: https://openvpn.net/vpn-client/
+[github-ssh-key-setup]: https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account
 
 [fury-docs]: https://docs.kubernetesfury.com
 [fury-docs-modules]: https://docs.kubernetesfury.com/docs/overview/modules/

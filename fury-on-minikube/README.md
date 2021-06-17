@@ -59,7 +59,7 @@ docker run -ti --rm \
    registry.sighup.io/delivery/fury-getting-started
 ```
 
-5. Test connection:
+3. Test connection:
 
 ```bash
 kubectl get nodes
@@ -80,7 +80,7 @@ minikube   Ready    master   16m   v1.19.4
 
 `furyctl` needs a `Furyfile.yml` to know which modules to download.
 
-For this tutorial, you can use the following `Furyfile.yml` which is located at `/demo/Furyfile.yaml`:
+For this tutorial, use the `Furyfile.yml` located at `/demo/Furyfile.yaml`:
 
 ```yaml
 versions:
