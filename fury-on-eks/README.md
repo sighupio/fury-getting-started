@@ -556,28 +556,15 @@ Navigate to <http://forecastle.fury.info> to see all the other ingresses deploye
 
 Navigate to <http://kibana.fury.info> or click the Kibana icon from Forecastle.
 
-Click on `Explore on my own` to see the main dashboard.
-
-#### Create a Kibana index
-
-1. Open the menu on the right-top corner of the page.
-
-2. Select `Stack Management` (it's on the very bottom of the menu). 
-
-3. Select `Index patterns` and click on `Create index pattern`.
-
-4. Write `kubernetes-*` as index pattern and flag *Include system and hidden indices*
-
-5. Click `Next step`.
-
-6. Select `@timestamp` as time field.s
-
-7. Click create the index.
-
 #### Read the logs
 
-Based on the index you created, you can read and query the logs.
-Navigate through the menu again, and select `Discover`.
+The Fury Logging module already collects data from the following indeces:
+
+- `kubernetes-*`
+- `system-*`
+- `ingress-controller-*`
+
+Click on `Discover` to see the main dashboard. On the top left cornet select one of the indeces to explore the logs.
 
 ![Kibana](../utils/images/kibana.png)
 
