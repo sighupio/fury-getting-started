@@ -1,3 +1,5 @@
+![Fury Logo](../utils/images/fury_logo.png)
+
 # Fury on Minikube
 
 This step-by-step tutorial helps you deploy the **Kubernetes Fury Distribution** on a local minikube cluster.
@@ -85,11 +87,11 @@ For this tutorial, use the `Furyfile.yml` located at `/demo/Furyfile.yaml`:
 
 ```yaml
 versions:
-  monitoring: v1.12
-  logging: v1.8
-  ingress: v1.10
+  monitoring: v1.11.1
+  logging: v1.7.1
+  ingress: v1.9.2
 
-resources:
+bases:
   - name: monitoring/prometheus-operator
   - name: monitoring/prometheus-operated
   - name: monitoring/alertmanager-operated
@@ -255,7 +257,7 @@ Click on `Explore on my own` to see the main dashboard.
 
 1. Open the menu on the right-top corner of the page.
 
-2. Select `Stack Management` (it's on the very bottom of the menu). 
+2. Select `Stack Management` (it's on the very bottom of the menu).
 
 3. Select `Index patterns` and click on `Create index pattern`.
 

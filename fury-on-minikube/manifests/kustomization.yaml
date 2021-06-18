@@ -24,13 +24,13 @@ resources:
 
 patchesStrategicMerge:
 
-  - patches/monitoring/alertmanager-operated-replicas.yml
-  - patches/monitoring/alertmanager-operated-resources.yml
-  - patches/monitoring/prometheus-operated-resources.yml
-  - patches/monitoring/prometheus-operator-resources.yml
-  - patches/monitoring/grafana-resources.yml
-  - patches/logging/fluentd-resources.yml
-  - patches/logging/kibana-resources.yml
-  - patches/logging/fluentbit-resources.yml
-  - patches/logging/elasticsearch-resources.yml
-  - patches/ingress/nginx-ingress-controller-resources.yml
+  - patches/alertmanager-operated-replicas.yml
+  - patches/alertmanager-operated-resources.yml
+  - patches/prometheus-operated-resources.yml
+  - patches/prometheus-operator-resources.yml
+  - patches/grafana-resources.yml
+  - patches/fluentd-resources.yml
+  - patches/kibana-resources.yml
+  - patches/fluentbit-resources.yml
+  - patches/elasticsearch-resources.yml
+  - patches/nginx-ingress-controller-resources.yml
