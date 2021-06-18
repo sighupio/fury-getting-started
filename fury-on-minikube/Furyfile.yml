@@ -3,7 +3,7 @@ versions:
   logging: v1.8
   ingress: v1.10
 
-resources:
+bases:
   - name: monitoring/prometheus-operator
   - name: monitoring/prometheus-operated
   - name: monitoring/alertmanager-operated

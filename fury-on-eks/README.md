@@ -145,7 +145,7 @@ Leave the rest as configured. More details about each field can be found [here][
 
 #### (optional) Create S3 Bucket to hold the Terraform remote
 
-Altough it is a tutorial, it is always a better practice to use a remote Terraform state over a local one. In case you are not familiar with Terraform, you can skip this section.
+Altough this is a tutorial, it is always a good practice to use a remote Terraform state over a local one. In case you are not familiar with Terraform, you can skip this section.
 
 1. Choose a unique name and a AWS region for the S3 Bucket:
 
@@ -419,7 +419,7 @@ vendor
 
 ## Step 3 - Installation
 
-Each module is a Kustomize project. Kustomize allows to group together related Kubernetes resources and combine them to create more complex deployment. Moreover, it is flexible, and it enables a simple patching mechanism for additional customization.
+Each module is a Kustomize project. Kustomize allows to group together related Kubernetes resources and combine them to create more complex deployments. Moreover, it is flexible, and it enables a simple patching mechanism for additional customization.
 
 To deploy the Fury distribution, use the following root `kustomization.yaml` located `/demo/manifests/kustomization.yaml`:
 
@@ -666,7 +666,7 @@ resources:
 # Open Policy Agent
 - ../../vendor/katalog/opa/gatekeeper/core
 - ../../vendor/katalog/opa/gatekeeper/monitoring
-- ../../vendor/katalog/opa/gatekeeper/rules
+- #../../vendor/katalog/opa/gatekeeper/rules
 
 patchesStrategicMerge:
 ...
@@ -691,7 +691,7 @@ make apply
 velero backup create --from-schedule manifests test -n kube-system
 ```
 
-2. Check that it ran succesfully:
+2. Check backup status:
 
 ```bash
 velero backup get -n kube-system
@@ -768,7 +768,7 @@ In case your ran into any problems feel free to open a issue here in GitHub.
 More tutorials:
 
 - [Fury on GKE][fury-on-gke]
-- [Fury on Minikube][fury-on-gke]
+- [Fury on Minikube][fury-on-minikube]
 
 More about Fury:
 

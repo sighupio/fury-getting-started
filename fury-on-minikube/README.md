@@ -37,8 +37,9 @@ cd fury-getting-started/fury-on-minikube
 1. Start minikube cluster:
 
 ```bash
-export REPO_DIR=$PWD && cd $REPO_DIR/infrastructure
+export REPO_DIR=$PWD 
 export KUBECONFIG=$REPO_DIR/infrastructure/kubeconfig
+cd $REPO_DIR/infrastructure
 make setup
 ```
 

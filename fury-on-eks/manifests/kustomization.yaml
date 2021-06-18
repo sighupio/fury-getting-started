@@ -36,7 +36,6 @@ resources:
 # Open Policy Agent
 # - ../../vendor/katalog/opa/gatekeeper/core
 # - ../../vendor/katalog/opa/gatekeeper/monitoring
-# - ../../vendor/katalog/opa/gatekeeper/rules
 
 patchesStrategicMerge:
 
