@@ -4,7 +4,7 @@ This step-by-step tutorial helps you deploy the **Kubernetes Fury Distribution**
 
 This tutorial covers the following steps:
 
-1. Deploy a local minkube cluster.
+1. Deploy a local Minikube cluster.
 2. Download the latest version of Fury with `furyctl`.
 3. Install Fury distribution.
 4. Explore some features of the distribution.
@@ -59,7 +59,7 @@ docker run -ti --rm \
    registry.sighup.io/delivery/fury-getting-started
 ```
 
-3. Test connection:
+3. Test the connection to the Minikube cluster:
 
 ```bash
 kubectl get nodes
@@ -94,27 +94,32 @@ resources:
   - name: monitoring/alertmanager-operated
   - name: monitoring/grafana
   - name: monitoring/goldpinger
-  - name: monitoring/kubeadm-sm
   - name: monitoring/configs
+  - name: monitoring/eks-sm
+  - name: monitoring/kube-proxy-metrics
   - name: monitoring/kube-state-metrics
   - name: monitoring/node-exporter
+  - name: monitoring/metrics-server
   - name: logging/elasticsearch-single
+  - name: logging/cerebro
+  - name: logging/curator
   - name: logging/fluentd
   - name: logging/kibana
   - name: ingress/nginx
+  - name: ingress/cert-manager
   - name: ingress/forecastle
 ```
 
-### Download modules
+### Download Fury modules
 
-1. Download the modules with `furyctl`:
+1. Download the Fury modules with `furyctl`:
 
 ```bash
 cd /demo/
 furyctl vendor -H
 ```
 
-2. Inspect the downloaded modules in the `vendor` DIR:
+2. Inspect the downloaded modules in the `vendor` folder:
 
 ```bash
 tree -d /demo/vendor -L 2
@@ -132,72 +137,86 @@ vendor
 
 ## Step 3 - Installation
 
-Each module is a Kustomize project. Kustomize allows to group together related Kubernetes resources and combine them to create more complex deployment. Moreover, it is flexible, and it enables a simple patching mechanism for additional customization.
+Each module is a Kustomize project. Kustomize allows to group together related Kubernetes resources and combine them to create more complex deployments. Moreover, it is flexible, and it enables a simple patching mechanism for additional customization.
 
-To deploy the Fury distribution, use the following `/demo/manifests/kustomization.yaml`:
+To deploy the Fury distribution, use the following root `kustomization.yaml` located `/demo/manifests/kustomization.yaml`:
 
 ```yaml
 resources:
 
-  # Monitoring module
-  - ../vendor/katalog/monitoring/prometheus-operator
-  - ../vendor/katalog/monitoring/prometheus-operated
-  - ../vendor/katalog/monitoring/alertmanager-operated
-  - ../vendor/katalog/monitoring/node-exporter
-  - ../vendor/katalog/monitoring/kube-state-metrics
-  - ../vendor/katalog/monitoring/grafana
-  - ../vendor/katalog/monitoring/goldpinger
-  - ../vendor/katalog/monitoring/configs
+# Ingress module
+- ../../vendor/katalog/ingress/forecastle
+- ../../vendor/katalog/ingress/nginx
+- ../../vendor/katalog/ingress/cert-manager
 
-  # Logging module
-  - ../vendor/katalog/logging/elasticsearch-single
-  - ../vendor/katalog/logging/fluentd
-  - ../vendor/katalog/logging/kibana
+# Logging module
+- ../../vendor/katalog/logging/cerebro
+- ../../vendor/katalog/logging/curator
+- ../../vendor/katalog/logging/elasticsearch-single
+- ../../vendor/katalog/logging/fluentd
+- ../../vendor/katalog/logging/kibana
 
-  # Ingress module
-  - ../vendor/katalog/ingress/nginx
-  - ../vendor/katalog/ingress/forecastle
+# Monitoring module
+- ../../vendor/katalog/monitoring/alertmanager-operated
+- ../../vendor/katalog/monitoring/goldpinger
+- ../../vendor/katalog/monitoring/grafana
+- ../../vendor/katalog/monitoring/kube-proxy-metrics
+- ../../vendor/katalog/monitoring/kube-state-metrics
+- ../../vendor/katalog/monitoring/eks-sm
+- ../../vendor/katalog/monitoring/metrics-server
+- ../../vendor/katalog/monitoring/node-exporter
+- ../../vendor/katalog/monitoring/prometheus-operated
+- ../../vendor/katalog/monitoring/prometheus-operator
 
-  # Ingress definitions
-  - resources/ingress.yml
+# Custom resources
+- resources/ingress.yml
 
 patchesStrategicMerge:
 
-  - patches/monitoring/alertmanager-operated-replicas.yml
-  - patches/monitoring/alertmanager-operated-resources.yml
-  - patches/monitoring/prometheus-operated-resources.yml
-  - patches/monitoring/prometheus-operator-resources.yml
-  - patches/monitoring/grafana-resources.yml
-  - patches/logging/fluentd-resources.yml
-  - patches/logging/kibana-resources.yml
-  - patches/logging/fluentbit-resources.yml
-  - patches/logging/elasticsearch-resources.yml
-  - patches/ingress/nginx-ingress-controller-resources.yml
+# Ingress module
+- patches/ingress-nginx-lb-annotation.yml
+
+# Logging module
+- patches/fluentd-resources.yml
+- patches/fluentbit-resources.yml
+
+# Monitoring module
+- patches/alertmanager-resources.yml
+- patches/cerebro-resources.yml
+- patches/elasticsearch-resources.yml
+- patches/prometheus-operator-resources.yml
+- patches/prometheus-resources.yml
 ```
 
 This `kustomization.yaml`:
 
-- references the modules downloaded in the previous sections
+- references the modules downloaded in the previous section
 - patches the upstream modules (e.g. `patches/elasticsearch-resources.yml` limits the resources requested by elastic search)
 - deploys some additional custom resources (e.g. `resources/ingress.yml`)
 
 Install the modules:
 
 ```bash
-cd manifest/
+cd /demo/manifests/
 
 make apply
-# You will see some errors related to CRDs creation, apply twice
+# Due to some chicken-egg 🐓🥚 problem with custom resources you have to apply again
 make apply
 ```
 
 ## Step 4 - Explore the distribution
 
-🚀 Now that the distrbution is finally deployed, you can explore some of the features.
+🚀 The distribution is finally deployed! In this section you explore some of its features.
 
 ### Setup local DNS
 
-To access more easily the ingresses, you will configurure your local DNS to resolve the address of the ingresses to the external minikube IP:
+In Step 3, alongside the distribution, you have deployed Kubernetes ingresses to expose underlying services at the following HTTP routes:
+
+- `forecastle.fury.info`
+- `grafana.fury.info`
+- `kibana.fury.info`
+
+To access the ingresses more easily via the browser, configure your local DNS to resolve the ingresses to the external Minikube IP:
 
 1. Get the address of the cluster IP:
 
@@ -225,36 +244,50 @@ Navigate to <http://forecastle.fury.info> to see all the other ingresses deploye
 
 ### Kibana
 
-[Kibana](https://github.com/elastic/kibana) is an open-source analytics and visualization platform for Elasticsearch. Kibana lets you perform advanced data analysis and visualize data in various charts, tables, and maps. You can use it to search, view, and interact with data
-stored in Elasticsearch indices.
+[Kibana](https://github.com/elastic/kibana) is an open-source analytics and visualization platform for Elasticsearch. Kibana lets you perform advanced data analysis and visualize data in various charts, tables, and maps. You can use it to search, view, and interact with data stored in Elasticsearch indices.
 
 Navigate to <http://kibana.fury.info> or click the Kibana icon from Forecastle.
 
-Click on `Explore on my own` and you should see the dashboard.
+Click on `Explore on my own` to see the main dashboard.
 
 #### Create a Kibana index
 
-Open the menu on the right-top corner of the page, and select `Stack Management` (it's on the very bottom of the menu). Then select `Index patterns` and click on `Create index pattern`.
+1. Open the menu on the right-top corner of the page.
 
-Write `kubernetes-*` as index pattern and flag *Include system and hidden indices*, then click `Next step`.
+2. Select `Stack Management` (it's on the very bottom of the menu). 
 
-Select `@timestamp` as time field and create the index.
+3. Select `Index patterns` and click on `Create index pattern`.
+
+4. Write `kubernetes-*` as index pattern and flag *Include system and hidden indices*
+
+5. Click `Next step`.
+
+6. Select `@timestamp` as time field.s
+
+7. Click create the index.
 
 #### Read the logs
 
-Based on our index, now we can read and query the logs. Let's navigate through the menu again, and select `Discover`.
+Based on the index you created, you can read and query the logs.
+Navigate through the menu again, and select `Discover`.
 
 ![Kibana](../utils/images/kibana.png)
 
 ### Grafana
 
-[Grafana](https://github.com/grafana/grafana) is an open-source platform for monitoring and observability. It allows you to query, visualize, alert on and understand your metrics.
+[Grafana](https://github.com/grafana/grafana) is an open-source platform for monitoring and observability. Grafana allows you to query, visualize, alert on and understand your metrics.
 
 Navigate to <http://grafana.fury.info> or click the Grafana icon from Forecastle.
 
-Fury provides some dashboard already configured to use.
+Fury provides some pre-configured dashboard to visualize the state of the cluster. Examine an example dashboard:
 
-Let's examine an example dashboard. Write `pods` and select the `Kubernetes/Pods` dashboard. This is what you should see:
+1. Click on the search icon on the left sidebar.
+
+2. Write `pods` and click enter.
+
+3. Select the `Kubernetes/Pods` dashboard.
+
+This is what you should see:
 
 ![Grafana](../utils/images/grafana.png)
 
@@ -263,14 +296,53 @@ Let's examine an example dashboard. Write `pods` and select the `Kubernetes/Pods
 1. Stop the docker container:
 
 ```bash
-# Execute the command inside the Docker container
+# Execute this command inside the Docker container
 exit
 ```
 
 2. Delete the minikube cluster:
 
 ```bash
-# Execute the commands from your local system, outside the Docker container
+# Execute these commands from your local system, outside the Docker container
 cd $REPO_DIR/infrastructure
 make delete
 ```
+
+## Conclusions
+
+Congratulations, you made it! 🥳🥳
+
+We hope you enjoyed this tour of Fury!
+
+### Issues/Feedback
+
+In case your ran into any problems feel free to open a issue here in GitHub.
+
+### Where to go next?
+
+More tutorials:
+
+- [Fury on GKE][fury-on-gke]
+- [Fury on EKS][fury-on-eks]
+
+More about Fury:
+
+- [Fury Documentation][fury-docs]
+
+[fury-getting-started-repository]: https://github.com/sighupio/fury-getting-started/
+[fury-getting-started-dockerfile]: https://github.com/sighupio/fury-getting-started/blob/main/utils/docker/Dockerfile
+
+[fury-on-minikube]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-minikube
+[fury-on-eks]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-eks
+[fury-on-gke]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-gke
+
+[furyagent-repository]: https://github.com/sighupio/furyagent
+
+[provisioner-bootstrap-aws-reference]: https://docs.kubernetesfury.com/docs/cli-reference/furyctl/provisioners/aws-bootstrap/
+
+[tunnelblick]: https://tunnelblick.net/downloads.html
+[openvpn-connect]: https://openvpn.net/vpn-client/
+[github-ssh-key-setup]: https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account
+
+[fury-docs]: https://docs.kubernetesfury.com
+[fury-docs-modules]: https://docs.kubernetesfury.com/docs/overview/modules/
