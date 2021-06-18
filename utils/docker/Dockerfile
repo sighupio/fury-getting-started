@@ -28,7 +28,8 @@ RUN apk --update --no-cache add \
   make \
   make \
   tree \
-  bind-tools
+  bind-tools \
+  bash-completion
 
 RUN pip3 install --upgrade pip
 RUN pip3 install requests awscli==${AWSCLI_VERSION}
@@ -68,6 +69,11 @@ RUN curl -L https://github.com/vmware-tanzu/velero/releases/download/${VELERO_VE
     tar -zxf /tmp/velero-${VELERO_VERSION}-linux-amd64.tar.gz -C /tmp/ && \
     mv /tmp/velero-${VELERO_VERSION}-linux-amd64/velero /usr/local/bin && \
     rm /tmp/velero-${VELERO_VERSION}-linux-amd64.tar.gz && rm -rf /tmp/velero-${VELERO_VERSION}-linux-amd64
+
+# Configure .bashrc
+RUN echo 'alias k="kubectl"' >> ~/.bashrc
+RUN echo 'source /etc/profile.d/bash_completion.sh' >> ~/.bashrc
+RUN echo 'export PS1="\[\e[31m\][\[\e[m\]\[\e[38;5;172m\]\u\[\e[m\]@\[\e[38;5;153m\]\h\[\e[m\] \[\e[38;5;214m\]\W\[\e[m\]\[\e[31m\]]\[\e[m\]\\$ "' >> ~/.bashrc
 
 WORKDIR /demo
 
