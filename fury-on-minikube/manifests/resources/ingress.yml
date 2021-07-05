@@ -31,7 +31,7 @@ metadata:
   namespace: ingress-nginx
 spec:
   rules:
-  - host: directory.fury.info
+  - host: forecastle.fury.info
     http:
       paths:
       - path: /

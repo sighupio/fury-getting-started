@@ -231,7 +231,7 @@ minikube ip
 3. Add the following line to your local `/etc/hosts`:
 
 ```bash
-<SOME_IP> directory.fury.info alertmanager.fury.info goldpinger.fury.info grafana.fury.info prometheus.fury.info
+<SOME_IP> forecastle.fury.info alertmanager.fury.info goldpinger.fury.info grafana.fury.info prometheus.fury.info
 
 ```
 
