@@ -96,7 +96,7 @@ More details about the bootstrap provisioner can be found [here][provisioner-boo
 
 The bootstrap provisioner takes a `bootstrap.yml` as input. This file, instructs the bootstrap provisioner with all the needed parameters to deploy the networking infrastructure.
 
-For this tutorial, use the `cluster.yml` template located at `/demo/infrastructure/cluster.yml`:
+For this tutorial, use the `bootstrap.yml` template located at `/demo/infrastructure/bootstrap.yml`:
 
 ```yaml
 kind: Bootstrap
@@ -366,11 +366,13 @@ For this tutorial, use the `Furyfile.yml` located at `/demo/Furyfile.yaml`:
 
 ```yaml
 versions:
-  monitoring: v1.12
-  logging: v1.8
-  ingress: v1.10
+  networking: v1.6.0
+  monitoring: v1.12.2
+  logging: v1.8.0
+  ingress: v1.10.0
 
-resources:
+bases:
+  - name: networking/calico
   - name: monitoring/prometheus-operator
   - name: monitoring/prometheus-operated
   - name: monitoring/alertmanager-operated
