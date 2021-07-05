@@ -1,5 +1,5 @@
 versions:
-  monitoring: v1.12.0
+  monitoring: v1.12.2
   logging: v1.8.0
   ingress: v1.10.0
 
