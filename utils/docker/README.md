@@ -4,14 +4,14 @@ Docker image containing all the necessary tools to deploy fury on EKS
 
 | Docker image           | Latest Tag |
 |------------------------|------------|
-| `fury-getting-started` | 0.0.2      |
+| `fury-getting-started` | 0.0.5      |
 
 ## Publish new version to Harbor
 
 After having modified the Dockerfile. Select the appropriate tag:
 
 ```bash
-export TAG=0.0.3 # Semantic Versioning: Major.minor.patch
+export TAG=0.0.5 # Semantic Versioning: Major.minor.patch
 ```
 
 Build the image:
