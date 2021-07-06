@@ -87,9 +87,9 @@ For this tutorial, use the `Furyfile.yml` located at `/demo/Furyfile.yaml`:
 
 ```yaml
 versions:
-  monitoring: v1.11.1
-  logging: v1.7.1
-  ingress: v1.9.2
+  monitoring: v1.12.2
+  logging: v1.8.0
+  ingress: v1.10.0
 
 bases:
   - name: monitoring/prometheus-operator
@@ -148,28 +148,28 @@ To deploy the Fury distribution, use the following root `kustomization.yaml` loc
 resources:
 
 # Ingress module
-- ../../vendor/katalog/ingress/forecastle
-- ../../vendor/katalog/ingress/nginx
-- ../../vendor/katalog/ingress/cert-manager
+- ../vendor/katalog/ingress/forecastle
+- ../vendor/katalog/ingress/nginx
+- ../vendor/katalog/ingress/cert-manager
 
 # Logging module
-- ../../vendor/katalog/logging/cerebro
-- ../../vendor/katalog/logging/curator
-- ../../vendor/katalog/logging/elasticsearch-single
-- ../../vendor/katalog/logging/fluentd
-- ../../vendor/katalog/logging/kibana
+- ../vendor/katalog/logging/cerebro
+- ../vendor/katalog/logging/curator
+- ../vendor/katalog/logging/elasticsearch-single
+- ../vendor/katalog/logging/fluentd
+- ../vendor/katalog/logging/kibana
 
 # Monitoring module
-- ../../vendor/katalog/monitoring/alertmanager-operated
-- ../../vendor/katalog/monitoring/goldpinger
-- ../../vendor/katalog/monitoring/grafana
-- ../../vendor/katalog/monitoring/kube-proxy-metrics
-- ../../vendor/katalog/monitoring/kube-state-metrics
-- ../../vendor/katalog/monitoring/eks-sm
-- ../../vendor/katalog/monitoring/metrics-server
-- ../../vendor/katalog/monitoring/node-exporter
-- ../../vendor/katalog/monitoring/prometheus-operated
-- ../../vendor/katalog/monitoring/prometheus-operator
+- ../vendor/katalog/monitoring/alertmanager-operated
+- ../vendor/katalog/monitoring/goldpinger
+- ../vendor/katalog/monitoring/grafana
+- ../vendor/katalog/monitoring/kube-proxy-metrics
+- ../vendor/katalog/monitoring/kube-state-metrics
+- ../vendor/katalog/monitoring/eks-sm
+- ../vendor/katalog/monitoring/metrics-server
+- ../vendor/katalog/monitoring/node-exporter
+- ../vendor/katalog/monitoring/prometheus-operated
+- ../vendor/katalog/monitoring/prometheus-operator
 
 # Custom resources
 - resources/ingress.yml
@@ -231,7 +231,7 @@ minikube ip
 3. Add the following line to your local `/etc/hosts`:
 
 ```bash
-<SOME_IP> forecastle.fury.info alertmanager.fury.info goldpinger.fury.info grafana.fury.info prometheus.fury.info
+<SOME_IP> forecastle.fury.info alertmanager.fury.info goldpinger.fury.info grafana.fury.info prometheus.fury.info kibana.fury.info
 
 ```
 
