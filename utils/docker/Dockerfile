@@ -4,12 +4,13 @@ LABEL maintainer="niccolo@sighup.io"
 
 ENV AWSCLI_VERSION 1.19
 ENV GCLOUD_VERSION 344.0.0
-ENV TERRAFORM_VERSION 0.15.0
+ENV TERRAFORM_VERSION 1.0.1
 ENV KUBECTL_VERSION v1.19.2
 ENV KUSTOMIZE_VERSION v3.6.1
 ENV FURYCTL_VERSION v0.5.3
 ENV FURYAGENT_VERSION v0.2.3
 ENV VELERO_VERSION v1.6.0
+ENV DIRENV_VERSION v2.28.0
 
 RUN apk --update --no-cache add \
   bash \
@@ -70,10 +71,16 @@ RUN curl -L https://github.com/vmware-tanzu/velero/releases/download/${VELERO_VE
     mv /tmp/velero-${VELERO_VERSION}-linux-amd64/velero /usr/local/bin && \
     rm /tmp/velero-${VELERO_VERSION}-linux-amd64.tar.gz && rm -rf /tmp/velero-${VELERO_VERSION}-linux-amd64
 
+# Install direnv
+RUN curl -L https://github.com/direnv/direnv/releases/download/${DIRENV_VERSION}/direnv.linux-amd64 -o /usr/local/bin/direnv && \
+  chmod +x /usr/local/bin/direnv
+
+# Create a group and user
+RUN addgroup -S fury && adduser -S fury -G fury
+USER fury
+
 # Configure .bashrc
-RUN echo 'alias k="kubectl"' >> ~/.bashrc
-RUN echo 'source /etc/profile.d/bash_completion.sh' >> ~/.bashrc
-RUN echo 'export PS1="\[\e[31m\][\[\e[m\]\[\e[38;5;172m\]\u\[\e[m\]@\[\e[38;5;153m\]\h\[\e[m\] \[\e[38;5;214m\]\W\[\e[m\]\[\e[31m\]]\[\e[m\]\\$ "' >> ~/.bashrc
+COPY src/.bashrc /home/fury/
 
 WORKDIR /demo
 
