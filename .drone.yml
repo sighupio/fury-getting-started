@@ -6,9 +6,8 @@ platform:
   arch: amd64
 
 trigger:
-  ref:
-    include:
-      - refs/tags/**
+  branch:
+  - drone-test
 
 
 steps:
@@ -23,6 +22,6 @@ steps:
       registry: registry.sighup.io
       repo: registry.sighup.io/delivery/fury-getting-started
       tags:
-        - latest
-        - ${DRONE_TAG}
+        - test
       context: ./utils/docker/
+      dockerfile: ./utils/docker/Dockerfile
