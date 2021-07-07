@@ -25,4 +25,4 @@ steps:
       tags:
         - latest
         - ${DRONE_TAG}
-      dockerfile: ./utils/docker/Dockerfile
+      context: ./utils/docker/
