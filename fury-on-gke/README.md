@@ -23,6 +23,7 @@ This tutorial assumes some basic familiarity with Kubernetes and GCP. Some exper
 To follow this tutorial, you need:
 
 - **GCP Access Credentials** of a GCP Account with `Project Owner` role.
+- Enable `Identity and Access Management (IAM) API`, `Compute Engine API`, `Cloud Resource Manager API` and `Kubernetes Engine API`
 - **Docker** - a [Docker image]([fury-on-gke-dockerfile]) containing `furyctl` and all the necessary tools is provided.
 - **OpenVPN Client** - [Tunnelblick][tunnelblick] (on macOS) or [OpenVPN Connect][openvpn-connect] (for other OS) are recommended.
 - **Google Cloud Storage** (optional) to hold the Terraform state.
@@ -34,7 +35,7 @@ To follow this tutorial, you need:
 2. Run the `fury-getting-started` docker image:
 
 ```bash
-docker run -ti -v $PWD:/demo docker run -ti -v $PWD:/demo registry.sighup.io/delivery/fury-getting-started
+docker run -ti --rm -v ${PWD}:/demo registry.sighup.io/delivery/fury-getting-started
 ```
 
 3. Clone the [fury getting started repository][fury-gke-repository] containing all the example code used in this tutorial:
@@ -252,7 +253,7 @@ spec:
     minSize: 3
     maxSize: 3 
     subnetworks: 
-    - "europe-west3-c"
+    - "europe-west3-a"
     instanceType: "n1-standard-2"
     volumeSize: 50
 executor:

@@ -429,28 +429,28 @@ To deploy the Fury distribution, use the following root `kustomization.yaml` loc
 resources:
 
 # Ingress module
-- ../../vendor/katalog/ingress/forecastle
-- ../../vendor/katalog/ingress/nginx
-- ../../vendor/katalog/ingress/cert-manager
+- ../vendor/katalog/ingress/forecastle
+- ../vendor/katalog/ingress/nginx
+- ../vendor/katalog/ingress/cert-manager
 
 # Logging module
-- ../../vendor/katalog/logging/cerebro
-- ../../vendor/katalog/logging/curator
-- ../../vendor/katalog/logging/elasticsearch-single
-- ../../vendor/katalog/logging/fluentd
-- ../../vendor/katalog/logging/kibana
+- ../vendor/katalog/logging/cerebro
+- ../vendor/katalog/logging/curator
+- ../vendor/katalog/logging/elasticsearch-single
+- ../vendor/katalog/logging/fluentd
+- ../vendor/katalog/logging/kibana
 
 # Monitoring module
-- ../../vendor/katalog/monitoring/alertmanager-operated
-- ../../vendor/katalog/monitoring/goldpinger
-- ../../vendor/katalog/monitoring/grafana
-- ../../vendor/katalog/monitoring/kube-proxy-metrics
-- ../../vendor/katalog/monitoring/kube-state-metrics
-- ../../vendor/katalog/monitoring/eks-sm
-- ../../vendor/katalog/monitoring/metrics-server
-- ../../vendor/katalog/monitoring/node-exporter
-- ../../vendor/katalog/monitoring/prometheus-operated
-- ../../vendor/katalog/monitoring/prometheus-operator
+- ../vendor/katalog/monitoring/alertmanager-operated
+- ../vendor/katalog/monitoring/goldpinger
+- ../vendor/katalog/monitoring/grafana
+- ../vendor/katalog/monitoring/kube-proxy-metrics
+- ../vendor/katalog/monitoring/kube-state-metrics
+- ../vendor/katalog/monitoring/eks-sm
+- ../vendor/katalog/monitoring/metrics-server
+- ../vendor/katalog/monitoring/node-exporter
+- ../vendor/katalog/monitoring/prometheus-operated
+- ../vendor/katalog/monitoring/prometheus-operator
 
 # Custom resources
 - resources/ingress.yml
