@@ -77,6 +77,9 @@ RUN curl -L https://github.com/direnv/direnv/releases/download/${DIRENV_VERSION}
 
 # Create a group and user
 RUN addgroup -S fury && adduser -S fury -G fury
+RUN mkdir /demo
+RUN chown -R fury /demo
+RUN chmod 755 /demo
 USER fury
 
 # Configure .bashrc
