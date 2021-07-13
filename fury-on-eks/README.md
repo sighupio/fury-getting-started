@@ -168,7 +168,6 @@ aws s3api create-bucket \
 ```yaml
 ...
 executor:
-  version: 0.13.6
   state:
    backend: s3
    config:
@@ -406,7 +405,7 @@ furyctl vendor -H
 2. Inspect the downloaded modules in the `vendor` folder:
 
 ```bash
-tree -d /demo/vendor -L 2
+tree -d /demo/vendor -L 3
 ```
 
 Output:
@@ -719,7 +718,7 @@ for tg in $target_groups ; do aws elbv2 delete-target-group --target-group-arn $
 loadbalancer=$(aws resourcegroupstaggingapi get-resources  \
                --tag-filters Key=kubernetes.io/cluster/fury-eks-demo,Values=owned \
                | jq -r ".ResourceTagMappingList[] | .ResourceARN" | grep loadbalancer)
-for i in $loadbalancer ; do aws elbv2 delete-load-balancer -load-balancer-arn $i ; done
+for i in $loadbalancer ; do aws elbv2 delete-load-balancer --load-balancer-arn $i ; done
 ```
 
 4. Destroy network infrastructure:
@@ -731,8 +730,10 @@ furyctl bootstrap destroy
 5. (Optional) Destroy the S3 bucket holding the Terraform state
 
 ```bash
-aws s3api delete-object --bucket $S3_BUCKET --key furyctl/bootstrap
-aws s3api delete-object --bucket $S3_BUCKET --key furyctl/cluster
+aws s3api delete-objects \
+  --bucket $S3_BUCKET \ 
+  --delete "$(aws s3api list-object-versions --bucket $S3_BUCKET --query='{Objects: Versions[].{Key:Key,VersionId:VersionId}}')"
+
 aws s3api delete-bucket --bucket $S3_BUCKET
 ```
 

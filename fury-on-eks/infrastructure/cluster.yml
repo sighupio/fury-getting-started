@@ -23,6 +23,6 @@ executor:
   #   backend: s3
   #   config:
   #     bucket: <S3_BUCKET>
-  #     key: <MY_KEY> 
+  #     key: fury/cluster
   #     region: <S3_BUCKET_REGION>
 provisioner: eks

@@ -34,8 +34,7 @@ resources:
 # - resources/velero-volume-snapshot-location.yml
 
 # Open Policy Agent
-# - ../../vendor/katalog/opa/gatekeeper/core
-# - ../../vendor/katalog/opa/gatekeeper/monitoring
+# - ../../vendor/katalog/opa/gatekeeper/
 
 patchesStrategicMerge:
 
