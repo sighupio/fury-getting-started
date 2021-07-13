@@ -411,11 +411,32 @@ tree -d /demo/vendor -L 3
 Output:
 
 ```bash
+$ tree -d vendor -L 3
+
 vendor
 └── katalog
     ├── ingress
+    │   ├── cert-manager
+    │   ├── forecastle
+    │   └── nginx
     ├── logging
-    └── monitoring
+    │   ├── cerebro
+    │   ├── curator
+    │   ├── elasticsearch-single
+    │   ├── fluentd
+    │   └── kibana
+    ├── monitoring
+    │   ├── alertmanager-operated
+    │   ├── configs
+    │   ├── goldpinger
+    │   ├── grafana
+    │   ├── kube-proxy-metrics
+    │   ├── kube-state-metrics
+    │   ├── node-exporter
+    │   ├── prometheus-operated
+    │   └── prometheus-operator
+    └── networking
+        └── calico
 ```
 
 ## Step 3 - Installation
@@ -504,22 +525,7 @@ To access the ingresses more easily via the browser, configure your local DNS to
 1. Get the address of the internal load balancer:
 
 ```bash
-kubectl get svc ingress-nginx -n ingress-nginx
-```
-
-Output:
-
-```bash
-NAME                    TYPE           CLUSTER-IP       EXTERNAL-IP                       PORT(S)                      AGE
-ingress-nginx           LoadBalancer   <SOME_IP>        xxx.elb.eu-west-1.amazonaws.com   80:31080/TCP,443:31443/TCP   103m
-```
-
-The address is listed under `EXTERNAL-IP` column, `xxx.elb.eu-west-1.amazonaws.com` in our case.
-
-2. Resolve the address to get the IP:
-
-```bash
-dig xxx.elb.eu-west-1.amazonaws.com
+dig $(kubectl get svc ingress-nginx -n ingress-nginx --no-headers | awk '{print $4}')
 ```
 
 Output:
@@ -541,7 +547,7 @@ xxx.elb.eu-west-1.amazonaws.com. 77 IN A <THIRD_IP>
 <FIRST_IP> forecastle.fury.info cerebro.fury.info kibana.fury.info grafana.fury.info
 ```
 
-4. Open a browser and navigate to <http://forecastle.fury.info>
+Now, you can reach the ingresses directly from your browser.
 
 ### Forecastle
 
@@ -652,9 +658,7 @@ resources:
 - resources/velero-volume-snapshot-location.yml
 
 # Open Policy Agent
-- ../../vendor/katalog/opa/gatekeeper/core
-- ../../vendor/katalog/opa/gatekeeper/monitoring
-- #../../vendor/katalog/opa/gatekeeper/rules
+- ../../vendor/katalog/opa/gatekeeper/
 
 patchesStrategicMerge:
 ...

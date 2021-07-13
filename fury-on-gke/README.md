@@ -22,8 +22,11 @@ This tutorial assumes some basic familiarity with Kubernetes and GCP. Some exper
 
 To follow this tutorial, you need:
 
-- **GCP Access Credentials** of a GCP Account with `Project Owner` role.
-- Enable `Identity and Access Management (IAM) API`, `Compute Engine API`, `Cloud Resource Manager API` and `Kubernetes Engine API`
+- **GCP Access Credentials** of a GCP Account with `Project Owner` role with the following APIs enabled:
+  - *Identity and Access Management (IAM) API*
+  - *Compute Engine API*
+  - *Cloud Resource Manager API*
+  - *Kubernetes Engine API*
 - **Docker** - a [Docker image]([fury-on-gke-dockerfile]) containing `furyctl` and all the necessary tools is provided.
 - **OpenVPN Client** - [Tunnelblick][tunnelblick] (on macOS) or [OpenVPN Connect][openvpn-connect] (for other OS) are recommended.
 - **Google Cloud Storage** (optional) to hold the Terraform state.
@@ -35,13 +38,16 @@ To follow this tutorial, you need:
 2. Run the `fury-getting-started` docker image:
 
 ```bash
-docker run -ti --rm -v ${PWD}:/demo registry.sighup.io/delivery/fury-getting-started
+docker run -ti --rm \
+  -v $PWD:/demo \
+  registry.sighup.io/delivery/fury-getting-started
 ```
 
 3. Clone the [fury getting started repository][fury-gke-repository] containing all the example code used in this tutorial:
 
 ```bash
-git clone <REPO_LINK>
+git clone https://github.com/sighupio/fury-getting-started
+cd fury-getting-started/fury-on-gke
 ```
 
 4. Setup your GCP credentials by exporting the following environment variables:
@@ -84,18 +90,17 @@ In the bootstrap phase, `furyctl` automatically provisions:
 
 More details about the bootstrap provisioner can be found [here][provisioner-bootstrap-gcp-reference].
 
-#### Configuration
+#### Configure the bootstrap provisioner
 
-The bootstrap provisioner takes a `bootstrap.yml` as input. This file instructs the bootstrap provisioner with all the needed parameters to deploy the networking infrastructure.
+The bootstrap provisioner takes a `bootstrap.yml` as input. This file, instructs the bootstrap provisioner with all the needed parameters to deploy the networking infrastructure.
 
-In the repository, you can find a template for this file at `infrastructure/bootstrap.yml`:
+For this tutorial, use the `bootstrap.yml` template located at `/demo/infrastructure/bootstrap.yml`:
 
 ```yaml
 kind: Bootstrap
 metadata:
   name: fury-gcp-demo
 spec:
-  networkCIDR: 10.0.0.0/16
   publicSubnetsCIDRs:
   - 10.0.1.0/24
   privateSubnetsCIDRs:
@@ -117,7 +122,7 @@ spec:
 provisioner: gcp
 ```
 
-Open the `bootstrap.yml` file with a text editor of your choice and:
+Open the `/demo/infrastructure/bootstrap.yml` file with a text editor of your choice and:
 
 - Replace the field `<GITHUB_USER>` with your actual GitHub username.
 - Make sure that the VPC and subnets ranges are not already in use. If so, specify different values in the fields:
@@ -127,18 +132,44 @@ Open the `bootstrap.yml` file with a text editor of your choice and:
   - `clusterNetwork`
 - (optional) Add the details of an **existing** GCS Bucket to hold the Terraform remote state.
 
-> ⚠️ The bootstrap provisioner does not create the GCS bucket for you. You can manually create it using the gcloud cli:
->
-> ```bash
-> # Make bucket
-> gsutil mb gs://<GCS_BUCKET>
-> ```
+#### (optional) Create S3 Bucket to hold the Terraform remote
+
+Altough this is a tutorial, it is always a good practice to use a remote Terraform state over a local one. In case you are not familiar with Terraform, you can skip this section.
+
+The bootstrap provisioner does not create the GCS bucket for you. 
+
+1. You can manually create it using the `gcloud cli`:
+
+```bash
+gsutil mb gs://<GCS_BUCKET>
 
 # Enable versioning (recommended for terraform state)
 gsutil versioning set on gs://<GCS_BUCKET>
 ```
 
-Leave the rest as configured. More details about each field can be found [here][provisioner-bootstrap-gcp-reference].
+2. Once created, uncomment the `spec.executor.state` block in the `/demo/infrastructure/bootstrap.yml` file:
+
+```yaml
+...
+executor:
+  state:
+    backend: gcs
+    config:
+      bucket: <GCS_BUCKET>
+      prefix: terraform/bootstrap
+```
+
+3. Replace the `<GCS_BUCKET>` with the correct values from the previous commands:
+
+```yaml
+...
+executor:
+  state:
+    backend: gcs
+    config:
+      bucket: fury-demo-gke # example value
+      prefix: terraform/bootstrap
+```
 
 #### Provision networking infrastructure
 
@@ -161,8 +192,9 @@ furyctl bootstrap init --reset
 furyctl bootstrap apply
 ```
 
-> 📝 This phase may take some minutes. 
-> You can inspect the logs at: `infrastructure/bootstrap/logs/terraform.logs`.
+> 📝 This phase may take some minutes.
+>
+> Logs are available at `/demo/infrastructure/bootstrap/logs/terraform.logs`.
 
 3. When the `furyctl bootstrap apply` completes, inspect the output:
 
@@ -267,61 +299,64 @@ provisioner: gke
 
 Open the file with a text editor and replace:
 
-- `example-ssh-key` with your public key in the form `ssh-rsa VERY_LONG_STRING user`
+- `example-ssh-key` with your public key (e.g. `ssh-rsa KEY`)
 - (optional) Add the details of an **existing** GCS Bucket to hold the Terraform remote state. If you are using the same bucket as before, please specify a different **key**.
 
-Initialize the cluster provisioner and create the cluster:
+#### Provision EKS Cluster
+
+1. Initialize the cluster provisioner:
 
 ```bash
-cd infrastructure
-
-# Initialize cluster provisioner
 furyctl cluster init
+```
 
-# Create cluster
+2. Create GKE cluster:
+
+```bash
 furyctl cluster apply
 ```
 
-> 📝 This phase may take some minutes. 
-> You can inspect the logs at: `infrastructure/cluster/logs/terraform.logs`.
+> 📝 This phase may take some minutes.
+>
+> Logs are available at `/demo/infrastructure/cluster/logs/terraform.logs`.
 
-When the `furyctl cluster apply` is complete, inspect the output and find the command to retrieve the `KUBECONFIG`.
-
-```bash
-export KUBECONFIG=<PATH_TO_KUBECONFIG>
-```
-
-Test the connection with the cluster:
+3. When the `furyctl cluster apply` completes, test the connection with the cluster:
 
 ```bash
+export KUBECONFIG=/demo/infrastructure/cluster/secrets/kubeconfig
 kubectl get nodes
 ```
 
 ## Step 2 - Download fury modules
 
-`furyctl` can do a lot more than deploying infrastructure. In this section, you will use `furyctl` to download the monitoring, logging, and ingress modules of the Fury distribution.
+`furyctl` can do a lot more than deploying infrastructure. In this section, you use `furyctl` to download the monitoring, logging, and ingress modules of the Fury distribution.
 
-The Fury distribution has a lot of modules that you can install. Each module provides specific functionality to your cluster. A `Furyfile.yml` tells `furyctl` which modules to download.
+### Inspect the Furyfile
 
-In this tutorial, you use the following `Furyfile.yml`:
+`furyctl` needs a `Furyfile.yml` to know which modules to download.
+
+For this tutorial, use the `Furyfile.yml` located at `/demo/Furyfile.yaml`:
 
 ```yaml
 versions:
-  monitoring: v1.12
-  logging: v1.8
-  ingress: v1.10
+  networking: v1.6.0
+  monitoring: v1.12.2
+  logging: v1.8.0
+  ingress: v1.10.0
 
-resources:
+bases:
+  - name: networking/calico
   - name: monitoring/prometheus-operator
   - name: monitoring/prometheus-operated
   - name: monitoring/alertmanager-operated
   - name: monitoring/grafana
   - name: monitoring/goldpinger
   - name: monitoring/configs
-  - name: monitoring/eks-sm
+  - name: monitoring/gke-sm
   - name: monitoring/kube-proxy-metrics
   - name: monitoring/kube-state-metrics
   - name: monitoring/node-exporter
+  - name: monitoring/metrics-server
   - name: logging/elasticsearch-single
   - name: logging/cerebro
   - name: logging/curator
@@ -332,22 +367,50 @@ resources:
   - name: ingress/forecastle
 ```
 
-Download the modules with `furyctl`:
+### Download Fury modules
+
+1. Download the Fury modules with `furyctl`:
 
 ```bash
+cd /demo/
 furyctl vendor -H
 ```
 
-Inspect the download modules in the `vendor` folder:
+2. Inspect the downloaded modules in the `vendor` folder:
 
 ```bash
-$ tree -d vendor -L 2
+tree -d /demo/vendor -L 3
+```
+
+Output:
+
+```bash
+$ tree -d vendor -L 3
 
 vendor
 └── katalog
     ├── ingress
+    │   ├── cert-manager
+    │   ├── forecastle
+    │   └── nginx
     ├── logging
-    └── monitoring
+    │   ├── cerebro
+    │   ├── curator
+    │   ├── elasticsearch-single
+    │   ├── fluentd
+    │   └── kibana
+    ├── monitoring
+    │   ├── alertmanager-operated
+    │   ├── configs
+    │   ├── goldpinger
+    │   ├── grafana
+    │   ├── kube-proxy-metrics
+    │   ├── kube-state-metrics
+    │   ├── node-exporter
+    │   ├── prometheus-operated
+    │   └── prometheus-operator
+    └── networking
+        └── calico
 ```
 
 ## Step 3 - Installation
@@ -360,26 +423,26 @@ To deploy the Fury distribution, use the main `manifests/demo-fury/kustomization
 resources:
 
 # Ingress module
-- ../../vendor/katalog/ingress/forecastle
-- ../../vendor/katalog/ingress/nginx
-- ../../vendor/katalog/ingress/cert-manager
+- ../vendor/katalog/ingress/forecastle
+- ../vendor/katalog/ingress/nginx
+- ../vendor/katalog/ingress/cert-manager
 
 # Logging module
-- ../../vendor/katalog/logging/cerebro
-- ../../vendor/katalog/logging/curator
-- ../../vendor/katalog/logging/elasticsearch-single
-- ../../vendor/katalog/logging/fluentd
-- ../../vendor/katalog/logging/kibana
+- ../vendor/katalog/logging/cerebro
+- ../vendor/katalog/logging/curator
+- ../vendor/katalog/logging/elasticsearch-single
+- ../vendor/katalog/logging/fluentd
+- ../vendor/katalog/logging/kibana
 
 # Monitoring module
-- ../../vendor/katalog/monitoring/alertmanager-operated
-- ../../vendor/katalog/monitoring/goldpinger
-- ../../vendor/katalog/monitoring/grafana
-- ../../vendor/katalog/monitoring/kube-proxy-metrics
-- ../../vendor/katalog/monitoring/kube-state-metrics
-- ../../vendor/katalog/monitoring/node-exporter
-- ../../vendor/katalog/monitoring/prometheus-operated
-- ../../vendor/katalog/monitoring/prometheus-operator
+- ../vendor/katalog/monitoring/alertmanager-operated
+- ../vendor/katalog/monitoring/goldpinger
+- ../vendor/katalog/monitoring/grafana
+- ../vendor/katalog/monitoring/kube-proxy-metrics
+- ../vendor/katalog/monitoring/kube-state-metrics
+- ../vendor/katalog/monitoring/node-exporter
+- ../vendor/katalog/monitoring/prometheus-operated
+- ../vendor/katalog/monitoring/prometheus-operator
 
 # Custom resources
 - resources/ingress.yml
@@ -410,58 +473,35 @@ This `kustomization.yaml`:
 Install the modules:
 
 ```bash
-cd manifest/demo-fury
+cd /demo/manifests/
 
 make apply
-# You will see some errors related to CRDs creation, apply twice
+# Due to some chicken-egg 🐓🥚 problem with custom resources you have to apply again
 make apply
 ```
 
 ## Step 4 - Explore the distribution
 
-In this section, we explore some features of the distribution.
+🚀 The distribution is finally deployed! In this section you explore some of its features.
 
 ### Setup local DNS
 
 1. Get the address of the internal loadbalancer:
 
 ```bash
-# Get the Load Balancer endpoint
-kubectl get svc ingress-nginx -n ingress-nginx
+kubectl get svc ingress-nginx -n ingress-nginx --no-headers | awk '{print $4}'
 ```
 
 Output:
 
 ```bash
-NAME                    TYPE           CLUSTER-IP       EXTERNAL-IP                       PORT(S)                      AGE
-ingress-nginx           LoadBalancer   <SOME_IP>        xxx.europe-west3.lb.demo.internal   80:31080/TCP,443:31443/TCP   103m
-```
-
-The address is listed under `EXTERNAL-IP` column, `xxx.europe-west3.lb.demo.internal` in our case.
-
-2. Resolve the address to get the Load Balancer IP
-
-```bash
-dig xxx.europe-west3.lb.demo.internal
-```
-
-Output:
-
-```bash
-...
-
-;; ANSWER SECTION:
-xxx.europe-west3.lb.demo.internal. 77 IN A <FIRST_IP>
-xxx.europe-west3.lb.demo.internal. 77 IN A <SECOND_IP>
-xxx.europe-west3.lb.demo.internal. 77 IN A <THIRD_IP>
-...
-
+10.1.0.5
 ```
 
 3. Add the following line to your local `/etc/hosts`:
 
 ```bash
-<FIRST_IP> forecastle.fury.info cerebro.fury.info kibana.fury.info grafana.fury.info
+10.1.0.5 forecastle.fury.info cerebro.fury.info kibana.fury.info grafana.fury.info
 ```
 
 Now, you can reach the ingresses directly from your browser.
@@ -476,36 +516,37 @@ Navigate to <http://forecastle.fury.info> to see all the other ingresses deploye
 
 ### Kibana
 
-[Kibana](https://github.com/elastic/kibana) is an open-source analytics and visualization platform for Elasticsearch. Kibana lets you perform advanced data analysis and visualize data in various charts, tables, and maps. You can use it to search, view, and interact with data
-stored in Elasticsearch indices.
+[Kibana](https://github.com/elastic/kibana) is an open-source analytics and visualization platform for Elasticsearch. Kibana lets you perform advanced data analysis and visualize data in various charts, tables, and maps. You can use it to search, view, and interact with data stored in Elasticsearch indices.
 
 Navigate to <http://kibana.fury.info> or click the Kibana icon from Forecastle.
 
-Click on `Explore on my own` and you should see the dashboard.
-
-#### Create a Kibana index
-
-Open the menu on the right-top corner of the page, and select `Stack Management` (it's on the very bottom of the menu). Then select `Index patterns` and click on `Create index pattern`.
-
-Write `kubernetes-*` as index pattern and flag *Include system and hidden indices*, then click `Next step`.
-
-Select `@timestamp` as time field and create the index.
-
 #### Read the logs
 
-Based on our index, now we can read and query the logs. Let's navigate through the menu again, and select `Discover`.
+The Fury Logging module already collects data from the following indeces:
+
+- `kubernetes-*`
+- `system-*`
+- `ingress-controller-*`
+
+Click on `Discover` to see the main dashboard. On the top left cornet select one of the indeces to explore the logs.
 
 ![Kibana](../utils/images/kibana.png)
 
 ### Grafana
 
-[Grafana](https://github.com/grafana/grafana) is an open-source platform for monitoring and observability. It allows you to query, visualize, alert on and understand your metrics.
+[Grafana](https://github.com/grafana/grafana) is an open-source platform for monitoring and observability. Grafana allows you to query, visualize, alert on and understand your metrics.
 
 Navigate to <http://grafana.fury.info> or click the Grafana icon from Forecastle.
 
-Fury provides some dashboard already configured to use.
+Fury provides some pre-configured dashboard to visualize the state of the cluster. Examine an example dashboard:
 
-Let's examine an example dashboard. Write `pods` and select the `Kubernetes/Pods` dashboard. This is what you should see:
+1. Click on the search icon on the left sidebar.
+
+2. Write `pods` and click enter.
+
+3. Select the `Kubernetes/Pods` dashboard.
+
+This is what you should see:
 
 ![Grafana](../utils/images/grafana.png)
 
@@ -584,7 +625,6 @@ cd manifest/demo-fury
 
 make apply
 # If you see some errors, apply twice
-
 ```
 
 ## Step 6 - Teardown
