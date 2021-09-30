@@ -714,15 +714,16 @@ furyctl cluster destroy
 3. Delete the target groups and loadbalancer associated with the EKS cluster using AWS CLI:
 
 ```bash
+loadbalancer=$(aws resourcegroupstaggingapi get-resources  \
+               --tag-filters Key=kubernetes.io/cluster/fury-eks-demo,Values=owned \
+               | jq -r ".ResourceTagMappingList[] | .ResourceARN" | grep loadbalancer)
+for i in $loadbalancer ; do aws elbv2 delete-load-balancer --load-balancer-arn $i ; done
+
 target_groups=$(aws resourcegroupstaggingapi get-resources \
                 --tag-filters Key=kubernetes.io/cluster/fury-eks-demo,Values=owned  \
                 | jq -r ".ResourceTagMappingList[] | .ResourceARN" | grep targetgroup)
 for tg in $target_groups ; do aws elbv2 delete-target-group --target-group-arn $tg ; done
 
-loadbalancer=$(aws resourcegroupstaggingapi get-resources  \
-               --tag-filters Key=kubernetes.io/cluster/fury-eks-demo,Values=owned \
-               | jq -r ".ResourceTagMappingList[] | .ResourceARN" | grep loadbalancer)
-for i in $loadbalancer ; do aws elbv2 delete-load-balancer --load-balancer-arn $i ; done
 ```
 
 4. Destroy network infrastructure:
