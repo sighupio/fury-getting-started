@@ -7,7 +7,7 @@ terraform {
   required_version = ">= 0.12"
 
   required_providers {
-    aws        = "=2.70.0"
+    aws        = "=3.37.0"
   }
 }
 
@@ -16,11 +16,8 @@ provider "aws" {
 }
 
 module "velero" {
-  source             = "../../vendor/modules/dr/eks-velero"
-  name               = "demo-fury"
-  env                = "demo"
-  backup_bucket_name = "demo-fury-velero"
-  oidc_provider_url  = "oidc.eks.eu-west-1.amazonaws.com/id/B04477AFC754650E08D8E46730715193"
-  region             = "eu-west-1"
+  source             = "../vendor/modules/dr/eks-velero"
+  backup_bucket_name = "fury-eks-demo-velero"
+  oidc_provider_url  = "oidc.eks.eu-west-1.amazonaws.com/id/CDB7AE563FA0B5CFA190CCDF0425A987"
 
 }

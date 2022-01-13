@@ -2,7 +2,7 @@ kind: Cluster
 metadata:
   name: fury-eks-demo
 spec:
-  version: 1.18
+  version: 1.21
   network: <VPC_ID>
   subnetworks:
   - <PRIVATE_SUBNET1_ID>

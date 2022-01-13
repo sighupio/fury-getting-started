@@ -1,0 +1,20 @@
+resources:
+
+- ../../vendor/katalog/monitoring/alertmanager-operated
+- ../../vendor/katalog/monitoring/goldpinger
+- ../../vendor/katalog/monitoring/grafana
+- ../../vendor/katalog/monitoring/kube-proxy-metrics
+- ../../vendor/katalog/monitoring/kube-state-metrics
+- ../../vendor/katalog/monitoring/eks-sm
+- ../../vendor/katalog/monitoring/metrics-server
+- ../../vendor/katalog/monitoring/node-exporter
+- ../../vendor/katalog/monitoring/prometheus-operated
+- ../../vendor/katalog/monitoring/prometheus-operator
+
+- resources/ingress.yml
+
+patchesStrategicMerge:
+
+- patches/alertmanager-resources.yml
+- patches/prometheus-operator-resources.yml
+- patches/prometheus-resources.yml
