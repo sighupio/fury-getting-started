@@ -512,7 +512,7 @@ Now, you can reach the ingresses directly from your browser.
 
 Navigate to <http://forecastle.fury.info> to see all the other ingresses deployed, grouped by namespace.
 
-![Forecastle](../utils/images/forecastle.png)
+![Forecastle][forecastle-screenshoot]
 
 ### Kibana
 
@@ -530,7 +530,7 @@ The Fury Logging module already collects data from the following indeces:
 
 Click on `Discover` to see the main dashboard. On the top left cornet select one of the indeces to explore the logs.
 
-![Kibana](../utils/images/kibana.png)
+![Kibana][kibana-screenshoot]
 
 ### Grafana
 
@@ -548,7 +548,7 @@ Fury provides some pre-configured dashboard to visualize the state of the cluste
 
 This is what you should see:
 
-![Grafana](../utils/images/grafana.png)
+![Grafana][grafana-screenshoot]
 
 ## Step 5 (optional) - Deploy additional modules
 
@@ -667,7 +667,8 @@ I hope you enjoyed the tutorial... TBC
 [tunnelblick]: https://tunnelblick.net/downloads.html
 [openvpn-connect]: https://openvpn.net/vpn-client/
 
-[kibana-screenshoot]: ../utils/images/kibana.png
-[grafana-screenshoot]: ../utils/images/grafana.png
-[cerebro-screenshoot]: ../utils/images/cerebro.png
-[forecastle-screenshoot]: ../utils/images/forecastle.png
+<!-- Images -->
+[kibana-screenshoot]: https://github.com/sighupio/fury_getting_started/blob/media/images/kibana.png
+[grafana-screenshoot]: https://github.com/sighupio/fury_getting_started/blob/media/images/grafana.png
+[cerebro-screenshoot]: https://github.com/sighupio/fury_getting_started/blob/media/images/cerebro.png
+[forecastle-screenshoot]: https://github.com/sighupio/fury_getting_started/blob/media/images/forecastle.png

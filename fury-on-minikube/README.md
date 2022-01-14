@@ -1,5 +1,3 @@
-![Fury Logo](../utils/images/fury_logo.png)
-
 # Fury on Minikube
 
 This step-by-step tutorial helps you deploy the **Kubernetes Fury Distribution** on a local minikube cluster.
@@ -243,7 +241,7 @@ Now, you can reach the ingresses directly from your browser.
 
 Navigate to <http://forecastle.fury.info> to see all the other ingresses deployed, grouped by namespace.
 
-![Forecastle](../utils/images/forecastle.png)
+![Forecastle](https://github.com/sighupio/fury_getting_started/blob/media/images/forecastle.png)
 
 ### Kibana
 
@@ -274,7 +272,7 @@ Click on `Explore on my own` to see the main dashboard.
 Based on the index you created, you can read and query the logs.
 Navigate through the menu again, and select `Discover`.
 
-![Kibana](../utils/images/kibana.png)
+![Kibana][kibana-screenshot]
 
 ### Grafana
 
@@ -292,7 +290,7 @@ Fury provides some pre-configured dashboard to visualize the state of the cluste
 
 This is what you should see:
 
-![Grafana](../utils/images/grafana.png)
+![Grafana][grafana-screenshot]
 
 ## Step 6 - Tear down
 
@@ -332,6 +330,7 @@ More about Fury:
 
 - [Fury Documentation][fury-docs]
 
+<!-- Links -->
 [fury-getting-started-repository]: https://github.com/sighupio/fury-getting-started/
 [fury-getting-started-dockerfile]: https://github.com/sighupio/fury-getting-started/blob/main/utils/docker/Dockerfile
 
@@ -349,3 +348,9 @@ More about Fury:
 
 [fury-docs]: https://docs.kubernetesfury.com
 [fury-docs-modules]: https://docs.kubernetesfury.com/docs/overview/modules/
+
+<!-- Images -->
+[kibana-screenshoot]: https://github.com/sighupio/fury_getting_started/blob/media/images/kibana.png
+[grafana-screenshoot]: https://github.com/sighupio/fury_getting_started/blob/media/images/grafana.png
+[cerebro-screenshoot]: https://github.com/sighupio/fury_getting_started/blob/media/images/cerebro.png
+[forecastle-screenshoot]: https://github.com/sighupio/fury_getting_started/blob/media/images/forecastle.png
