@@ -241,7 +241,7 @@ Now, you can reach the ingresses directly from your browser.
 
 Navigate to <http://forecastle.fury.info> to see all the other ingresses deployed, grouped by namespace.
 
-![Forecastle](https://github.com/sighupio/fury_getting_started/blob/media/images/forecastle.png)
+![Forecastle][forecastle-screenshot]
 
 ### Kibana
 
@@ -254,17 +254,11 @@ Click on `Explore on my own` to see the main dashboard.
 #### Create a Kibana index
 
 1. Open the menu on the right-top corner of the page.
-
 2. Select `Stack Management` (it's on the very bottom of the menu).
-
 3. Select `Index patterns` and click on `Create index pattern`.
-
 4. Write `kubernetes-*` as index pattern and flag *Include system and hidden indices*
-
 5. Click `Next step`.
-
 6. Select `@timestamp` as time field.s
-
 7. Click create the index.
 
 #### Read the logs
@@ -283,9 +277,7 @@ Navigate to <http://grafana.fury.info> or click the Grafana icon from Forecastle
 Fury provides some pre-configured dashboard to visualize the state of the cluster. Examine an example dashboard:
 
 1. Click on the search icon on the left sidebar.
-
 2. Write `pods` and click enter.
-
 3. Select the `Kubernetes/Pods` dashboard.
 
 This is what you should see:
@@ -350,7 +342,7 @@ More about Fury:
 [fury-docs-modules]: https://docs.kubernetesfury.com/docs/overview/modules/
 
 <!-- Images -->
-[kibana-screenshoot]: https://github.com/sighupio/fury-getting-started/blob/media/kibana.png
-[grafana-screenshoot]: https://github.com/sighupio/fury-getting-started/blob/media/grafana.png
-[cerebro-screenshoot]: https://github.com/sighupio/fury-getting-started/blob/media/cerebro.png
-[forecastle-screenshoot]: https://github.com/sighupio/fury-getting-started/blob/media/forecastle.png
+[kibana-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/kibana.png
+[grafana-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/grafana.png
+[cerebro-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/cerebro.png
+[forecastle-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/forecastle.png

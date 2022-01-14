@@ -785,7 +785,7 @@ More about Fury:
 [fury-docs-modules]: https://docs.kubernetesfury.com/docs/overview/modules/
 
 <!-- Images -->
-[kibana-screenshoot]: https://github.com/sighupio/fury-getting-started/blob/media/kibana.png
-[grafana-screenshoot]: https://github.com/sighupio/fury-getting-started/blob/media/grafana.png
-[cerebro-screenshoot]: https://github.com/sighupio/fury-getting-started/blob/media/cerebro.png
-[forecastle-screenshoot]: https://github.com/sighupio/fury-getting-started/blob/media/forecastle.png
+[kibana-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/kibana.png
+[grafana-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/grafana.png
+[cerebro-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/cerebro.png
+[forecastle-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/forecastle.png
