@@ -123,7 +123,6 @@ spec:
     sshUsers:
     - <GITHUB_USER>
 executor:
-  version: 0.13.6
   # state:
   #   backend: s3
   #   config:
@@ -293,7 +292,7 @@ kind: Cluster
 metadata:
   name: fury-eks-demo
 spec:
-  version: 1.18
+  version: 1.21
   network: <VPC_ID>
   subnetworks:
   - <PRIVATE_SUBNET1_ID>
@@ -310,7 +309,6 @@ spec:
     instanceType: t3.large
     volumeSize: 50
 executor:
-  version: 0.13.6
   # state:
   #   backend: s3
   #   config:
@@ -448,51 +446,34 @@ To deploy the Fury distribution, use the following root `kustomization.yaml` loc
 ```yaml
 resources:
 
-# Ingress module
-- ../vendor/katalog/ingress/forecastle
-- ../vendor/katalog/ingress/nginx
-- ../vendor/katalog/ingress/cert-manager
+- ingress
+- logging
+- monitoring
+- networking
+```
 
-# Logging module
-- ../vendor/katalog/logging/cerebro
-- ../vendor/katalog/logging/curator
-- ../vendor/katalog/logging/elasticsearch-single
-- ../vendor/katalog/logging/fluentd
-- ../vendor/katalog/logging/kibana
+This `kustomization.yaml` wraps the other `kustomization.yaml`s in subfolders. For example in `/demo/manifests/logging/kustomization.yaml`
 
-# Monitoring module
-- ../vendor/katalog/monitoring/alertmanager-operated
-- ../vendor/katalog/monitoring/goldpinger
-- ../vendor/katalog/monitoring/grafana
-- ../vendor/katalog/monitoring/kube-proxy-metrics
-- ../vendor/katalog/monitoring/kube-state-metrics
-- ../vendor/katalog/monitoring/eks-sm
-- ../vendor/katalog/monitoring/metrics-server
-- ../vendor/katalog/monitoring/node-exporter
-- ../vendor/katalog/monitoring/prometheus-operated
-- ../vendor/katalog/monitoring/prometheus-operator
+```yaml
+resources:
 
-# Custom resources
+- ../../vendor/katalog/logging/cerebro
+- ../../vendor/katalog/logging/curator
+- ../../vendor/katalog/logging/elasticsearch-single
+- ../../vendor/katalog/logging/fluentd
+- ../../vendor/katalog/logging/kibana
+
 - resources/ingress.yml
 
 patchesStrategicMerge:
 
-# Ingress module
-- patches/ingress-nginx-lb-annotation.yml
-
-# Logging module
 - patches/fluentd-resources.yml
 - patches/fluentbit-resources.yml
-
-# Monitoring module
-- patches/alertmanager-resources.yml
-- patches/cerebro-resources.yml
 - patches/elasticsearch-resources.yml
-- patches/prometheus-operator-resources.yml
-- patches/prometheus-resources.yml
+- patches/cerebro-resources.yml
 ```
 
-This `kustomization.yaml`:
+Each `kustomization.yaml`:
 
 - references the modules downloaded in the previous section
 - patches the upstream modules (e.g. `patches/elasticsearch-resources.yml` limits the resources requested by elastic search)
@@ -609,12 +590,13 @@ In this section, you deploy the following additional modules:
 ```yaml
 versions:
   ...
-  dr: v1.6.1
-  opa: v1.3.1
+  dr: v1.8.0
+  opa: v1.5.0
 
 bases:
   ...
   - name: dr/velero
+  - name: opa/gatekeeper
 
 modules:
 - name: dr/eks-velero
@@ -632,47 +614,59 @@ furyctl vendor -H
 ```bash
 cd demo/terraform/
 
-terraform init
-terraform plan -out terraform.plan
-terraform apply terraform.plan
+make init
+make plan
+make apply
 ```
 
 4. Gather some output manifests from Terraform:
 
 ```bash
-terraform output -raw velero_patch > ../../manifests/demo-fury/patches/velero.yml
-terraform output -raw velero_backup_storage_location > ../../manifests/demo-fury/resources/velero-backup-storage-location.yml
-terraform output -raw velero_volume_snapshot_location > ../../manifests/demo-fury/resources/velero-volume-snapshot-location.yml
+make generate-output
+```
+That is a shortcut for:
+
+```bash
+terraform output -raw velero_patch > ../manifests/dr/patches/velero.yml
+terraform output -raw velero_backup_storage_location > ../manifests/dr/resources/velero-backup-storage-location.yml
+terraform output -raw velero_volume_snapshot_location > ../manifests/dr/resources/velero-volume-snapshot-location.yml
 ```
 
-5. Add the following lines to `kustomization.yaml`:
+5. Have a look at `/demo/manifests/dr/kustomization.yaml`...
 
 ```yaml
 resources:
-...
 
-# Disaster Recovery
 - ../../vendor/katalog/dr/velero/velero-aws
 - ../../vendor/katalog/dr/velero/velero-schedules
 - resources/velero-backup-storage-location.yml
 - resources/velero-volume-snapshot-location.yml
 
-# Open Policy Agent
-- ../../vendor/katalog/opa/gatekeeper/
-
 patchesStrategicMerge:
-...
 
-# Disaster Recovery
 - patches/velero.yml
 ...
+```
+
+... and `/demo/manifests/opa/kustomization.yaml`
+
+```yaml
+resources:
+
+- ../../vendor/katalog/opa/gatekeeper
 ```
 
 6. Install the modules as before:
 
 ```bash
-cd /demo/manifest/
+cd /demo/manifests/dr
 make apply
+# Again our chicken-egg 🐓🥚 problem with custom resources 
+make apply
+cd ..
+cd /demo/manifests/opa
+make apply
+cd ..
 ```
 
 ### (optional) Create a backup with Velero
