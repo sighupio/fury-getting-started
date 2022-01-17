@@ -668,7 +668,7 @@ I hope you enjoyed the tutorial... TBC
 [openvpn-connect]: https://openvpn.net/vpn-client/
 
 <!-- Images -->
-[kibana-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/kibana.png
-[grafana-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/grafana.png
-[cerebro-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/cerebro.png
-[forecastle-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/forecastle.png
+[kibana-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/kibana.png?raw=true
+[grafana-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/grafana.png?raw=true
+[cerebro-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/cerebro.png?raw=true
+[forecastle-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/forecastle.png?raw=true
