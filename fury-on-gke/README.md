@@ -373,7 +373,7 @@ bases:
 
 ```bash
 cd /demo/
-furyctl vendor -H
+furyctl distribution download -H
 ```
 
 2. Inspect the downloaded modules in the `vendor` folder:
@@ -579,7 +579,7 @@ modules:
 And download the new vendor:
 
 ```bash
-furyctl vendor -H
+furyctl distribution download -H
 ```
 
 Create the resources using Terraform:
@@ -618,7 +618,7 @@ resources:
 
 ```
 
-Istall the modules with:
+Install the modules with:
 
 ```bash
 cd manifest/demo-fury

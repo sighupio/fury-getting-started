@@ -117,7 +117,7 @@ bases:
 
 ```bash
 cd /demo/
-furyctl vendor -H
+furyctl distribution download -H
 ```
 
 2. Inspect the downloaded modules in the `vendor` folder:
