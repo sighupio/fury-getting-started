@@ -19,7 +19,7 @@ This tutorial assumes some basic familiarity with Kubernetes.
 To follow this tutorial, you need:
 
 - **Minikube** - follow the [installation guide](https://minikube.sigs.k8s.io/docs/start/). This guide is based on Minikube with the VirtualBox driver.
-- **Docker** - for simplicity, we provide you with a Docker image] that includes `furyctl` and all the necessary tools to follow the guide.
+- **Docker** - for simplicity, we provide you with a Docker image that includes `furyctl` and all the other tools used in this guide.
 
 ### Setup and initialize the environment
 
