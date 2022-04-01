@@ -18,8 +18,8 @@ This tutorial assumes some basic familiarity with Kubernetes.
 
 To follow this tutorial, you need:
 
-- **Minikube** - follow the [installation guide](https://minikube.sigs.k8s.io/docs/start/).
-- **Docker** - a [Docker image]([fury-getting-started]) containing `furyctl` and all the necessary tools is provided.
+- **Minikube** - follow the [installation guide](https://minikube.sigs.k8s.io/docs/start/). This guide is based on Minikube with the VirtualBox driver.
+- **Docker** - for simplicity, we provide you with a Docker image] that includes `furyctl` and all the necessary tools to follow the guide.
 
 ### Setup and initialize the environment
 
@@ -76,6 +76,8 @@ minikube   Ready    master   16m   v1.19.4
 ## Step 2 - Download fury modules
 
 `furyctl` can do a lot more than deploying infrastructure. In this section, you use `furyctl` to download the monitoring, logging, and ingress modules of the Fury distribution.
+
+To learn more about `furyctl` and its features, head to the [documentation site][furyctl-docs].
 
 ### Inspect the Furyfile
 
@@ -340,6 +342,8 @@ More about Fury:
 
 [fury-docs]: https://docs.kubernetesfury.com
 [fury-docs-modules]: https://docs.kubernetesfury.com/docs/overview/modules/
+
+[furyctl-docs]: https://docs.kubernetesfury.com/docs/infrastructure/furyctl
 
 <!-- Images -->
 [kibana-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/kibana.png?raw=true
