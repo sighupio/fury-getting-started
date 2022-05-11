@@ -11,8 +11,15 @@ resources:
   - ../vendor/katalog/monitoring/configs
 
   # Logging module
+  - ../vendor/katalog/logging/cerebro
+  - ../vendor/katalog/logging/curator
   - ../vendor/katalog/logging/elasticsearch-single
-  - ../vendor/katalog/logging/fluentd
+  - ../vendor/katalog/logging/logging-operator
+  - ../vendor/katalog/logging/logging-operated
+  - ../vendor/katalog/logging/configs/kubernetes
+  - ../vendor/katalog/logging/configs/ingress-nginx
+  - ../vendor/katalog/logging/configs/audit
+  - ../vendor/katalog/logging/configs/events
   - ../vendor/katalog/logging/kibana
 
   # Ingress module
@@ -29,8 +36,6 @@ patchesStrategicMerge:
   - patches/prometheus-operated-resources.yml
   - patches/prometheus-operator-resources.yml
   - patches/grafana-resources.yml
-  - patches/fluentd-resources.yml
   - patches/kibana-resources.yml
-  - patches/fluentbit-resources.yml
   - patches/elasticsearch-resources.yml
   - patches/nginx-ingress-controller-resources.yml

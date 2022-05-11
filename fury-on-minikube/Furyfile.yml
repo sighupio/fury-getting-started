@@ -1,7 +1,7 @@
 versions:
-  monitoring: v1.12.2
-  logging: v1.8.0
-  ingress: v1.10.0
+  monitoring: v1.14.2
+  logging: v2.0.1
+  ingress: v1.12.2
 
 bases:
   - name: monitoring/prometheus-operator
@@ -13,8 +13,14 @@ bases:
   - name: monitoring/configs
   - name: monitoring/kube-state-metrics
   - name: monitoring/node-exporter
+  
+  - name: logging/cerebro
+  - name: logging/curator
   - name: logging/elasticsearch-single
-  - name: logging/fluentd
+  - name: logging/logging-operator
+  - name: logging/logging-operated
+  - name: logging/configs
   - name: logging/kibana
+
   - name: ingress/nginx
   - name: ingress/forecastle

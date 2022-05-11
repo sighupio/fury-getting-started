@@ -1,5 +1,5 @@
 ---
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
@@ -15,11 +15,14 @@ spec:
       http:
         paths:
           - path: /
+            pathType: Prefix
             backend:
-              serviceName: grafana
-              servicePort: http
+              service:
+                name: grafana
+                port: 
+                  number: 3000
 ---
-apiVersion: networking.k8s.io/v1beta1
+apiVersion:  networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
@@ -35,11 +38,14 @@ spec:
     http:
       paths:
       - path: /
+        pathType: Prefix
         backend:
-          serviceName: forecastle
-          servicePort: 80
+            service:
+              name: forecastle
+              port: 
+                number: 80
 ---
-apiVersion: networking.k8s.io/v1beta1
+apiVersion:  networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
@@ -55,11 +61,14 @@ spec:
     http:
       paths:
       - path: /
+        pathType: Prefix
         backend:
-          serviceName: kibana
-          servicePort: http
+            service:
+              name: kibana
+              port: 
+                number: 5601
 ---
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
@@ -75,11 +84,14 @@ spec:
     http:
       paths:
       - path: /
+        pathType: Prefix
         backend:
-          serviceName: alertmanager-main
-          servicePort: web
+          service: 
+            name: alertmanager-main
+            port: 
+              number: 9093
 ---
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
@@ -95,11 +107,14 @@ spec:
     http:
       paths:
       - path: /
+        pathType: Prefix
         backend:
-          serviceName: goldpinger
-          servicePort: http
+          service: 
+            name: goldpinger
+            port: 
+              number: 8080
 ---
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
@@ -115,7 +130,10 @@ spec:
       http:
         paths:
           - path: /
+            pathType: Prefix
             backend:
-              serviceName: prometheus-k8s
-              servicePort: web
+              service:
+                name: prometheus-k8s
+                port: 
+                  number: 9090
 ---
