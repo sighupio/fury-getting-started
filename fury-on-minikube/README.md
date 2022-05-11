@@ -87,8 +87,8 @@ For this tutorial, use the `Furyfile.yml` located at `/demo/Furyfile.yaml`:
 
 ```yaml
 versions:
-  monitoring: v1.14.2
-  logging: v2.0.1
+  monitoring: v1.14.1
+  logging: v1.10.2
   ingress: v1.12.2
 
 bases:
@@ -102,12 +102,10 @@ bases:
   - name: monitoring/kube-state-metrics
   - name: monitoring/node-exporter
   
+  - name: logging/elasticsearch-single
   - name: logging/cerebro
   - name: logging/curator
-  - name: logging/elasticsearch-single
-  - name: logging/logging-operator
-  - name: logging/logging-operated
-  - name: logging/configs
+  - name: logging/fluentd
   - name: logging/kibana
 
   - name: ingress/nginx
@@ -148,30 +146,23 @@ To deploy the Fury distribution, use the following root `kustomization.yaml` loc
 ```yaml
 resources:
 
-  # Monitoring module
+  # Monitoring
   - ../vendor/katalog/monitoring/prometheus-operator
   - ../vendor/katalog/monitoring/prometheus-operated
-  - ../vendor/katalog/monitoring/alertmanager-operated
-  - ../vendor/katalog/monitoring/node-exporter
-  - ../vendor/katalog/monitoring/kube-state-metrics
   - ../vendor/katalog/monitoring/grafana
   - ../vendor/katalog/monitoring/goldpinger
-  - ../vendor/katalog/monitoring/configs
+  - ../vendor/katalog/monitoring/kube-state-metrics
+  - ../vendor/katalog/monitoring/node-exporter
+  - ../vendor/katalog/monitoring/alertmanager-operated
 
-  # Logging module
+  # Logging
+  - ../vendor/katalog/logging/elasticsearch-single
   - ../vendor/katalog/logging/cerebro
   - ../vendor/katalog/logging/curator
-  - ../vendor/katalog/logging/elasticsearch-single
-  - ../vendor/katalog/logging/logging-operator
-  - ../vendor/katalog/logging/logging-operated
-  - ../vendor/katalog/logging/configs/kubernetes
-  - ../vendor/katalog/logging/configs/ingress-nginx
-  - ../vendor/katalog/logging/configs/audit
-  - ../vendor/katalog/logging/configs/events
+  - ../vendor/katalog/logging/fluentd
   - ../vendor/katalog/logging/kibana
 
-
-  # Ingress module
+  # Ingress
   - ../vendor/katalog/ingress/nginx
   - ../vendor/katalog/ingress/forecastle
 
@@ -187,6 +178,8 @@ patchesStrategicMerge:
   - patches/grafana-resources.yml
   - patches/kibana-resources.yml
   - patches/elasticsearch-resources.yml
+  - patches/fluentd-resources.yml
+  - patches/fluentbit-resources.yml
   - patches/nginx-ingress-controller-resources.yml
 
 ```

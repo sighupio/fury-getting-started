@@ -1,6 +1,6 @@
 versions:
-  monitoring: v1.14.2
-  logging: v2.0.1
+  monitoring: v1.14.1
+  logging: v1.10.2
   ingress: v1.12.2
 
 bases:
@@ -14,12 +14,10 @@ bases:
   - name: monitoring/kube-state-metrics
   - name: monitoring/node-exporter
   
+  - name: logging/elasticsearch-single
   - name: logging/cerebro
   - name: logging/curator
-  - name: logging/elasticsearch-single
-  - name: logging/logging-operator
-  - name: logging/logging-operated
-  - name: logging/configs
+  - name: logging/fluentd
   - name: logging/kibana
 
   - name: ingress/nginx
