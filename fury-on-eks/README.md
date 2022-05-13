@@ -180,7 +180,7 @@ executor:
 ```yaml
 ...
 executor:
-  version: 0.13.6
+#  version: 0.13.6
   state:
    backend: s3
    config:
@@ -246,10 +246,9 @@ In the cluster provisioning phase, `furyctl`  automatically deploys a battle-tes
 1. Create the `fury.ovpn` OpenVPN credentials file with `furyagent`:
 
 ```bash
-furyagent configure openvpn-client \ 
+furyagent configure openvpn-client \
   --client-name fury \
-  --config /demo/infrastructure/bootstrap/secrets/furyagent.yml \
-  > fury.ovpn
+  --config /demo/infrastructure/bootstrap/secrets/furyagent.yml > fury.ovpn
 ```
 
 > 🕵🏻‍♂️ [Furyagent][furyagent-repository] is a tool developed by SIGHUP to manage OpenVPN and SSH user access to the bastion host.
@@ -363,32 +362,39 @@ For this tutorial, use the `Furyfile.yml` located at `/demo/Furyfile.yaml`:
 
 ```yaml
 versions:
-  networking: v1.6.0
-  monitoring: v1.12.2
-  logging: v1.8.0
-  ingress: v1.10.0
+  networking: v1.8.2
+  monitoring: v1.14.1
+  logging: v1.10.2
+  ingress: v1.12.2
+#  dr: v1.9.2
+#  opa: v1.6.2
 
 bases:
   - name: networking/calico
   - name: monitoring/prometheus-operator
   - name: monitoring/prometheus-operated
-  - name: monitoring/alertmanager-operated
   - name: monitoring/grafana
   - name: monitoring/goldpinger
   - name: monitoring/configs
-  - name: monitoring/eks-sm
+  - name: monitoring/kubeadm-sm
   - name: monitoring/kube-proxy-metrics
   - name: monitoring/kube-state-metrics
   - name: monitoring/node-exporter
   - name: monitoring/metrics-server
+  - name: monitoring/eks-sm
+  - name: monitoring/alertmanager-operated
   - name: logging/elasticsearch-single
   - name: logging/cerebro
   - name: logging/curator
   - name: logging/fluentd
   - name: logging/kibana
   - name: ingress/nginx
-  - name: ingress/cert-manager
   - name: ingress/forecastle
+#  - name: dr/velero
+#  - name: opa/gatekeeper
+
+#modules:
+#- name: dr/eks-velero
 ```
 
 ### Download Fury modules
@@ -666,6 +672,10 @@ make apply
 cd ..
 cd /demo/manifests/opa
 make apply
+# Again our chicken-egg 🐓🥚 problem with custom resources 
+make apply
+# Again our chicken-egg 🐓🥚 problem with custom resources 
+make apply
 cd ..
 ```
 
@@ -709,13 +719,11 @@ furyctl cluster destroy
 
 ```bash
 loadbalancer=$(aws resourcegroupstaggingapi get-resources  \
-               --tag-filters Key=kubernetes.io/cluster/fury-eks-demo,Values=owned \
-               | jq -r ".ResourceTagMappingList[] | .ResourceARN" | grep loadbalancer)
+               --tag-filters Key=kubernetes.io/cluster/fury-eks-demo,Values=owned | jq -r ".ResourceTagMappingList[] | .ResourceARN" | grep loadbalancer)
 for i in $loadbalancer ; do aws elbv2 delete-load-balancer --load-balancer-arn $i ; done
 
 target_groups=$(aws resourcegroupstaggingapi get-resources \
-                --tag-filters Key=kubernetes.io/cluster/fury-eks-demo,Values=owned  \
-                | jq -r ".ResourceTagMappingList[] | .ResourceARN" | grep targetgroup)
+                --tag-filters Key=kubernetes.io/cluster/fury-eks-demo,Values=owned  | jq -r ".ResourceTagMappingList[] | .ResourceARN" | grep targetgroup)
 for tg in $target_groups ; do aws elbv2 delete-target-group --target-group-arn $tg ; done
 
 ```
@@ -729,8 +737,7 @@ furyctl bootstrap destroy
 5. (Optional) Destroy the S3 bucket holding the Terraform state
 
 ```bash
-aws s3api delete-objects \
-  --bucket $S3_BUCKET \ 
+aws s3api delete-objects --bucket $S3_BUCKET \
   --delete "$(aws s3api list-object-versions --bucket $S3_BUCKET --query='{Objects: Versions[].{Key:Key,VersionId:VersionId}}')"
 
 aws s3api delete-bucket --bucket $S3_BUCKET
