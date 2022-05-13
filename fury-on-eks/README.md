@@ -779,11 +779,11 @@ More about Fury:
 
 [furyagent-repository]: https://github.com/sighupio/furyagent
 
-[provisioner-bootstrap-aws-reference]: https://docs.kubernetesfury.com/docs/cli-reference/furyctl/provisioners/aws-bootstrap/
+[provisioner-bootstrap-aws-reference]: https://github.com/sighupio/fury-eks-installer/tree/master/modules/vpc-and-vpn
 
 [tunnelblick]: https://tunnelblick.net/downloads.html
 [openvpn-connect]: https://openvpn.net/vpn-client/
 [github-ssh-key-setup]: https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account
 
 [fury-docs]: https://docs.kubernetesfury.com
-[fury-docs-modules]: https://docs.kubernetesfury.com/docs/overview/modules/
+[fury-docs-modules]: https://docs.kubernetesfury.com/docs/modules/
