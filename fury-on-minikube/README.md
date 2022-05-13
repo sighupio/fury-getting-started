@@ -21,7 +21,7 @@ This tutorial assumes some basic familiarity with Kubernetes.
 To follow this tutorial, you need:
 
 - **Minikube** - follow the [installation guide](https://minikube.sigs.k8s.io/docs/start/).
-- **Docker** - a [Docker image]([fury-getting-started]) containing `furyctl` and all the necessary tools is provided.
+- **Docker** - a [Docker image][fury-getting-started-dockerfile] containing `furyctl` and all the necessary tools is provided.
 
 ### Setup and initialize the environment
 

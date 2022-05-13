@@ -26,7 +26,7 @@ This tutorial assumes some basic familiarity with Kubernetes and AWS. Some exper
 To follow this tutorial, you need:
 
 - **AWS Access Credentials** of an AWS Account with the following [IAM permissions](https://github.com/terraform-aws-modules/terraform-aws-eks/blob/master/docs/iam-permissions.md).
-- **Docker** - a [Docker image][fury-on-eks-dockerfile] containing `furyctl` and all the necessary tools is provided.
+- **Docker** - a [Docker image][fury-getting-started-dockerfile] containing `furyctl` and all the necessary tools is provided.
 - **OpenVPN Client** - [Tunnelblick][tunnelblick] (on macOS) or [OpenVPN Connect][openvpn-connect] (for other OS) are recommended.
 - **AWS S3 Bucket** (optional) to hold the Terraform state.
 - **Github** account with [SSH key configured][github-ssh-key-setup].
