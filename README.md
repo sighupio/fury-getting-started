@@ -1,8 +1,8 @@
 ![Fury Logo](./utils/images/fury_logo.png)
 
-# Fury Getting Started
+# Getting Started with Kubernetes Fury Distribution
 
-Getting started guides to deploy the Fury distribution in different environments
+Getting started guides to create Fury clusters and deploy the Kubernetes Fury Distribution in different environments
 
 |                     Guide                      |  Environment  | Fury Release | Kubernetes Version |  Status  |
 |:----------------------------------------------:|:-------------:|:------------:|:------------------:|:--------:|
