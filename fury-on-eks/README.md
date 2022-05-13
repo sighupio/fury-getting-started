@@ -1,5 +1,3 @@
-![Fury Logo](../utils/images/fury_logo.png)
-
 # Fury on EKS
 
 This step-by-step tutorial guides you to deploy the **Kubernetes Fury Distribution** on an EKS cluster on AWS.
@@ -542,7 +540,7 @@ Now, you can reach the ingresses directly from your browser.
 
 Navigate to <http://forecastle.fury.info> to see all the other ingresses deployed, grouped by namespace.
 
-![Forecastle](../utils/images/forecastle.png)
+![Forecastle][forecastle-screenshot]
 
 ### Kibana
 
@@ -560,7 +558,7 @@ The Fury Logging module already collects data from the following indeces:
 
 Click on `Discover` to see the main dashboard. On the top left cornet select one of the indeces to explore the logs.
 
-![Kibana](../utils/images/kibana.png)
+![Kibana][kibana-screenshot]
 
 ### Grafana
 
@@ -571,14 +569,12 @@ Navigate to <http://grafana.fury.info> or click the Grafana icon from Forecastle
 Fury provides some pre-configured dashboard to visualize the state of the cluster. Examine an example dashboard:
 
 1. Click on the search icon on the left sidebar.
-
 2. Write `pods` and click enter.
-
 3. Select the `Kubernetes/Pods` dashboard.
 
 This is what you should see:
 
-![Grafana](../utils/images/grafana.png)
+![Grafana][grafana-screenshot]
 
 ## Step 5 (optional) - Deploy additional modules
 
@@ -770,6 +766,7 @@ More about Fury:
 
 - [Fury Documentation][fury-docs]
 
+<!-- Links -->
 [fury-getting-started-repository]: https://github.com/sighupio/fury-getting-started/
 [fury-getting-started-dockerfile]: https://github.com/sighupio/fury-getting-started/blob/main/utils/docker/Dockerfile
 
@@ -787,3 +784,9 @@ More about Fury:
 
 [fury-docs]: https://docs.kubernetesfury.com
 [fury-docs-modules]: https://docs.kubernetesfury.com/docs/modules/
+
+<!-- Images -->
+[kibana-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/kibana.png?raw=true
+[grafana-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/grafana.png?raw=true
+[cerebro-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/cerebro.png?raw=true
+[forecastle-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/forecastle.png?raw=true

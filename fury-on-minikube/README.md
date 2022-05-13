@@ -1,5 +1,3 @@
-![Fury Logo](../utils/images/fury_logo.png)
-
 # Fury on Minikube
 
 This step-by-step tutorial helps you deploy the **Kubernetes Fury Distribution** on a local minikube cluster.
@@ -20,7 +18,7 @@ This tutorial assumes some basic familiarity with Kubernetes.
 
 To follow this tutorial, you need:
 
-- **Minikube** - follow the [installation guide](https://minikube.sigs.k8s.io/docs/start/).
+- **Minikube** - follow the [installation guide](https://minikube.sigs.k8s.io/docs/start/). This guide is based on Minikube with the VirtualBox driver.
 - **Docker** - a [Docker image][fury-getting-started-dockerfile] containing `furyctl` and all the necessary tools is provided.
 
 ### Setup and initialize the environment
@@ -45,11 +43,11 @@ cd $REPO_DIR/infrastructure
 make setup
 ```
 
-> ⚠️ This command will spin up by default a single-node Kubernetes v1.19.4 cluster, using VirtualBox driver: the node has 4 CPUs, 4096MB RAM and 20,000 MB Disk. Please have a look at [Makefile](infrastructure/Makefile) to change the default values.
+> ⚠️ This command will spin up by default a single-node Kubernetes v1.23.1 cluster, using VirtualBox driver: the node has 4 CPUs, 8192MB RAM and 20,000 MB Disk. Please have a look at [Makefile](infrastructure/Makefile) to change the default values.
 > You can also pass custom parameters:
 >
 > ```bash
-> make setup cpu=2 memory=2048
+> make setup cpu=4 memory=4096
 > ```
 
 2. Run the `fury-getting-started` docker image:
@@ -72,12 +70,14 @@ Output:
 
 ```bash
 NAME       STATUS   ROLES    AGE   VERSION
-minikube   Ready    master   16m   v1.19.4
+minikube   Ready    master   16m   v1.23.1
 ```
 
 ## Step 2 - Download fury modules
 
 `furyctl` can do a lot more than deploying infrastructure. In this section, you use `furyctl` to download the monitoring, logging, and ingress modules of the Fury distribution.
+
+To learn more about `furyctl` and its features, head to the [documentation site][furyctl-docs].
 
 ### Inspect the Furyfile
 
@@ -87,9 +87,9 @@ For this tutorial, use the `Furyfile.yml` located at `/demo/Furyfile.yaml`:
 
 ```yaml
 versions:
-  monitoring: v1.12.2
-  logging: v1.8.0
-  ingress: v1.10.0
+  monitoring: v1.14.1
+  logging: v1.10.2
+  ingress: v1.12.2
 
 bases:
   - name: monitoring/prometheus-operator
@@ -97,19 +97,18 @@ bases:
   - name: monitoring/alertmanager-operated
   - name: monitoring/grafana
   - name: monitoring/goldpinger
+  - name: monitoring/kubeadm-sm
   - name: monitoring/configs
-  - name: monitoring/eks-sm
-  - name: monitoring/kube-proxy-metrics
   - name: monitoring/kube-state-metrics
   - name: monitoring/node-exporter
-  - name: monitoring/metrics-server
+  
   - name: logging/elasticsearch-single
   - name: logging/cerebro
   - name: logging/curator
   - name: logging/fluentd
   - name: logging/kibana
+
   - name: ingress/nginx
-  - name: ingress/cert-manager
   - name: ingress/forecastle
 ```
 
@@ -147,48 +146,42 @@ To deploy the Fury distribution, use the following root `kustomization.yaml` loc
 ```yaml
 resources:
 
-# Ingress module
-- ../vendor/katalog/ingress/forecastle
-- ../vendor/katalog/ingress/nginx
-- ../vendor/katalog/ingress/cert-manager
+  # Monitoring
+  - ../vendor/katalog/monitoring/prometheus-operator
+  - ../vendor/katalog/monitoring/prometheus-operated
+  - ../vendor/katalog/monitoring/grafana
+  - ../vendor/katalog/monitoring/goldpinger
+  - ../vendor/katalog/monitoring/kube-state-metrics
+  - ../vendor/katalog/monitoring/node-exporter
+  - ../vendor/katalog/monitoring/alertmanager-operated
 
-# Logging module
-- ../vendor/katalog/logging/cerebro
-- ../vendor/katalog/logging/curator
-- ../vendor/katalog/logging/elasticsearch-single
-- ../vendor/katalog/logging/fluentd
-- ../vendor/katalog/logging/kibana
+  # Logging
+  - ../vendor/katalog/logging/elasticsearch-single
+  - ../vendor/katalog/logging/cerebro
+  - ../vendor/katalog/logging/curator
+  - ../vendor/katalog/logging/fluentd
+  - ../vendor/katalog/logging/kibana
 
-# Monitoring module
-- ../vendor/katalog/monitoring/alertmanager-operated
-- ../vendor/katalog/monitoring/goldpinger
-- ../vendor/katalog/monitoring/grafana
-- ../vendor/katalog/monitoring/kube-proxy-metrics
-- ../vendor/katalog/monitoring/kube-state-metrics
-- ../vendor/katalog/monitoring/eks-sm
-- ../vendor/katalog/monitoring/metrics-server
-- ../vendor/katalog/monitoring/node-exporter
-- ../vendor/katalog/monitoring/prometheus-operated
-- ../vendor/katalog/monitoring/prometheus-operator
+  # Ingress
+  - ../vendor/katalog/ingress/nginx
+  - ../vendor/katalog/ingress/forecastle
 
-# Custom resources
-- resources/ingress.yml
+  # Ingress definitions
+  - resources/ingress.yml
 
 patchesStrategicMerge:
 
-# Ingress module
-- patches/ingress-nginx-lb-annotation.yml
+  - patches/alertmanager-operated-replicas.yml
+  - patches/alertmanager-operated-resources.yml
+  - patches/prometheus-operated-resources.yml
+  - patches/prometheus-operator-resources.yml
+  - patches/grafana-resources.yml
+  - patches/kibana-resources.yml
+  - patches/elasticsearch-resources.yml
+  - patches/fluentd-resources.yml
+  - patches/fluentbit-resources.yml
+  - patches/nginx-ingress-controller-resources.yml
 
-# Logging module
-- patches/fluentd-resources.yml
-- patches/fluentbit-resources.yml
-
-# Monitoring module
-- patches/alertmanager-resources.yml
-- patches/cerebro-resources.yml
-- patches/elasticsearch-resources.yml
-- patches/prometheus-operator-resources.yml
-- patches/prometheus-resources.yml
 ```
 
 This `kustomization.yaml`:
@@ -243,7 +236,7 @@ Now, you can reach the ingresses directly from your browser.
 
 Navigate to <http://forecastle.fury.info> to see all the other ingresses deployed, grouped by namespace.
 
-![Forecastle](../utils/images/forecastle.png)
+![Forecastle][forecastle-screenshot]
 
 ### Kibana
 
@@ -256,17 +249,11 @@ Click on `Explore on my own` to see the main dashboard.
 #### Create a Kibana index
 
 1. Open the menu on the right-top corner of the page.
-
 2. Select `Stack Management` (it's on the very bottom of the menu).
-
 3. Select `Index patterns` and click on `Create index pattern`.
-
 4. Write `kubernetes-*` as index pattern and flag *Include system and hidden indices*
-
 5. Click `Next step`.
-
 6. Select `@timestamp` as time field.s
-
 7. Click create the index.
 
 #### Read the logs
@@ -274,7 +261,7 @@ Click on `Explore on my own` to see the main dashboard.
 Based on the index you created, you can read and query the logs.
 Navigate through the menu again, and select `Discover`.
 
-![Kibana](../utils/images/kibana.png)
+![Kibana][kibana-screenshot]
 
 ### Grafana
 
@@ -285,14 +272,12 @@ Navigate to <http://grafana.fury.info> or click the Grafana icon from Forecastle
 Fury provides some pre-configured dashboard to visualize the state of the cluster. Examine an example dashboard:
 
 1. Click on the search icon on the left sidebar.
-
 2. Write `pods` and click enter.
-
 3. Select the `Kubernetes/Pods` dashboard.
 
 This is what you should see:
 
-![Grafana](../utils/images/grafana.png)
+![Grafana][grafana-screenshot]
 
 ## Step 6 - Tear down
 
@@ -332,6 +317,7 @@ More about Fury:
 
 - [Fury Documentation][fury-docs]
 
+<!-- Links -->
 [fury-getting-started-repository]: https://github.com/sighupio/fury-getting-started/
 [fury-getting-started-dockerfile]: https://github.com/sighupio/fury-getting-started/blob/main/utils/docker/Dockerfile
 
@@ -349,3 +335,11 @@ More about Fury:
 
 [fury-docs]: https://docs.kubernetesfury.com
 [fury-docs-modules]: https://docs.kubernetesfury.com/docs/overview/modules/
+
+[furyctl-docs]: https://docs.kubernetesfury.com/docs/infrastructure/furyctl
+
+<!-- Images -->
+[kibana-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/kibana.png?raw=true
+[grafana-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/grafana.png?raw=true
+[cerebro-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/cerebro.png?raw=true
+[forecastle-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/forecastle.png?raw=true

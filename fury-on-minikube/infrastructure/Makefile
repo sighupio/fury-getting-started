@@ -1,6 +1,6 @@
-kubernetes-version?=v1.19.4
+kubernetes-version?=v1.23.1
 driver?=virtualbox
-memory?=4096
+memory?=8192
 cpu?=4
 cni?=calico
 nodes?=1
