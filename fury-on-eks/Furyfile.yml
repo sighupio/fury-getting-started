@@ -3,8 +3,8 @@ versions:
   monitoring: v1.14.1
   logging: v1.10.2
   ingress: v1.12.2
-  dr: v1.9.2
-  opa: v1.6.2
+#  dr: v1.9.2
+#  opa: v1.6.2
 
 bases:
   - name: networking/calico
@@ -27,8 +27,8 @@ bases:
   - name: logging/kibana
   - name: ingress/nginx
   - name: ingress/forecastle
-  - name: dr/velero
-  - name: opa/gatekeeper
+#  - name: dr/velero
+#  - name: opa/gatekeeper
 
-modules:
-- name: dr/eks-velero
+#modules:
+#- name: dr/eks-velero
