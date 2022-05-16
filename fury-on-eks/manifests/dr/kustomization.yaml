@@ -1,0 +1,10 @@
+resources:
+
+- ../../vendor/katalog/dr/velero/velero-aws
+- ../../vendor/katalog/dr/velero/velero-schedules
+- resources/velero-backup-storage-location.yml
+- resources/velero-volume-snapshot-location.yml
+
+patchesStrategicMerge:
+
+- patches/velero.yml

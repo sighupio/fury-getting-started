@@ -1,0 +1,16 @@
+resources:
+
+- ../../vendor/katalog/logging/cerebro
+- ../../vendor/katalog/logging/curator
+- ../../vendor/katalog/logging/elasticsearch-single
+- ../../vendor/katalog/logging/fluentd
+- ../../vendor/katalog/logging/kibana
+
+- resources/ingress.yml
+
+patchesStrategicMerge:
+
+- patches/fluentd-resources.yml
+- patches/fluentbit-resources.yml
+- patches/elasticsearch-resources.yml
+- patches/cerebro-resources.yml

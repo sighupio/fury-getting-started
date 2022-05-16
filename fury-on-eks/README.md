@@ -24,7 +24,7 @@ This tutorial assumes some basic familiarity with Kubernetes and AWS. Some exper
 To follow this tutorial, you need:
 
 - **AWS Access Credentials** of an AWS Account with the following [IAM permissions](https://github.com/terraform-aws-modules/terraform-aws-eks/blob/master/docs/iam-permissions.md).
-- **Docker** - a [Docker image]([fury-on-eks-dockerfile]) containing `furyctl` and all the necessary tools is provided.
+- **Docker** - a [Docker image][fury-getting-started-dockerfile] containing `furyctl` and all the necessary tools is provided.
 - **OpenVPN Client** - [Tunnelblick][tunnelblick] (on macOS) or [OpenVPN Connect][openvpn-connect] (for other OS) are recommended.
 - **AWS S3 Bucket** (optional) to hold the Terraform state.
 - **Github** account with [SSH key configured][github-ssh-key-setup].
@@ -121,7 +121,6 @@ spec:
     sshUsers:
     - <GITHUB_USER>
 executor:
-  version: 0.13.6
   # state:
   #   backend: s3
   #   config:
@@ -179,7 +178,7 @@ executor:
 ```yaml
 ...
 executor:
-  version: 0.13.6
+#  version: 0.13.6
   state:
    backend: s3
    config:
@@ -245,10 +244,9 @@ In the cluster provisioning phase, `furyctl`  automatically deploys a battle-tes
 1. Create the `fury.ovpn` OpenVPN credentials file with `furyagent`:
 
 ```bash
-furyagent configure openvpn-client \ 
+furyagent configure openvpn-client \
   --client-name fury \
-  --config /demo/infrastructure/bootstrap/secrets/furyagent.yml \
-  > fury.ovpn
+  --config /demo/infrastructure/bootstrap/secrets/furyagent.yml > fury.ovpn
 ```
 
 > 🕵🏻‍♂️ [Furyagent][furyagent-repository] is a tool developed by SIGHUP to manage OpenVPN and SSH user access to the bastion host.
@@ -291,7 +289,7 @@ kind: Cluster
 metadata:
   name: fury-eks-demo
 spec:
-  version: 1.18
+  version: 1.21
   network: <VPC_ID>
   subnetworks:
   - <PRIVATE_SUBNET1_ID>
@@ -308,7 +306,6 @@ spec:
     instanceType: t3.large
     volumeSize: 50
 executor:
-  version: 0.13.6
   # state:
   #   backend: s3
   #   config:
@@ -363,32 +360,39 @@ For this tutorial, use the `Furyfile.yml` located at `/demo/Furyfile.yaml`:
 
 ```yaml
 versions:
-  networking: v1.6.0
-  monitoring: v1.12.2
-  logging: v1.8.0
-  ingress: v1.10.0
+  networking: v1.8.2
+  monitoring: v1.14.1
+  logging: v1.10.2
+  ingress: v1.12.2
+#  dr: v1.9.2
+#  opa: v1.6.2
 
 bases:
   - name: networking/calico
   - name: monitoring/prometheus-operator
   - name: monitoring/prometheus-operated
-  - name: monitoring/alertmanager-operated
   - name: monitoring/grafana
   - name: monitoring/goldpinger
   - name: monitoring/configs
-  - name: monitoring/eks-sm
+  - name: monitoring/kubeadm-sm
   - name: monitoring/kube-proxy-metrics
   - name: monitoring/kube-state-metrics
   - name: monitoring/node-exporter
   - name: monitoring/metrics-server
+  - name: monitoring/eks-sm
+  - name: monitoring/alertmanager-operated
   - name: logging/elasticsearch-single
   - name: logging/cerebro
   - name: logging/curator
   - name: logging/fluentd
   - name: logging/kibana
   - name: ingress/nginx
-  - name: ingress/cert-manager
   - name: ingress/forecastle
+#  - name: dr/velero
+#  - name: opa/gatekeeper
+
+#modules:
+#- name: dr/eks-velero
 ```
 
 ### Download Fury modules
@@ -446,51 +450,34 @@ To deploy the Fury distribution, use the following root `kustomization.yaml` loc
 ```yaml
 resources:
 
-# Ingress module
-- ../vendor/katalog/ingress/forecastle
-- ../vendor/katalog/ingress/nginx
-- ../vendor/katalog/ingress/cert-manager
+- ingress
+- logging
+- monitoring
+- networking
+```
 
-# Logging module
-- ../vendor/katalog/logging/cerebro
-- ../vendor/katalog/logging/curator
-- ../vendor/katalog/logging/elasticsearch-single
-- ../vendor/katalog/logging/fluentd
-- ../vendor/katalog/logging/kibana
+This `kustomization.yaml` wraps the other `kustomization.yaml`s in subfolders. For example in `/demo/manifests/logging/kustomization.yaml`
 
-# Monitoring module
-- ../vendor/katalog/monitoring/alertmanager-operated
-- ../vendor/katalog/monitoring/goldpinger
-- ../vendor/katalog/monitoring/grafana
-- ../vendor/katalog/monitoring/kube-proxy-metrics
-- ../vendor/katalog/monitoring/kube-state-metrics
-- ../vendor/katalog/monitoring/eks-sm
-- ../vendor/katalog/monitoring/metrics-server
-- ../vendor/katalog/monitoring/node-exporter
-- ../vendor/katalog/monitoring/prometheus-operated
-- ../vendor/katalog/monitoring/prometheus-operator
+```yaml
+resources:
 
-# Custom resources
+- ../../vendor/katalog/logging/cerebro
+- ../../vendor/katalog/logging/curator
+- ../../vendor/katalog/logging/elasticsearch-single
+- ../../vendor/katalog/logging/fluentd
+- ../../vendor/katalog/logging/kibana
+
 - resources/ingress.yml
 
 patchesStrategicMerge:
 
-# Ingress module
-- patches/ingress-nginx-lb-annotation.yml
-
-# Logging module
 - patches/fluentd-resources.yml
 - patches/fluentbit-resources.yml
-
-# Monitoring module
-- patches/alertmanager-resources.yml
-- patches/cerebro-resources.yml
 - patches/elasticsearch-resources.yml
-- patches/prometheus-operator-resources.yml
-- patches/prometheus-resources.yml
+- patches/cerebro-resources.yml
 ```
 
-This `kustomization.yaml`:
+Each `kustomization.yaml`:
 
 - references the modules downloaded in the previous section
 - patches the upstream modules (e.g. `patches/elasticsearch-resources.yml` limits the resources requested by elastic search)
@@ -605,12 +592,13 @@ In this section, you deploy the following additional modules:
 ```yaml
 versions:
   ...
-  dr: v1.6.1
-  opa: v1.3.1
+  dr: v1.8.0
+  opa: v1.5.0
 
 bases:
   ...
   - name: dr/velero
+  - name: opa/gatekeeper
 
 modules:
 - name: dr/eks-velero
@@ -628,47 +616,63 @@ furyctl vendor -H
 ```bash
 cd demo/terraform/
 
-terraform init
-terraform plan -out terraform.plan
-terraform apply terraform.plan
+make init
+make plan
+make apply
 ```
 
 4. Gather some output manifests from Terraform:
 
 ```bash
-terraform output -raw velero_patch > ../../manifests/demo-fury/patches/velero.yml
-terraform output -raw velero_backup_storage_location > ../../manifests/demo-fury/resources/velero-backup-storage-location.yml
-terraform output -raw velero_volume_snapshot_location > ../../manifests/demo-fury/resources/velero-volume-snapshot-location.yml
+make generate-output
+```
+That is a shortcut for:
+
+```bash
+terraform output -raw velero_patch > ../manifests/dr/patches/velero.yml
+terraform output -raw velero_backup_storage_location > ../manifests/dr/resources/velero-backup-storage-location.yml
+terraform output -raw velero_volume_snapshot_location > ../manifests/dr/resources/velero-volume-snapshot-location.yml
 ```
 
-5. Add the following lines to `kustomization.yaml`:
+5. Have a look at `/demo/manifests/dr/kustomization.yaml`...
 
 ```yaml
 resources:
-...
 
-# Disaster Recovery
 - ../../vendor/katalog/dr/velero/velero-aws
 - ../../vendor/katalog/dr/velero/velero-schedules
 - resources/velero-backup-storage-location.yml
 - resources/velero-volume-snapshot-location.yml
 
-# Open Policy Agent
-- ../../vendor/katalog/opa/gatekeeper/
-
 patchesStrategicMerge:
-...
 
-# Disaster Recovery
 - patches/velero.yml
 ...
+```
+
+... and `/demo/manifests/opa/kustomization.yaml`
+
+```yaml
+resources:
+
+- ../../vendor/katalog/opa/gatekeeper
 ```
 
 6. Install the modules as before:
 
 ```bash
-cd /demo/manifest/
+cd /demo/manifests/dr
 make apply
+# Again our chicken-egg 🐓🥚 problem with custom resources 
+make apply
+cd ..
+cd /demo/manifests/opa
+make apply
+# Again our chicken-egg 🐓🥚 problem with custom resources 
+make apply
+# Again our chicken-egg 🐓🥚 problem with custom resources 
+make apply
+cd ..
 ```
 
 ### (optional) Create a backup with Velero
@@ -711,13 +715,11 @@ furyctl cluster destroy
 
 ```bash
 loadbalancer=$(aws resourcegroupstaggingapi get-resources  \
-               --tag-filters Key=kubernetes.io/cluster/fury-eks-demo,Values=owned \
-               | jq -r ".ResourceTagMappingList[] | .ResourceARN" | grep loadbalancer)
+               --tag-filters Key=kubernetes.io/cluster/fury-eks-demo,Values=owned | jq -r ".ResourceTagMappingList[] | .ResourceARN" | grep loadbalancer)
 for i in $loadbalancer ; do aws elbv2 delete-load-balancer --load-balancer-arn $i ; done
 
 target_groups=$(aws resourcegroupstaggingapi get-resources \
-                --tag-filters Key=kubernetes.io/cluster/fury-eks-demo,Values=owned  \
-                | jq -r ".ResourceTagMappingList[] | .ResourceARN" | grep targetgroup)
+                --tag-filters Key=kubernetes.io/cluster/fury-eks-demo,Values=owned  | jq -r ".ResourceTagMappingList[] | .ResourceARN" | grep targetgroup)
 for tg in $target_groups ; do aws elbv2 delete-target-group --target-group-arn $tg ; done
 
 ```
@@ -731,8 +733,7 @@ furyctl bootstrap destroy
 5. (Optional) Destroy the S3 bucket holding the Terraform state
 
 ```bash
-aws s3api delete-objects \
-  --bucket $S3_BUCKET \ 
+aws s3api delete-objects --bucket $S3_BUCKET \
   --delete "$(aws s3api list-object-versions --bucket $S3_BUCKET --query='{Objects: Versions[].{Key:Key,VersionId:VersionId}}')"
 
 aws s3api delete-bucket --bucket $S3_BUCKET
@@ -775,14 +776,14 @@ More about Fury:
 
 [furyagent-repository]: https://github.com/sighupio/furyagent
 
-[provisioner-bootstrap-aws-reference]: https://docs.kubernetesfury.com/docs/cli-reference/furyctl/provisioners/aws-bootstrap/
+[provisioner-bootstrap-aws-reference]: https://github.com/sighupio/fury-eks-installer/tree/master/modules/vpc-and-vpn
 
 [tunnelblick]: https://tunnelblick.net/downloads.html
 [openvpn-connect]: https://openvpn.net/vpn-client/
 [github-ssh-key-setup]: https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account
 
 [fury-docs]: https://docs.kubernetesfury.com
-[fury-docs-modules]: https://docs.kubernetesfury.com/docs/overview/modules/
+[fury-docs-modules]: https://docs.kubernetesfury.com/docs/modules/
 
 <!-- Images -->
 [kibana-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/kibana.png?raw=true
