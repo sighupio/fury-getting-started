@@ -21,7 +21,7 @@ This tutorial assumes basic familiarity with Kubernetes, Docker and Talos Linux.
 
 To follow this tutorial you will need:
 
-- **Docker** - we will use a [container image][fury-getting-started-dockerfile] containing `furyctl` and all the necessary tools. (Optional). You can use the same tools from your local machine if you prefer. Additionally, `talosctl` will use Docker to create the Kubernetes cluster.
+- **Docker** we will use a [container image][fury-getting-started-dockerfile] containing `furyctl` and all the necessary tools. (Optional) you can use the same tools from your local machine if you prefer. Additionally, `talosctl` will use Docker to create the Kubernetes cluster.
 <!--
  - `furyctl >= v.0.6.2`: Fury command line interface tool to manage the distribution. Follow the [official installation instructions][furyctl-repo].
   - `kubectl >= 1.23.6`: Kubernetes client
@@ -62,14 +62,14 @@ You are all set to start the tutorial 🚀
 
 ## Step 1 - Create a Kubernetes cluster with Talos
 
-`talosctl create cluster` by default creates a 2 node cluster, 1 node for the master (control-plane) and 1 node for the worker. Both of them run as containers with Docker.
+`talosctl create cluster` by default creates a 2 node cluster, 1 node for the master (control-plane) and 1 node for the worker. Both of them run as containers within Docker.
 
 For this tutorial we won't use the default command, we will need to use some custom flags:
 
-1. Let's pin the Kubernetes version using the `--kubernetes-version` flag.
-2. The default sizing of the worker will not be enough for this tutorial, we need to set the `--cpus-workers` and `--memory-workers` flag.
+1. We will pin the Kubernetes version using the `--kubernetes-version` flag.
+2. The default sizing of the worker will not be enough for this tutorial, we need to set the `--cpus-workers` and `--memory-workers` flags.
 3. We will be using the Ingress module, we need to expose some ports using the `--exposed-ports` flag.
-4. We need storage for some components of the distribution, talos does not include one by default. We will use [Rancher's `local-path` storage][rancher-local-path] provider, but for it to work we need to patch the worker's configuration with the `--config-patch-worker` flag. The patch looks like this:
+4. We will need storage for some components of the distribution, Talos does not include one by default. We will use [Rancher's `local-path` storage][rancher-local-path] provider, but for it to work we need to patch the worker's configuration with the `--config-patch-worker` flag. The patch looks like this:
 
 ```yaml
 - op: replace
@@ -84,7 +84,7 @@ For this tutorial we won't use the default command, we will need to use some cus
         - rw
 ```
 
-> You can find this patch already in the file [`talos-worker-patch.yaml`](infrastructure/talos-worker-patch.yaml) of this tutorial repository.
+> ℹ️ you can find this patch already in the file [`talos-worker-patch.yaml`](infrastructure/talos-worker-patch.yaml) of this tutorial repository.
 
 Considering the previous requirements, we can proceed to the first step.
 
@@ -131,7 +131,7 @@ NAME                      TYPE           IP         CPU    RAM      DISK
 talosctl --nodes 10.5.0.2 kubeconfig infrastructure/
 ```
 
-> Make sure to put the master's IP as the --nodes flag value
+> Make sure to use the master's IP as the --nodes flag value in the previous command
 
 3. Run the `fury-getting-started` docker image:
 
@@ -148,7 +148,12 @@ docker run -ti --rm \
 4. Test the connection to the cluster:
 
 ```bash
-$ kubectl get nodes
+kubectl get nodes
+```
+
+Output:
+
+```bash
 NAME                     STATUS   ROLES                  AGE   VERSION
 talos-default-master-1   Ready    control-plane,master   96s   v1.23.6
 talos-default-worker-1   Ready    <none>                 92s   v1.23.6
@@ -193,14 +198,6 @@ In this step we will use `furyctl` to get the files for the KFD modules.
 
 > ℹ️ learn more about `furyctl` in the [official documentation site][furyctl-docs]
 
-You can get a full `Furfile.yml` for a release of KFD using the following command:
-
-```bash
-furyctl init --version v1.23.1
-```
-
-The command will also download a `Furyfile.yml` file and a `kustomization.yaml` file that you can use as the starting point to configure and deploy the distribution.
-
 [KFD is a modular distribution][kfd-docs-modules], you can deploy only the parts of it that you need. For this tutorial, we won't use the full distribution but a subset of it because of the limited resources.
 
 Let's use a minimal `Furyfile.yml` like the one located at `/demo/Furyfile.yml` in the container:
@@ -216,7 +213,6 @@ bases:
   - name: monitoring/prometheus-operated
   - name: monitoring/alertmanager-operated
   - name: monitoring/grafana
-  - name: monitoring/kubeadm-sm
   - name: monitoring/configs
   - name: monitoring/kube-state-metrics
   - name: monitoring/node-exporter
@@ -233,9 +229,20 @@ bases:
 
 As you can see, we will be using only the Monitoring, Logging, and Ingress modules.
 
+> ℹ️ You can get a full `Furyfile.yml` file and a `kustomization.yaml` file for a version of KFD using the following command:
+>
+> ```bash
+> furyctl init --version v1.23.1
+> ```
+>
+> The command will download the files that you can use as the starting point to configure and deploy the distribution.
+>
+> ⚠️ Don't run this command now, it will overwrite the existing `Furyfile.yml`
+
+
 ### Download the modules
 
-Now that we have a `Furyfile.yml`, we can proceed to download all the modules.
+Now that we have a `Furyfile.yml`, we can proceed to download the modules.
 
 1. Run the following command to download the modules specified by the Furyfile:
 
@@ -244,7 +251,7 @@ cd /demo
 furyctl vendor -H
 ```
 
-> ℹ️ the `-H` flag makes furyctl use HTTP(S) to download from GitHub instead of using SSH.
+> ℹ️ the `-H` flag tells `furyctl` to use HTTP(S) instead of SSH to download the modules from GitHub.
 
 2. Inspect the downloaded modules in the `vendor` folder:
 
@@ -335,7 +342,7 @@ The `kustomization.yaml` file:
 
 - references the modules downloaded in the previous section
 - patches the upstream modules for this tutorial usecase (e.g. `patches/elasticsearch-resources.yml` limits the resources requested by elastic search)
-- deploys some additional custom resources (e.g. `resources/ingress.yml`) not included by default in the modules.
+- deploys some additional custom resources not included by default in the modules (e.g. `resources/ingress.yml`).
 
 Proceed to install the modules into the cluster:
 
@@ -369,9 +376,10 @@ If you remember in the first step we created the cluster with some port-forward 
 <YOUR_LOCAL_IP> forecastle.fury.info alertmanager.fury.info grafana.fury.info prometheus.fury.info kibana.fury.info
 ```
 
-> You can just put `127.0.0.1` as the IP address if you do not know it. The port-forward is enabled for all the IPs in your machine. You will need to edit the `hosts` file as `root` most probably.
+> You can just put `127.0.0.1` as the IP address if you do not know it. The port-forward is enabled for all the IPs in your machine.
+> Remember that you will need to edit the `hosts` file as `root` most probably.
 
-Now, you can reach the ingresses directly from your browser **on the port `31080`** for HTTP and on port `31443` for HTTPS.
+Now, you can reach the ingresses directly from your browser **on port `31080`** for HTTP and on port `31443` for HTTPS.
 
 ### Forecastle
 
@@ -396,7 +404,7 @@ Click on `Explore on my own` to see the main dashboard.
 3. Select `Index patterns` and click on `Create index pattern`.
 4. Click on Show advanced settings and *Allow hidden and system indices*
 5. Write `kubernetes-*` as index pattern
-6. Select `@timestamp` as time field.s
+6. Select `@timestamp` as time field.
 7. Click create Index Pattern.
 
 #### Read the logs
@@ -459,7 +467,7 @@ More tutorials:
 
 More about Fury:
 
-- [Fury Documentation][fury-docs]
+- [Fury Documentation][kfd-docs]
 
 <!-- Links -->
 [talos-linux]: https://talos.dev
@@ -471,6 +479,7 @@ More about Fury:
 [furyctl-docs]: https://docs.kubernetesfury.com/docs/infrastructure/furyctl
 
 [kfd-docs-modules]: https://docs.kubernetesfury.com/docs/modules/
+[kfd-docs]: https://docs.kubernetesfury.com/
 [kustomize-docs]: https://kubectl.docs.kubernetes.io/
 
 <!--  -->

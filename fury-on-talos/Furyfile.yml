@@ -8,7 +8,6 @@ bases:
   - name: monitoring/prometheus-operated
   - name: monitoring/alertmanager-operated
   - name: monitoring/grafana
-  - name: monitoring/kubeadm-sm
   - name: monitoring/configs
   - name: monitoring/kube-state-metrics
   - name: monitoring/node-exporter
