@@ -2,6 +2,15 @@
 
 This step-by-step tutorial helps you deploy the **Kubernetes Fury Distribution** (KFD) on a local Kubernetes cluster based on [Talos Linux][talos-linux].
 
+Talos Linux is Linux designed for Kubernetes: - secure, immutable, and minimal.
+
+- Supports cloud platforms, bare metal, and virtualization platforms
+- All system management is done via an API. No SSH, shell or console
+- Production ready: supports some of the largest Kubernetes clusters in the world
+- Open source project from the team at Sidero Labs
+
+Note that Talos can run on several other platforms, this tutorial is a quick start on a local environment but you can apply the same steps to deploy KFD on other types of Talos installations. Refer to [Talos Official Documentation][talos-docs] for more details.
+
 This tutorial will cover the following topics:
 
 1. Local Kubernetes cluster creation with Talos
@@ -10,8 +19,6 @@ This tutorial will cover the following topics:
 4. Install the KFD
 5. Explore some of the Features
 6. Teardown the environment
-
-Please note that Talos can run on several other platforms, this tutorial is a quick start on a local environment but you can apply the same steps to deploy KFD on other types of Talos installations. Refer to [Talos Official Documentation][talos-docs] for more details.
 
 > ☁️ If you prefer trying Fury in a cloud environment, check out the [Fury on EKS](../fury-on-eks) tutorial or the [Fury on GKE](../fury-on-gke) tutorial.
 
