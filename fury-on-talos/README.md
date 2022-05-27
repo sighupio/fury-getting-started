@@ -2,14 +2,14 @@
 
 This step-by-step tutorial helps you deploy the **Kubernetes Fury Distribution** (KFD) on a local Kubernetes cluster based on [Talos Linux][talos-linux].
 
-Talos Linux is Linux designed for Kubernetes: - secure, immutable, and minimal.
+Talos Linux is Linux designed for Kubernetes: secure, immutable, and minimal.
 
 - Supports cloud platforms, bare metal, and virtualization platforms
 - All system management is done via an API. No SSH, shell or console
 - Production ready: supports some of the largest Kubernetes clusters in the world
 - Open source project from the team at Sidero Labs
 
-Note that Talos can run on several other platforms, this tutorial is a quick start on a local environment but you can apply the same steps to deploy KFD on other types of Talos installations. Refer to [Talos Official Documentation][talos-docs] for more details.
+Talos Linux can run on several other platforms, this tutorial is a quick start on a local environment, but you can apply the same steps to deploy KFD on other types of Talos installations. Refer to [Talos Official Documentation][talos-docs] for more details.
 
 This tutorial will cover the following topics:
 
@@ -28,7 +28,7 @@ This tutorial assumes basic familiarity with Kubernetes, Docker and Talos Linux.
 
 To follow this tutorial you will need:
 
-- **Docker** we will use a [container image][fury-getting-started-dockerfile] containing `furyctl` and all the necessary tools. (Optional) you can use the same tools from your local machine if you prefer. Additionally, `talosctl` will use Docker to create the Kubernetes cluster.
+- **Docker** `talosctl` will use Docker to create the Kubernetes cluster. The tutorial uses a [container image][fury-getting-started-dockerfile] containing `furyctl` and all the necessary tools for simplicity. You can use the same tools from your local machine if you prefer.
 <!--
  - `furyctl >= v.0.6.2`: Fury command line interface tool to manage the distribution. Follow the [official installation instructions][furyctl-repo].
   - `kubectl >= 1.23.6`: Kubernetes client
@@ -71,7 +71,7 @@ You are all set to start the tutorial 🚀
 
 `talosctl create cluster` by default creates a 2 node cluster, 1 node for the master (control-plane) and 1 node for the worker. Both of them run as containers within Docker.
 
-For this tutorial we won't use the default command, we will need to use some custom flags:
+For this tutorial we won't use the default cluster creation command, we will need to use some custom flags:
 
 1. We will pin the Kubernetes version using the `--kubernetes-version` flag.
 2. The default sizing of the worker will not be enough for this tutorial, we need to set the `--cpus-workers` and `--memory-workers` flags.
@@ -91,14 +91,18 @@ For this tutorial we won't use the default command, we will need to use some cus
         - rw
 ```
 
-> ℹ️ you can find this patch already in the file [`talos-worker-patch.yaml`](infrastructure/talos-worker-patch.yaml) of this tutorial repository.
+>ℹ️ You don't need to copy the content, the patch is already in the file [`talos-worker-patch.yaml`](infrastructure/talos-worker-patch.yaml) of this tutorial repository that you have cloned.
 
-Considering the previous requirements, we can proceed to the first step.
+Considering the previous requirements, we can proceed to the first step: the cluster creation.
 
-1. Create the Talos Cluster:
+1. Create the Talos Cluster using the flags mentioned before:
 
 ```bash
-$ talosctl cluster create --kubernetes-version 1.23.6 --cpus-workers 4 --memory-workers 4096 --exposed-ports 31080:31080/tcp,31443:31443/tcp --config-patch-worker @infrastructure/talos-worker-patch.yaml
+talosctl cluster create --kubernetes-version 1.23.6 --cpus-workers 4 --memory-workers 4096 --exposed-ports 31080:31080/tcp,31443:31443/tcp --config-patch-worker @infrastructure/talos-worker-patch.yaml
+```
+
+Expected output:
+```bash
 validating CIDR and reserving IPs
 generating PKI and tokens
 creating network talos-default
@@ -132,13 +136,13 @@ NAME                      TYPE           IP         CPU    RAM      DISK
 /talos-default-worker-1   worker         10.5.0.3   4.00   4.3 GB   -
 ```
 
-2. By default `talosctl` will add a new context to your kubeconfig. For simplicity, let's export the kubeconfig to a file in the `infrastructure` folder:
+2. By default `talosctl` will add a new context to your current kubeconfig. For simplicity, let's export the kubeconfig to a file in the `infrastructure` folder:
 
 ```bash
 talosctl --nodes 10.5.0.2 kubeconfig infrastructure/
 ```
 
-> Make sure to use the master's IP as the --nodes flag value in the previous command
+>⚠️ Make sure to use the master's IP as the --nodes flag value in the previous command
 
 3. Run the `fury-getting-started` docker image:
 
@@ -150,7 +154,7 @@ docker run -ti --rm \
    registry.sighup.io/delivery/fury-getting-started
 ```
 
-> ℹ️ from now on all commands in this guide assume to be run inside this container unless otherwise specified.
+>ℹ️ From now on all commands in this guide assume to be run inside this container unless otherwise specified.
 
 4. Test the connection to the cluster:
 
@@ -178,7 +182,7 @@ kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisione
 kubectl patch storageclass local-path -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
 ```	
 
-7. Check that the local-path-storage is working properly.
+7. Check that the `local-path-storage` is working properly.
 
 Check the logs, with the following command:
 
@@ -205,9 +209,9 @@ In this step we will use `furyctl` to get the files for the KFD modules.
 
 > ℹ️ learn more about `furyctl` in the [official documentation site][furyctl-docs]
 
-[KFD is a modular distribution][kfd-docs-modules], you can deploy only the parts of it that you need. For this tutorial, we won't use the full distribution but a subset of it because of the limited resources.
+[KFD is a modular distribution][kfd-docs-modules], you can choose to deploy the parts of it that you need. For this tutorial, we won't use the full distribution but a subset of it because of the limited resources. This won't be a production-grade installation, but you will get an idea of what the distribution offers.
 
-Let's use a minimal `Furyfile.yml` like the one located at `/demo/Furyfile.yml` in the container:
+Inspect the provided custom `Furyfile.yml` located at `/demo/Furyfile.yml` in the container:
 
 ```yaml
 versions:
@@ -234,9 +238,11 @@ bases:
   - name: ingress/forecastle
 ```
 
-As you can see, we will be using only the Monitoring, Logging, and Ingress modules.
+As you can see, we will be using only the Monitoring, Logging, and Ingress modules. There are other modules like OPA for policy enforcement that you can also install and test in this local environment but are left as an excerise to the reader.
 
-> ℹ️ You can get a full `Furyfile.yml` file and a `kustomization.yaml` file for a version of KFD using the following command:
+> ℹ️ Read more about Fury modules in the [documentation][kfd-docs-modules].
+<!-- space left intentionally as separator -->
+> ℹ️ You don't need to write the `Furyfile.yml` file by hand, can get a full `Furyfile.yml` file and a `kustomization.yaml` file for a give4n version of KFD from GitHub releases or, more easily, using `furyctl`:
 >
 > ```bash
 > furyctl init --version v1.23.1
@@ -245,7 +251,6 @@ As you can see, we will be using only the Monitoring, Logging, and Ingress modul
 > The command will download the files that you can use as the starting point to configure and deploy the distribution.
 >
 > ⚠️ Don't run this command now, it will overwrite the existing `Furyfile.yml`
-
 
 ### Download the modules
 
