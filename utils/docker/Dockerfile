@@ -1,16 +1,17 @@
-FROM alpine:3.10
+FROM alpine:3.15
 
-LABEL maintainer="niccolo@sighup.io"
+LABEL maintainer="alessandro.lo.manto@sighup.io"
 
 ENV AWSCLI_VERSION 1.19
 ENV GCLOUD_VERSION 344.0.0
-ENV TERRAFORM_VERSION 1.0.1
+ENV TERRAFORM_VERSION 0.15.4
 ENV KUBECTL_VERSION v1.21.2
 ENV KUSTOMIZE_VERSION v3.6.1
 ENV FURYCTL_VERSION v0.6.1
 ENV FURYAGENT_VERSION v0.2.3
 ENV VELERO_VERSION v1.6.0
 ENV DIRENV_VERSION v2.28.0
+ENV HELM_VERSION v3.9.0
 
 RUN apk --update --no-cache add \
   bash \
@@ -30,6 +31,7 @@ RUN apk --update --no-cache add \
   make \
   tree \
   bind-tools \
+  openssl \
   bash-completion
 
 RUN pip3 install --upgrade pip
@@ -56,6 +58,12 @@ RUN curl -L https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_
 RUN curl -L https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2F${KUSTOMIZE_VERSION}/kustomize_${KUSTOMIZE_VERSION}_linux_amd64.tar.gz -o /tmp/kustomize_${KUSTOMIZE_VERSION}_linux_amd64.tar.gz && \
     tar -zxf /tmp/kustomize_${KUSTOMIZE_VERSION}_linux_amd64.tar.gz -C /usr/local/bin/ && \
     rm /tmp/kustomize_${KUSTOMIZE_VERSION}_linux_amd64.tar.gz
+
+# Install helm
+RUN curl -LOs https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz && \
+  tar -zxvf helm-${HELM_VERSION}-linux-amd64.tar.gz && \
+  mv linux-amd64/helm /usr/local/bin/helm && \
+  rm -rf linux-amd64/
 
 # Install furyctl
 RUN curl -L https://github.com/sighupio/furyctl/releases/download/${FURYCTL_VERSION}/furyctl-linux-amd64 -o /usr/local/bin/furyctl && \

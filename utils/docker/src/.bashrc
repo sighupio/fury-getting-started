@@ -6,6 +6,7 @@ source /etc/profile.d/bash_completion.sh
 
 # Custom aliases
 alias k="kubectl"
+alias ll="ls -lart"
 
 # Direnv
 eval "$(direnv hook bash)"
