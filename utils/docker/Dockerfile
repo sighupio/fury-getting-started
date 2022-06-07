@@ -1,6 +1,6 @@
 FROM alpine:3.15
 
-LABEL maintainer="niccolo@sighup.io"
+LABEL maintainer="alessandro.lo.manto@sighup.io"
 
 ENV AWSCLI_VERSION 1.19
 ENV GCLOUD_VERSION 344.0.0
