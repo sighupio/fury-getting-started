@@ -1,5 +1,6 @@
-kind: pipeline
 name: docker-build
+kind: pipeline
+type: docker
 
 platform:
   os: linux
