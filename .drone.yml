@@ -18,9 +18,9 @@ steps:
     settings:
       debug: true
       username:
-        from_secret: docker_username
+        from_secret: REGISTRY_USERNAME
       password:
-        from_secret: docker_password
+        from_secret: REGISTRY_PASSWORD
       registry: registry.sighup.io
       repo: registry.sighup.io/delivery/fury-getting-started
       tags:
