@@ -60,8 +60,10 @@ RUN curl -L https://github.com/kubernetes-sigs/kustomize/releases/download/kusto
     rm /tmp/kustomize_${KUSTOMIZE_VERSION}_linux_amd64.tar.gz
 
 # Install helm
-RUN curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 \
-    && chmod +x get_helm.sh && ./get_helm.sh
+RUN curl -LOs https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz && \
+  tar -zxvf helm-${HELM_VERSION}-linux-amd64.tar.gz && \
+  mv linux-amd64/helm /usr/local/bin/helm && \
+  rm -rf linux-amd64/
 
 # Install furyctl
 RUN curl -L https://github.com/sighupio/furyctl/releases/download/${FURYCTL_VERSION}/furyctl-linux-amd64 -o /usr/local/bin/furyctl && \
