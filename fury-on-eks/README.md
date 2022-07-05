@@ -56,7 +56,7 @@ export AWS_SECRET_ACCESS_KEY=<YOUR_AWS_SECRET_ACCESS_KEY>
 export AWS_DEFAULT_REGION=<YOUR_AWS_REGION>
 ```
 
-In alternative, authenticate with AWS by running `aws configure` in your terminal. When prompted, enter your AWS Access Key ID, Secret Access Key, region and output format.
+Alternatively, authenticate with AWS by running `aws configure` in your terminal. When prompted, enter your AWS Access Key ID, Secret Access Key, region and output format.
 
 ```bash
 $ aws configure
@@ -297,7 +297,7 @@ spec:
   - <PRIVATE_SUBNET3_ID>
   dmzCIDRRange:
   - 10.0.0.0/16
-  sshPublicKey: example-ssh-key
+  sshPublicKey: example-ssh-key # put your id_rsa.pub file content here
   nodePools:
   - name: fury
     version: null
@@ -322,6 +322,8 @@ Open the file with a text editor and replace:
 - `<PRIVATE_SUBNET2_ID>` with ID of the second private subnet ID (`subnet-subnet-0a23db3b19e5a7ed7`) created in the previous phase.
 - `<PRIVATE_SUBNET3_ID>` with ID of the third private subnet ID (`subnet-08f4930148ab5223f`) created in the previous phase.
 - (optional) As before, add the details of an the S3 Bucket that holds the Terraform remote state.
+
+> ⚠️ if you are using an S3 bucket to store the Terraform state make sure to use a different key in `executor.state.config.key` than the one used in the boorstrap phase.
 
 #### Provision EKS Cluster
 
