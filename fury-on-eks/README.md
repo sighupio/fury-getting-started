@@ -23,10 +23,10 @@ This tutorial assumes some basic familiarity with Kubernetes and AWS. Some exper
 
 To follow this tutorial, you need:
 
-- **AWS Access Credentials** of an AWS Account with the following [IAM permissions](https://github.com/terraform-aws-modules/terraform-aws-eks/blob/master/docs/iam-permissions.md).
-- **Docker** - a [Docker image][fury-getting-started-dockerfile] containing `furyctl` and all the necessary tools is provided.
+- **AWS Access Credentials** of an AWS Account with the following [IAM permissions][terraform-aws-eks-iam-permissions].
+- **Docker** - the tutorial uses a [Docker image][fury-getting-started-dockerfile] containing `furyctl` and all the necessary tools to follow it.
 - **OpenVPN Client** - [Tunnelblick][tunnelblick] (on macOS) or [OpenVPN Connect][openvpn-connect] (for other OS) are recommended.
-- **AWS S3 Bucket** (optional) to hold the Terraform state.
+- **AWS S3 Bucket** (optional) to store the Terraform state.
 - **Github** account with [SSH key configured][github-ssh-key-setup].
 
 ### Setup and initialize the environment
@@ -56,7 +56,7 @@ export AWS_SECRET_ACCESS_KEY=<YOUR_AWS_SECRET_ACCESS_KEY>
 export AWS_DEFAULT_REGION=<YOUR_AWS_REGION>
 ```
 
-Alternatively, authenticate with AWS by running `aws configure` in your terminal. When prompted, enter your AWS Access Key ID, Secret Access Key, region and output format.
+Alternatively, authenticate with AWS by running `aws configure` in your terminal. When prompted, enter your AWS Access Key ID, Secret Access Key, region, and output format.
 
 ```bash
 $ aws configure
@@ -142,16 +142,16 @@ Leave the rest as configured. More details about each field can be found [here][
 
 #### (optional) Create S3 Bucket to hold the Terraform remote
 
-Altough this is a tutorial, it is always a good practice to use a remote Terraform state over a local one. In case you are not familiar with Terraform, you can skip this section.
+Although this is a tutorial, it is always a good practice to use a remote Terraform state over a local one. In case you are not familiar with Terraform, you can skip this section.
 
-1. Choose a unique name and a AWS region for the S3 Bucket:
+1. Choose a unique name and an AWS region for the S3 Bucket:
 
 ```bash
 export S3_BUCKET=fury-demo-eks              # Use a different name
 export S3_BUCKET_REGION=$AWS_DEFAULT_REGION # You can use the same region of before
 ```
 
-2. Create S3 bucket using the AWS CLI:
+2. Create the S3 bucket using the AWS CLI:
 
 ```bash
 aws s3api create-bucket \
@@ -159,6 +159,8 @@ aws s3api create-bucket \
   --region $S3_BUCKET_REGION \
   --create-bucket-configuration LocationConstraint=$S3_BUCKET_REGION
 ```
+
+> ℹ️  You might need to give permissions on S3 to the user.
 
 3. Once created, uncomment the `spec.executor.state` block in the `/demo/infrastructure/bootstrap.yml` file:
 
@@ -208,7 +210,7 @@ furyctl bootstrap init --reset
 furyctl bootstrap apply
 ```
 
-> 📝 This phase may take some minutes.
+> ⏱ This phase may take some minutes.
 >
 > Logs are available at `/demo/infrastructure/bootstrap/logs/terraform.logs`.
 
@@ -237,9 +239,9 @@ These values are used in the cluster provisioning phase.
 
 ### Cluster provisioning phase
 
-In the cluster provisioning phase, `furyctl`  automatically deploys a battle-tested private EKS Cluster. To interact with the private EKS cluster, connect first to the private network via the OpenVPN server in the bastion host.
+In the cluster provisioning phase, `furyctl` automatically deploys a battle-tested private EKS Cluster. To interact with the private EKS cluster, connect first to the private network via the OpenVPN server in the bastion host.
 
-#### Connect to private network
+#### Connect to the private network
 
 1. Create the `fury.ovpn` OpenVPN credentials file with `furyagent`:
 
@@ -282,7 +284,7 @@ Output:
 
 The cluster provisioner takes a `cluster.yml` as input. This file instructs the provisioner with all the needed parameters to deploy the EKS cluster.
 
-In the repository, you can find a template for this file at `/demo/infrastructure/bootstrap/cluster.yml`:
+In the repository, you can find a template for this file at `/demo/infrastructure/cluster.yml`:
 
 ```yaml
 kind: Cluster
@@ -321,7 +323,7 @@ Open the file with a text editor and replace:
 - `<PRIVATE_SUBNET1_ID>` with ID of the first private subnet ID (`subnet-072b1e3405f662c70`) created in the previous phase.
 - `<PRIVATE_SUBNET2_ID>` with ID of the second private subnet ID (`subnet-subnet-0a23db3b19e5a7ed7`) created in the previous phase.
 - `<PRIVATE_SUBNET3_ID>` with ID of the third private subnet ID (`subnet-08f4930148ab5223f`) created in the previous phase.
-- (optional) As before, add the details of an the S3 Bucket that holds the Terraform remote state.
+- (optional) As before, add the details of the S3 Bucket that holds the Terraform remote state.
 
 > ⚠️ if you are using an S3 bucket to store the Terraform state make sure to use a different key in `executor.state.config.key` than the one used in the boorstrap phase.
 
@@ -339,7 +341,7 @@ furyctl cluster init
 furyctl cluster apply
 ```
 
-> 📝 This phase may take some minutes.
+> ⏱ This phase may take some minutes.
 >
 > Logs are available at `/demo/infrastructure/cluster/logs/terraform.logs`.
 
@@ -390,6 +392,7 @@ bases:
   - name: logging/kibana
   - name: ingress/nginx
   - name: ingress/forecastle
+  - name: ingress/cert-manager
 #  - name: dr/velero
 #  - name: opa/gatekeeper
 
@@ -445,7 +448,7 @@ vendor
 
 ## Step 3 - Installation
 
-Each module is a Kustomize project. Kustomize allows to group together related Kubernetes resources and combine them to create more complex deployments. Moreover, it is flexible, and it enables a simple patching mechanism for additional customization.
+Each module is a Kustomize project. Kustomize allows to group together related Kubernetes resources and combines them to create more complex deployments. Moreover, it is flexible, and it enables a simple patching mechanism for additional customization.
 
 To deploy the Fury distribution, use the following root `kustomization.yaml` located `/demo/manifests/kustomization.yaml`:
 
@@ -497,7 +500,7 @@ make apply
 
 ## Step 4 - Explore the distribution
 
-🚀 The distribution is finally deployed! In this section you explore some of its features.
+🚀 The distribution is finally deployed! In this section, you explore some of its features.
 
 ### Setup local DNS
 
@@ -528,7 +531,7 @@ xxx.elb.eu-west-1.amazonaws.com. 77 IN A <THIRD_IP>
 
 ```
 
-3. Add the following line to your local `/etc/hosts`:
+3. Add the following line to your machine's `/etc/hosts` (not the container's):
 
 ```bash
 <FIRST_IP> forecastle.fury.info cerebro.fury.info kibana.fury.info grafana.fury.info
@@ -552,13 +555,13 @@ Navigate to <http://kibana.fury.info> or click the Kibana icon from Forecastle.
 
 #### Read the logs
 
-The Fury Logging module already collects data from the following indeces:
+The Fury Logging module already collects data from the following indices:
 
 - `kubernetes-*`
 - `system-*`
 - `ingress-controller-*`
 
-Click on `Discover` to see the main dashboard. On the top left cornet select one of the indeces to explore the logs.
+Click on `Discover` to see the main dashboard. On the top left corner select one of the indices to explore the logs.
 
 ![Kibana][kibana-screenshot]
 
@@ -568,7 +571,7 @@ Click on `Discover` to see the main dashboard. On the top left cornet select one
 
 Navigate to <http://grafana.fury.info> or click the Grafana icon from Forecastle.
 
-Fury provides some pre-configured dashboard to visualize the state of the cluster. Examine an example dashboard:
+Fury provides some pre-configured dashboards to visualize the state of the cluster. Examine an example dashboard:
 
 1. Click on the search icon on the left sidebar.
 2. Write `pods` and click enter.
@@ -589,7 +592,7 @@ In this section, you deploy the following additional modules:
 
 > The `Fury Disaster Recovery Module` requires additional infrastructure to function. These required resources are deployed via Terraform.
 
-1. Edit the `Furyfile.yml` and add the new modules:
+1. Edit the `Furyfile.yml` in the `/demo` folder and add (uncomment) the new bases and modules:
 
 ```yaml
 versions:
@@ -616,7 +619,7 @@ furyctl vendor -H
 3. Create the resources for the Velero module using Terraform:
 
 ```bash
-cd demo/terraform/
+cd /demo/terraform/
 
 make init
 make plan
@@ -628,7 +631,8 @@ make apply
 ```bash
 make generate-output
 ```
-That is a shortcut for:
+
+The `make` entry point is a shortcut for:
 
 ```bash
 terraform output -raw velero_patch > ../manifests/dr/patches/velero.yml
@@ -667,7 +671,6 @@ cd /demo/manifests/dr
 make apply
 # Again our chicken-egg 🐓🥚 problem with custom resources 
 make apply
-cd ..
 cd /demo/manifests/opa
 make apply
 # Again our chicken-egg 🐓🥚 problem with custom resources 
@@ -685,15 +688,17 @@ cd ..
 velero backup create --from-schedule manifests test -n kube-system
 ```
 
-2. Check backup status:
+2. Check the backup status:
 
 ```bash
 velero backup get -n kube-system
 ```
 
-### (optional) Enforce a OPA Policy
+### (optional) Enforce a Policy with OPA Gatekeeper
 
-T.B.D.
+This section is under construction.
+
+Please refer to the [OPA module's documentation][opa-module-docs] while we work on this part of the guide. Sorry for the inconvenience.
 
 ## Step 6 - Teardown
 
@@ -713,7 +718,9 @@ cd /demo/infrastructure/
 furyctl cluster destroy
 ```
 
-3. Delete the target groups, loadbalancers, volumes and snapshots associated with the EKS cluster using AWS CLI:
+3. Some resources are created outside Terraform, for example when you create a LoadBalancer service it will create an ELB. You can find a script to delete the target groups, load balancers, volumes, and snapshots associated with the EKS cluster using AWS CLI:
+
+> ✋🏻 Check that the `TAG_KEY` variable has the righ value before running the script. It should finihs with the cluster name.
 
 ```bash
 bash cleanup.sh
@@ -748,7 +755,7 @@ We hope you enjoyed this tour of Fury!
 
 ### Issues/Feedback
 
-In case your ran into any problems feel free to open a issue here in GitHub.
+In case your ran into any problems feel free to open an issue here on GitHub.
 
 ### Where to go next?
 
@@ -762,6 +769,7 @@ More about Fury:
 - [Fury Documentation][fury-docs]
 
 <!-- Links -->
+[terraform-aws-eks-iam-permissions]: https://github.com/terraform-aws-modules/terraform-aws-eks/blob/v17.24.0/docs/iam-permissions.md
 [fury-getting-started-repository]: https://github.com/sighupio/fury-getting-started/
 [fury-getting-started-dockerfile]: https://github.com/sighupio/fury-getting-started/blob/main/utils/docker/Dockerfile
 
@@ -779,6 +787,7 @@ More about Fury:
 
 [fury-docs]: https://docs.kubernetesfury.com
 [fury-docs-modules]: https://docs.kubernetesfury.com/docs/modules/
+[opa-module-docs]: https://docs.kubernetesfury.com/docs/modules/opa/overview
 
 <!-- Images -->
 [kibana-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/kibana.png?raw=true

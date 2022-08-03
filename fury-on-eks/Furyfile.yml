@@ -27,6 +27,7 @@ bases:
   - name: logging/kibana
   - name: ingress/nginx
   - name: ingress/forecastle
+  - name: ingress/cert-manager
 #  - name: dr/velero
 #  - name: opa/gatekeeper
 
