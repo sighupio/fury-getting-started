@@ -69,7 +69,7 @@ You are all set to start the tutorial 🚀
 
 ## Step 1 - Create a Kubernetes cluster with Talos
 
-`talosctl create cluster` by default creates a 2 node cluster, 1 node for the master (control-plane) and 1 node for the worker. Both of them run as containers within Docker.
+`talosctl cluster create` by default creates a 2 node cluster, 1 node for the master (control-plane) and 1 node for the worker. Both of them run as containers within Docker.
 
 For this tutorial we won't use the default cluster creation command, we will need to use some custom flags:
 
