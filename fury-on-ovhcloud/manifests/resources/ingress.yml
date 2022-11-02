@@ -1,0 +1,158 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    forecastle.stakater.com/expose: "true"
+    forecastle.stakater.com/appName: "Grafana"
+    forecastle.stakater.com/icon: "https://github.com/stakater/ForecastleIcons/raw/master/grafana.png"
+  namespace: monitoring
+  name: grafana
+spec:
+  rules:
+    - host: grafana.fury.info
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: grafana
+                port: 
+                  number: 3000
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    forecastle.stakater.com/expose: "true"
+    forecastle.stakater.com/appName: "Forecastle"
+    forecastle.stakater.com/icon: "https://raw.githubusercontent.com/stakater/Forecastle/master/assets/web/forecastle-round-100px.png"
+  name: forecastle
+  namespace: ingress-nginx
+spec:
+  rules:
+  - host: forecastle.fury.info
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+            service:
+              name: forecastle
+              port: 
+                number: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    forecastle.stakater.com/expose: "true"
+    forecastle.stakater.com/appName: "Kibana"
+    forecastle.stakater.com/icon: "https://github.com/stakater/ForecastleIcons/raw/master/kibana.png"
+  name: kibana
+  namespace: logging
+spec:
+  rules:
+  - host: kibana.fury.info
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+            service:
+              name: kibana
+              port: 
+                number: 5601
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    forecastle.stakater.com/expose: "true"
+    forecastle.stakater.com/appName: "Alertmanager"
+    forecastle.stakater.com/icon: "https://github.com/stakater/ForecastleIcons/raw/master/alert-manager.png"
+  namespace: monitoring
+  name: alertmanager
+spec:
+  rules:
+  - host: alertmanager.fury.info
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service: 
+            name: alertmanager-main
+            port: 
+              number: 9093
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    forecastle.stakater.com/expose: "true"
+    forecastle.stakater.com/appName: "Goldpinger"
+    forecastle.stakater.com/icon: "https://avatars2.githubusercontent.com/u/1416818?s=200&v=4"
+  namespace: monitoring
+  name: goldpinger
+spec:
+  rules:
+  - host: goldpinger.fury.info
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service: 
+            name: goldpinger
+            port: 
+              number: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    forecastle.stakater.com/expose: "true"
+    forecastle.stakater.com/appName: "Prometheus"
+    forecastle.stakater.com/icon: "https://github.com/stakater/ForecastleIcons/raw/master/prometheus.png"
+  namespace: monitoring
+  name: prometheus
+spec:
+  rules:
+    - host: prometheus.fury.info
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: prometheus-k8s
+                port: 
+                  number: 9090
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    forecastle.stakater.com/expose: "true"
+    forecastle.stakater.com/appName: "Cerebro"
+    forecastle.stakater.com/icon: "https://github.com/stakater/ForecastleIcons/raw/master/cerebro.png"
+  name: cerebro
+  namespace: logging
+spec:
+  rules:
+  - host: cerebro.fury.info
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: cerebro
+          servicePort: http

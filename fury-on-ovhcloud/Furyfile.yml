@@ -1,0 +1,30 @@
+versions:
+  monitoring: v1.14.1
+  logging: v1.10.2
+  ingress: v1.12.2
+#  dr: v1.9.2
+#  opa: v1.6.2
+
+bases:
+  - name: monitoring/prometheus-operator
+  - name: monitoring/prometheus-operated
+  - name: monitoring/grafana
+  - name: monitoring/goldpinger
+  - name: monitoring/configs
+  - name: monitoring/kubeadm-sm
+  - name: monitoring/kube-proxy-metrics
+  - name: monitoring/kube-state-metrics
+  - name: monitoring/node-exporter
+  - name: logging/elasticsearch-single
+  - name: logging/cerebro
+  - name: logging/curator
+  - name: logging/fluentd
+  - name: logging/kibana
+  - name: ingress/nginx
+  - name: ingress/forecastle
+  - name: ingress/cert-manager
+#  - name: dr/velero
+#  - name: opa/gatekeeper
+
+#modules:
+#- name: dr/eks-velero
