@@ -1,0 +1,22 @@
+# Openstack vars from openrc file
+export OS_AUTH_URL=https://auth.cloud.ovh.net/v3
+export OS_IDENTITY_API_VERSION=3
+export OS_USER_DOMAIN_NAME=${OS_USER_DOMAIN_NAME:-"Default"}
+export OS_PROJECT_DOMAIN_NAME=${OS_PROJECT_DOMAIN_NAME:-"Default"}
+export OS_TENANT_ID=""
+export OS_TENANT_NAME=""
+export OS_USERNAME=""
+export OS_PASSWORD=""
+export OS_REGION_NAME="GRA9"
+if [ -z "$OS_REGION_NAME" ]; then unset OS_REGION_NAME; fi
+
+# OVH API vars from OVHcloud manager
+export OVH_ENDPOINT=ovh-eu
+export OVH_APPLICATION_KEY=
+export OVH_APPLICATION_SECRET=
+export OVH_CONSUMER_KEY=
+
+# Terraform 
+export TF_VAR_IP="$(curl ifconfig.me)/32"
+export TF_VAR_serviceName="$OS_TENANT_ID"
+export TF_VAR_keypairAdmin="" # The ready to deployed SSH public key

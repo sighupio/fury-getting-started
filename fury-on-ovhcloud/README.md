@@ -23,6 +23,13 @@ To follow this tutorial, you need:
 
 1. A Public Cloud project in your OVHcloud account
 
+2. API access
+
+3. jq openstack-cli terraform
+
+TODO - 
+
+Private network on a single region (GRA9)
 
 
 TODO - setup a Managed Kubernetes Cluster connected to a private network

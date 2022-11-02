@@ -48,11 +48,11 @@ function SHA1_HEX {
 }
 
 # Set API variables & signature
-FULLQUERY="${APIURL}${QUERY}"
-TIMESTAMP="$(curl -s ${APIURL}/auth/time)"
+FULLQUERY="https://api.ovh.com/1.0/${QUERY}"
+TIMESTAMP="$(curl -s https://api.ovh.com/1.0/auth/time)"
 METHOD="${METHOD}"
-PRESIGNATURE="${OVH_API_AS}+${OVH_API_CK}+${METHOD}+${FULLQUERY}+${BODY}+${TIMESTAMP}"
+PRESIGNATURE="${OVH_APPLICATION_SECRET}+${OVH_CONSUMER_KEY}+${METHOD}+${FULLQUERY}+${BODY}+${TIMESTAMP}"
 SIGNATURE="\$1\$$(SHA1_HEX "${PRESIGNATURE}")"
 
 # Execute the request
-curl -s -X${METHOD} -H "X-Ovh-Application:${OVH_API_AK}" -H "X-Ovh-Timestamp:${TIMESTAMP}" -H "X-Ovh-Signature:${SIGNATURE}" -H "X-Ovh-Consumer:${OVH_API_CK}" -H 'Content-Type:application/json;charset=UTF-8' -d "$BODY" ${FULLQUERY}
+curl -s -X${METHOD} -H "X-Ovh-Application:${OVH_APPLICATION_KEY}" -H "X-Ovh-Timestamp:${TIMESTAMP}" -H "X-Ovh-Signature:${SIGNATURE}" -H "X-Ovh-Consumer:${OVH_CONSUMER_KEY}" -H 'Content-Type:application/json;charset=UTF-8' -d "$BODY" ${FULLQUERY}
