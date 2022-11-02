@@ -1,0 +1,4 @@
+export OVH_API_AK=""
+export OVH_API_AS=""
+export OVH_API_CK=""
+export APIURL="https://api.ovh.com/1.0"

@@ -21,6 +21,10 @@ This tutorial assumes some basic familiarity with Kubernetes and OVHcloud. Some 
 
 To follow this tutorial, you need:
 
+1. A Public Cloud project in your OVHcloud account
+
+
+
 TODO - setup a Managed Kubernetes Cluster connected to a private network
 
 ### Setup and initialize the environment
