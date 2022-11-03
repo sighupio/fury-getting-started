@@ -33,3 +33,14 @@ sudo apt update && sudo apt install -y ansible
 curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" \
         && sudo mv ./kubectl /usr/local/bin/kubectl \
         && sudo chmod 0755 /usr/local/bin/kubectl
+
+# furyctl
+wget -q "https://github.com/sighupio/furyctl/releases/download/v0.8.0/furyctl-$(uname -s)-amd64" -O /tmp/furyctl \
+        && chmod +x /tmp/furyctl \
+        && sudo mv /tmp/furyctl /usr/local/bin/furyctl
+
+# Kustomize
+wget -q "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv4.5.7/kustomize_v4.5.7_linux_amd64.tar.gz" -O /tmp/kustomize_v4.5.7_linux_amd64.tar.gz \
+        && tar zxvf /tmp/kustomize_v4.5.7_linux_amd64.tar.gz \
+        && chmod u+x kustomize \
+        && sudo mv kustomize /usr/local/bin/kustomize
