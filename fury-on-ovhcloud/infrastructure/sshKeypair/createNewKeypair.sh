@@ -13,3 +13,7 @@ export TF_VAR_keypairPubKey="$(cat ${TF_VAR_keypairName}.pub)"
 terraform init
 terraform plan
 terraform apply --auto-approve
+
+cp ${TF_VAR_keypairName}* ~/.ssh/
+eval $(ssh-agent)
+ssh-add ~/.ssh/furyKeyPair

@@ -18,7 +18,7 @@ network:
       dhcp6: false
       routes:
       - to: 192.168.2.0/24
-        via: TF_VAR_rtrIp
+        via: 192.168.2.1
 EOF
 netplan apply
 

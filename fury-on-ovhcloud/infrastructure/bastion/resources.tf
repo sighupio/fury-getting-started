@@ -22,6 +22,6 @@ resource "null_resource" "ssh_config" {
   }
 
   provisioner "local-exec" {
-    command = "cat ${path.module}/ssh_config.tpl | sed -e 's/bastionIP/${openstack_compute_instance_v2.myBastion.network[0].fixed_ip_v4}/g' -e 's/TF_VAR_keypairName/${var.keypairName}/g'> ${path.module}/ssh_config"
+    command = "cat ${path.module}/ssh_config.tpl | sed -e 's/TF_VAR_bastionIP/${openstack_compute_instance_v2.myBastion.network[0].fixed_ip_v4}/g' -e 's/TF_VAR_keypairName/${var.keypairName}/g' -e 's/TF_VAR_bastionUser/${var.bastionUser}/g' -e 's/TF_VAR_bastionName/${var.bastionName}/g' > ~/.ssh/ssh_config_${var.bastionName}"
   }
 }

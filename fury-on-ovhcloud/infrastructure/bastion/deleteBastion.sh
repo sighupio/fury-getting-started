@@ -6,7 +6,4 @@ cd ${DIR}
 source ../utils/ovhrc
 source ../properties
 
-# Remove Ext-Net network from state
-terraform state rm openstack_networking_network_v2.Ext-Net
-
 terraform destroy --auto-approve

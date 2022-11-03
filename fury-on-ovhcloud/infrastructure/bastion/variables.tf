@@ -26,6 +26,10 @@ variable "bastionImage" {
  type = string
 }
 
+variable "bastionUser" {
+ type = string
+}
+
 variable "bastionIP" {
  type = string
 }

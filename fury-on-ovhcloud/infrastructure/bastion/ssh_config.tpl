@@ -1,5 +1,9 @@
-Host bastion_apps
-    HostName bastionIP
-    User ubuntu
-    ForwardAgent yes
-    IdentityFile ../sshKeypair/TF_VAR_keypairName
+Host TF_VAR_bastionName
+	HostName TF_VAR_bastionIP
+	User TF_VAR_bastionUser
+	ForwardAgent yes
+	IdentityFile ~/.ssh/TF_VAR_keypairName
+	StrictHostKeyChecking no
+	UserKnownHostsFile /dev/null
+	ServerAliveInterval 60
+	ServerAliveCountMax 30

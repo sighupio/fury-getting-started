@@ -6,3 +6,4 @@ terraform.tfstate*
 fury-on-ovhcloud/infrastructure/sshKeypair/furyKeyPair
 fury-on-ovhcloud/infrastructure/sshKeypair/furyKeyPair.pub
 fury-on-ovhcloud/infrastructure/bastion/ssh_config
+fury-on-ovhcloud/infrastructure/bastion/user-data-bastion.sh
