@@ -29,7 +29,7 @@ export TF_VAR_k8sPoolMaxNodes="3"
 export TF_VAR_k8sPoolMinNodes="3"
 
 # Bastion Instance
-TF_VAR_bastionName="furyBastion"
-TF_VAR_bastionFlavor="b2-7"
-TF_VAR_bastionImage="Ubuntu 20.04"
-TF_VAR_bastionIP="192.168.2.2"
+export TF_VAR_bastionName="furyBastion"
+export TF_VAR_bastionFlavor="b2-7"
+export TF_VAR_bastionImage="Ubuntu 20.04"
+export TF_VAR_bastionIP="192.168.2.2"
