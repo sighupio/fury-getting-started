@@ -1,0 +1,6 @@
+# Network
+export rtrName="rtr-apps"
+export rtrIp="192.168.1.1"
+export subnetName="subnet_apps"
+export pvNetworkName="pvnw_apps"
+
