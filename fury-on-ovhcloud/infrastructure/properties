@@ -17,3 +17,13 @@ export TF_VAR_rtrIp="192.168.2.1"
 
 # SSH KeyPair
 export TF_VAR_keypairName="furyKeyPair"
+export TF_VAR_keypairPubKey="$(cat sshKeypair/${TF_VAR_keypairName}.pub 2>>/dev/null)"
+
+# Managed Kubernetes
+export TF_VAR_k8sName="furyCluster"
+export TF_VAR_k8sVersion="1.21"
+export TF_VAR_k8sPoolName="furypool"
+export TF_VAR_k8sPoolFlavor="b2-7"
+export TF_VAR_k8sPoolDesiredNodes="3"
+export TF_VAR_k8sPoolMaxNodes="3"
+export TF_VAR_k8sPoolMinNodes="3"
