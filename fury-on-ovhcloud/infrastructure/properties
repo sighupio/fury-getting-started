@@ -2,15 +2,15 @@
 export TF_VAR_region="GRA9"
 
 # Network - Private Network
-export TF_VAR_pvNetworkName="pvnw_apps"
-export TF_VAR_pvNetworkId="11"
+export TF_VAR_pvNetworkName="furyNw"
+export TF_VAR_pvNetworkId="20"
 
 # Network - Subnet
-export TF_VAR_subnetName="subnet_apps"
-export TF_VAR_subnetCIDR="192.168.1.0/24"
-export TF_VAR_subnetDHCPStart="192.168.1.200"
-export TF_VAR_subnetDHCPEnd="192.168.1.254"
+export TF_VAR_subnetName="furySubnet"
+export TF_VAR_subnetCIDR="192.168.2.0/24"
+export TF_VAR_subnetDHCPStart="192.168.2.200"
+export TF_VAR_subnetDHCPEnd="192.168.2.254"
 
 # Network - Router
-export TF_VAR_rtrName="rtr-apps"
-export TF_VAR_rtrIp="192.168.1.1"
+export TF_VAR_rtrName="furyRouter"
+export TF_VAR_rtrIp="192.168.2.1"
