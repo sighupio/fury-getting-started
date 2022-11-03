@@ -3,3 +3,5 @@ vendor
 fury-on-ovhcloud/infrastructure/utils/ovhrc
 .terraform*
 terraform.tfstate*
+fury-on-ovhcloud/infrastructure/sshKeypair/furyKeyPair
+fury-on-ovhcloud/infrastructure/sshKeypair/furyKeyPair.pub
