@@ -48,7 +48,7 @@ function SHA1_HEX {
 }
 
 # Set API variables & signature
-FULLQUERY="https://api.ovh.com/1.0/${QUERY}"
+FULLQUERY="https://api.ovh.com/1.0${QUERY}"
 TIMESTAMP="$(curl -s https://api.ovh.com/1.0/auth/time)"
 METHOD="${METHOD}"
 PRESIGNATURE="${OVH_APPLICATION_SECRET}+${OVH_CONSUMER_KEY}+${METHOD}+${FULLQUERY}+${BODY}+${TIMESTAMP}"

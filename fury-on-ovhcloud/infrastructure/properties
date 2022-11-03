@@ -1,6 +1,16 @@
-# Network
-export rtrName="rtr-apps"
-export rtrIp="192.168.1.1"
-export subnetName="subnet_apps"
-export pvNetworkName="pvnw_apps"
+# Region
+export TF_VAR_region="GRA9"
 
+# Network - Private Network
+export TF_VAR_pvNetworkName="pvnw_apps"
+export TF_VAR_pvNetworkId="11"
+
+# Network - Subnet
+export TF_VAR_subnetName="subnet_apps"
+export TF_VAR_subnetCIDR="192.168.1.0/24"
+export TF_VAR_subnetDHCPStart="192.168.1.200"
+export TF_VAR_subnetDHCPEnd="192.168.1.254"
+
+# Network - Router
+export TF_VAR_rtrName="rtr-apps"
+export TF_VAR_rtrIp="192.168.1.1"
