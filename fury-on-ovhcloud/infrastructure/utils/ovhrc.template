@@ -17,6 +17,6 @@ export OVH_APPLICATION_SECRET=
 export OVH_CONSUMER_KEY=
 
 # Terraform 
-export TF_VAR_IP="$(curl ifconfig.me)/32"
+export TF_VAR_IP="$(curl -s ifconfig.me)/32"
 export TF_VAR_serviceName="$OS_TENANT_ID"
 export TF_VAR_keypairAdmin="" # The ready to deployed SSH public key
