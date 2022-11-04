@@ -1,0 +1,18 @@
+upstream backend {
+   server 192.168.1.202:31080;
+   server 192.168.1.232:31080;
+   server 192.168.1.240:31080;
+}
+
+server {
+        listen 80;
+        listen [::]:80;
+
+        server_name forecastle.fury.info cerebro.fury.info kibana.fury.info grafana.fury.info alertmanager.fury.info goldpinger.fury.info prometheus.fury.info;
+
+        location / {
+                proxy_pass http://backend;
+                proxy_set_header Host $host;
+        }
+
+}

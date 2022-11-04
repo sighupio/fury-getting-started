@@ -21,7 +21,7 @@ export TF_VAR_keypairPubKey="$(cat ~/.ssh/${TF_VAR_keypairName}.pub 2>>/dev/null
 
 # Managed Kubernetes
 export TF_VAR_k8sName="furyCluster"
-export TF_VAR_k8sVersion="1.21"
+export TF_VAR_k8sVersion="1.23"
 export TF_VAR_k8sPoolName="furypool"
 export TF_VAR_k8sPoolFlavor="b2-7"
 export TF_VAR_k8sPoolDesiredNodes="3"
