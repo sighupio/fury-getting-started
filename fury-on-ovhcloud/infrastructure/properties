@@ -1,5 +1,5 @@
 # Region
-export TF_VAR_region="GRA9"
+export TF_VAR_region="${OS_REGION_NAME}"
 
 # Network - Private Network
 export TF_VAR_pvNetworkName="furyNw"
