@@ -44,15 +44,17 @@ git clone https://github.com/sighupio/fury-getting-started
 cd fury-getting-started/fury-on-ovhcloud
 ```
 
+> If your environment is Debian-based, you can use the **infrastructure/utils/installDeps.sh** script to install all necessary binaries (terraform, openstack-cli, jq, furyctl, kubectl).
+
 5. Setup your OVHcloud credentials by editing the **infrastructure/utils/ovhrc file**:
 
-Create a new ovhrc from the ovhrc.templite file:
+Create a new ovhrc from the ovhrc.template file:
 
 ```bash
 cp infrastructure/utils/ovhrc.template infrastructure/utils/ovhrc
 ```
 
-Edit the file and fill the missing values.
+Edit the file and add the missing values.
 
 The firt part of the config file is for the openstack client, which must be filled with informations from your [openstack user openrc file](https://docs.ovh.com/gb/en/public-cloud/creation-and-deletion-of-openstack-user):
 
@@ -70,7 +72,7 @@ export OS_REGION_NAME="GRA7"
 if [ -z "$OS_REGION_NAME" ]; then unset OS_REGION_NAME; fi
 ```
 
-The second part is for using the [OVHcloud API](https://api.ovh.com), create or use an existing [OVHcloud API token](https://www.ovh.com/auth/api/createToken) 
+The second part is dedicated to the use of the [OVHcloud API](https://api.ovh.com), create or use an existing [OVHcloud API token](https://www.ovh.com/auth/api/createToken). 
 
 ```bash
 # OVH API vars from OVHcloud manager
