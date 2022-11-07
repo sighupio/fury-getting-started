@@ -175,7 +175,19 @@ The **Managed Kubernetes Cluster** parameters. This is the minimal configuration
 #### Bastion Instance
 > optionnal - A third instance to access and test the **Kubernetes Fury Distribution**.
 
+### Boostrap the private network
 
+```bash
+cd infrastructure/network
+./createNetworks.sh
+```
+
+### Boostrap the Managed Kubernetes Cluster
+
+```bash
+cd infrastructure/managed-kubernetes
+./createManagedKubernetes.sh
+```
 
 ## Step 2 - Download fury modules
 
