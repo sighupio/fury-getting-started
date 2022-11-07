@@ -236,8 +236,9 @@ bases:
 
 1. Download the Fury modules with `furyctl`:
 
+From the **fury-on-ovhcloud** directory:
+ 
 ```bash
-cd /demo/
 furyctl vendor -H
 ```
 
