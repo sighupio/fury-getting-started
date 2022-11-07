@@ -23,7 +23,7 @@ To follow this tutorial, you need:
 
 1. A [OVHcloud Public Cloud](https://www.ovhcloud.com/en-gb/public-cloud) project in your OVHcloud account and a configured [vRack](https://docs.ovh.com/gb/en/publiccloud/network-services/public-cloud-vrack).
 
-2. Packages that have to be installed into your environment for OVHcloud Managed Kubernetes bootstraping: 
+2. Packages that have to be installed into your environment for **OVHcloud Managed Kubernetes** bootstraping: 
 
 - [terraform](https://developer.hashicorp.com/terraform/cli) cli.
 
@@ -89,32 +89,23 @@ export TF_VAR_serviceName="$OS_TENANT_ID"
 export TF_VAR_keypairAdmin="" # The ready to deployed SSH public key
 ```
 
-> The **TF_VAR_keypairAdmin** variable is optionnal and will only be used if you planned to acces Kubernetes Fury Distribution from a third Instance.
+The **TF_VAR_IP** is setted with the machine where you are playing this tutorial public IP, if you want to use IP access restriction rules.
 
+The **TF_VAR_serviceName** is for giving your openstack project Id to terraform.
 
+The **TF_VAR_keypairAdmin** variable is optionnal and will only be used if you planned to acces Kubernetes Fury Distribution from a third Instance.
 
-TODO - setup a Managed Kubernetes Cluster connected to a private network
-
-### Setup and initialize the environment
-
-3. Clone the [fury getting started repository][fury-gke-repository] containing all the example code used in this tutorial:
+Initialize your environment with the needed variables:
 
 ```bash
-git clone https://github.com/sighupio/fury-getting-started
-cd fury-getting-started/fury-on-ovhcloud
+. infrastructure/utils/ovhrc
 ```
 
-4. Setup your credentials by exporting the following environment variables:
+## Step 1 - Automatic provisioning of the OVHcloud Managed Kubernetes Cluster
 
-## Step 1 - Automatic provisioning of an OVHcloud Managed Kubernetes Cluster
 
-### Boostrap provisioning phase
 
-#### Configure the bootstrap provisioner
 
-#### (optional) Create S3 Bucket to hold the Terraform remote
-
-### Cluster provisioning phase
 
 ## Step 2 - Download fury modules
 
