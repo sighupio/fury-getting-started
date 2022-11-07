@@ -263,15 +263,14 @@ furyctl vendor -H
 2. Inspect the downloaded modules in the `vendor` folder:
 
 ```bash
-tree -d /demo/vendor -L 3
+tree -d vendor -L 3
 ```
 
 Output:
 
 ```bash
 $ tree -d vendor -L 3
-
-vendor
+vendor/
 └── katalog
     ├── ingress
     │   ├── cert-manager
@@ -283,25 +282,23 @@ vendor
     │   ├── elasticsearch-single
     │   ├── fluentd
     │   └── kibana
-    ├── monitoring
-    │   ├── alertmanager-operated
-    │   ├── configs
-    │   ├── goldpinger
-    │   ├── grafana
-    │   ├── kube-proxy-metrics
-    │   ├── kube-state-metrics
-    │   ├── node-exporter
-    │   ├── prometheus-operated
-    │   └── prometheus-operator
-    └── networking
-        └── calico
+    └── monitoring
+        ├── configs
+        ├── goldpinger
+        ├── grafana
+        ├── kubeadm-sm
+        ├── kube-proxy-metrics
+        ├── kube-state-metrics
+        ├── node-exporter
+        ├── prometheus-operated
+        └── prometheus-operator
 ```
 
 ## Step 3 - Installation
 
 Each module is a Kustomize project. Kustomize allows to group together related Kubernetes resources and combine them to create more complex deployment. Moreover, it is flexible, and it enables a simple patching mechanism for additional customization.
 
-To deploy the Fury distribution, use the main `manifests/demo-fury/kustomization.yaml` file:
+To deploy the Fury distribution, use the main `manifests/kustomization.yaml` file:
 
 ```yaml
 resources:
@@ -352,7 +349,7 @@ This `kustomization.yaml`:
 Install the modules:
 
 ```bash
-cd /demo/manifests/
+cd manifests/
 
 make apply
 # Due to some chicken-egg 🐓🥚 problem with custom resources you have to apply again
@@ -363,24 +360,118 @@ make apply
 
 🚀 The distribution is finally deployed! In this section you explore some of its features.
 
+### Create a dedicated Instance to access and test the distribution
+
+Because the Kubernetes cluster is configured to work in a private network, we are going to deploy a specific instance that can access to the nodePort service, and configure a simple Nginx reverse proxu in front of it.
+
+1. Create a SSH Keypair
+
+```bash
+infrastructure/bastion/sshKeypair/createNewKeypair.sh
+```
+
+This script:
+
+- create a new SSH keypair, named as the value defined with the **TF_VAR_keypairName** variable.
+
+- add the generated keys into your $HOME/.ssh directory.
+
+- add the generated keys to a ssh-agent.
+
+2. Create the Bastion instance
+
+```bash
+infrastructure/bastion/createBastion.sh
+```
+
+This script:
+
+- create an instance bastion connected both to the public and the private network.
+
+- deploy the previously generated SSH key into the main user SSH config.
+
+- create a SSH config file (~/.ssh/ssh_config_$TF_VAR_keypairName) to facilitate the access to the bastion instance.
+
+Example:
+```bash
+Host furyBastion
+        HostName xxx.xxx.xxx.xxx
+        User ubuntu
+        ForwardAgent yes
+        IdentityFile ~/.ssh/furyKeyPair
+        StrictHostKeyChecking no
+        UserKnownHostsFile /dev/null
+        ServerAliveInterval 60
+        ServerAliveCountMax 30
+```
+
+3. Connect to the bastion
+
+```bash
+ssh -F ~/.ssh/ssh_config_furyBastion furyBastion
+```
+
+You should have a prompt like this:
+
+```bash
+ubuntu@furybastion:~$
+```
+
+4. Install Nginx server and allow access
+
+```bash
+sudo apt install -y nginx
+sudo ufw allow 'Nginx full'
+```
+
+5. Configure the reverse proxy and restart the Nginx service
+
+From your machine, get the Kubernetes cluster nodes public IP addresses, and modify the **/infrastructure/bastion/nginx-reverse-proxy-default** file.
+
+FROM
+```bash
+$ kubectl describe nodes | grep InternalIP
+  InternalIP:  192.168.2.203
+  InternalIP:  192.168.2.247
+  InternalIP:  192.168.2.238
+```
+
+TO infrastructure/bastion/nginx-reverse-proxy-default:
+```
+upstream backend {
+   server 192.168.2.203:31080;
+   server 192.168.2.247:31080;
+   server 192.168.2.238:31080;
+}
+```
+
+From the bastion machine, edit the **/etc/nginx/sites-available/default**, remove the whole content and paste the content of the infrastructure/bastion/nginx-reverse-proxy-default file.
+
+Then restart the nginx service:
+
+```bash
+sudo systemctl restart nginx
+```
+
 ### Setup local DNS
 
-1. Get the address of the internal loadbalancer:
+1. get the bastion instance public IP:
 
 ```bash
-kubectl get svc ingress-nginx -n ingress-nginx --no-headers | awk '{print $4}'
+cd infrastructure/bastion
+terraform output
 ```
 
-Output:
+The output should be like:
 
 ```bash
-10.1.0.5
+bastion_public_IP = "146.59.192.71"
 ```
 
-3. Add the following line to your local `/etc/hosts`:
+3. Then add the following line to your local `/etc/hosts`:
 
 ```bash
-10.1.0.5 forecastle.fury.info cerebro.fury.info kibana.fury.info grafana.fury.info
+146.59.192.71 forecastle.fury.info cerebro.fury.info kibana.fury.info grafana.fury.info alertmanager.fury.info goldpinger.fury.info prometheus.fury.info
 ```
 
 Now, you can reach the ingresses directly from your browser.

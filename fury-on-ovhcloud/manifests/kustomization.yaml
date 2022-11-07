@@ -20,7 +20,7 @@ resources:
   # Ingress
   - ../vendor/katalog/ingress/nginx
   - ../vendor/katalog/ingress/forecastle
-  - ../vendor/katalog/ingress/cert-manager
+#  - ../vendor/katalog/ingress/cert-manager
 
   # Ingress definitions
   - resources/ingress.yml

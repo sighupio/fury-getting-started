@@ -3,8 +3,8 @@
 DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd ${DIR}
 
-source ../utils/ovhrc
-source ../properties
+source ../../utils/ovhrc
+source ../../properties
 
 # Create a new SSH keypair
 ssh-keygen -t rsa -b 4096 -f $TF_VAR_keypairName
