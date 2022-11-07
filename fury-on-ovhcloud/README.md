@@ -182,11 +182,29 @@ cd infrastructure/network
 ./createNetworks.sh
 ```
 
+Wait a few minutes until the end of the creation process.
+
 ### Boostrap the Managed Kubernetes Cluster
 
 ```bash
 cd infrastructure/managed-kubernetes
 ./createManagedKubernetes.sh
+```
+
+Once created, get the kubeconfig file and add it to your environment, for example in a **$HOME/.kube/file** file. Then verify everything is running:
+
+```bash
+kubectl get nodes
+```
+
+The output should be like:
+
+```bash
+$ kubectl get nodes
+NAME                   STATUS   ROLES    AGE    VERSION
+furypool-node-0916c5   Ready    <none>   177m   v1.23.9
+furypool-node-eabc26   Ready    <none>   177m   v1.23.9
+furypool-node-fa51ae   Ready    <none>   177m   v1.23.9
 ```
 
 ## Step 2 - Download fury modules
