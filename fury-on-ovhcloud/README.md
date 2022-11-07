@@ -154,26 +154,28 @@ export TF_VAR_bastionUser="ubuntu"
 export TF_VAR_bastionIP="192.168.2.2"
 ```
 
-### Region
+#### Region
 The region is picked from your openstack cofiguration.
 
-### Network - Private Network
+#### Network - Private Network
 The private network Id must be a free one.
 
-### Network - Subnet
+#### Network - Subnet
 The class C subnet is created with a DHCP range.
 
-### Network - Router
+#### Network - Router
 The router IP is the first IP of the subnet CIDR range.
 
-### SSH KeyPair
+#### SSH KeyPair
 > optionnal - Create (or import) a SSH keypair and name it here.
 
-### Managed Kubernetes
+#### Managed Kubernetes
 The **Managed Kubernetes Cluster** parameters. This is the minimal configuration to test the **Kubernetes Fury Distribution**.
 
-### Bastion Instance
+#### Bastion Instance
 > optionnal - A third instance to access and test the **Kubernetes Fury Distribution**.
+
+
 
 ## Step 2 - Download fury modules
 
