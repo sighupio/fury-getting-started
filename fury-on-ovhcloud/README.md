@@ -21,15 +21,76 @@ This tutorial assumes some basic familiarity with Kubernetes and OVHcloud. Some 
 
 To follow this tutorial, you need:
 
-1. A Public Cloud project in your OVHcloud account
+1. A [OVHcloud Public Cloud](https://www.ovhcloud.com/en-gb/public-cloud) project in your OVHcloud account and a configured [vRack](https://docs.ovh.com/gb/en/publiccloud/network-services/public-cloud-vrack).
 
-2. API access
+2. Packages that have to be installed into your environment for OVHcloud Managed Kubernetes bootstraping: 
 
-3. jq openstack-cli terraform
+- [terraform](https://developer.hashicorp.com/terraform/cli) cli.
 
-TODO - 
+- [openstack](https://docs.openstack.org/newton/user-guide/common/cli-install-openstack-command-line-clients.html) cli.
 
-Private network on a single region (GRA9)
+- [jq](https://stedolan.github.io/jq) command-line JSON processor.
+
+3. Packages that have to be installed into your environment to install and manage your **Kubernetes Fury Distribution**:
+
+- [furyctl](https://github.com/sighupio/furyctl) cli.
+
+- [kubectl](https://kubernetes.io/fr/docs/tasks/tools/install-kubectl) cli.
+
+4. Clone the [fury getting started repository][fury-gke-repository] containing all the example code used in this tutorial:
+
+```bash
+git clone https://github.com/sighupio/fury-getting-started
+cd fury-getting-started/fury-on-ovhcloud
+```
+
+5. Setup your OVHcloud credentials by editing the **infrastructure/utils/ovhrc file**:
+
+Create a new ovhrc from the ovhrc.templite file:
+
+```bash
+cp infrastructure/utils/ovhrc.template infrastructure/utils/ovhrc
+```
+
+Edit the file and fill the missing values.
+
+The firt part of the config file is for the openstack client, which must be filled with informations from your [openstack user openrc file](https://docs.ovh.com/gb/en/public-cloud/creation-and-deletion-of-openstack-user):
+
+```bash
+# Openstack vars from openrc file
+export OS_AUTH_URL=https://auth.cloud.ovh.net/v3
+export OS_IDENTITY_API_VERSION=3
+export OS_USER_DOMAIN_NAME=${OS_USER_DOMAIN_NAME:-"Default"}
+export OS_PROJECT_DOMAIN_NAME=${OS_PROJECT_DOMAIN_NAME:-"Default"}
+export OS_TENANT_ID=""
+export OS_TENANT_NAME=""
+export OS_USERNAME=""
+export OS_PASSWORD=""
+export OS_REGION_NAME="GRA7"
+if [ -z "$OS_REGION_NAME" ]; then unset OS_REGION_NAME; fi
+```
+
+The second part is for using the [OVHcloud API](https://api.ovh.com), create or use an existing [OVHcloud API token](https://www.ovh.com/auth/api/createToken) 
+
+```bash
+# OVH API vars from OVHcloud manager
+export OVH_ENDPOINT=ovh-eu
+export OVH_APPLICATION_KEY=
+export OVH_APPLICATION_SECRET=
+export OVH_CONSUMER_KEY=
+```
+
+The last part is needed by the terraform cli:
+
+```bash
+# Terraform
+export TF_VAR_IP="$(curl -s ifconfig.me)/32"
+export TF_VAR_serviceName="$OS_TENANT_ID"
+export TF_VAR_keypairAdmin="" # The ready to deployed SSH public key
+```
+
+> The **TF_VAR_keypairAdmin** variable is optionnal and will only be used if you planned to acces Kubernetes Fury Distribution from a third Instance.
+
 
 
 TODO - setup a Managed Kubernetes Cluster connected to a private network
