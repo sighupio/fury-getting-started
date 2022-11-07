@@ -1,7 +1,7 @@
 upstream backend {
-   server 192.168.2.203:31080;
-   server 192.168.2.247:31080;
-   server 192.168.2.238:31080;
+   server 192.168.2.xxx:31080;
+   server 192.168.2.yyy:31080;
+   server 192.168.2.zzz:31080;
 }
 
 server {

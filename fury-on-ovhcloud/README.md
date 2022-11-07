@@ -520,103 +520,19 @@ This is what you should see:
 
 ![Grafana][grafana-screenshot]
 
-## Step 5 (optional) - Deploy additional modules
-
-We now install other modules:
-
-- dr
-- opa
-
-To deploy Velero as Disaster Recovery solution, we need to have credentials to interact with `aws` volumes.
-
-Let's add a module at the bottom of `Furyfile.yml`:
-
-```yaml
-versions:
-  ...
-  dr: v1.7.0
-  opa: v1.3.1
-
-bases:
-  ...
-  - name: dr/velero
-  - name: opa/gatekeeper
-
-modules:
-- name: dr/gcp-velero
-```
-
-And download the new vendor:
-
-```bash
-furyctl vendor -H
-```
-
-Create the resources using Terraform:
-
-```bash
-cd terraform/demo-fury
-terraform init
-terraform plan -out terraform.plan
-terraform apply terraform.plan
-
-# Output the resources to yaml files, so we can use them in kustomize
-terraform output -raw velero_backup_storage_location > ../../manifests/demo-fury/resources/velero-backup-storage-location.yml
-terraform output -raw velero_volume_snapshot_location > ../../manifests/demo-fury/resources/velero-volume-snapshot-location.yml
-terraform output -raw velero_cloud_credentials > ../../manifests/demo-fury/resources/velero-cloud-credentials.yml
-
-```
-
-Let's add the following lines to `kustomization.yaml`:
-
-```yaml
-resources:
-
-...
-
-# Disaster Recovery
-- ../../vendor/katalog/dr/velero/velero-gcp
-- ../../vendor/katalog/dr/velero/velero-schedules
-- resources/velero-backup-storage-location.yml
-- resources/velero-volume-snapshot-location.yml
-- resources/velero-cloud-credentials.yml
-
-# Open Policy Agent
-- ../../vendor/katalog/opa/gatekeeper/core
-- ../../vendor/katalog/opa/gatekeeper/monitoring
-- ../../vendor/katalog/opa/gatekeeper/rules
-
-```
-
-Istall the modules with:
-
-```bash
-cd manifest/demo-fury
-
-make apply
-# If you see some errors, apply twice
-```
-
-## Step 6 - Teardown
+## Step 5 - Teardown
 
 To clean up the environment:
 
 ```bash
-# (Required if you performed Disaster Recovery step)
-cd terraform/demo-fury
-terraform destroy
+# (Required if you have created the bastion instance)
+infrastructure/bastion/deleteBastion.sh
 
 # Destroy cluster
-cd infrastructure
-furyctl cluster destroy
+infrastructure/managed-kubernetes/deleteManagedKubernetes.sh
 
 # Destroy network components
-cd infrastructure
-furyctl bootstrap destroy
-
-#(Optional) Destroy bucket
-gsutil -m rm -r gs://fury-gcp-demo/terraform
-gsutil rb gs://fury-gcp-demo
+infrastructure/network/deleteNetworks.sh
 ```
 
 ## Conclusions
@@ -627,15 +543,11 @@ I hope you enjoyed the tutorial... TBC
 [fury-getting-started-dockerfile]: https://github.com/sighupio/fury-getting-started/blob/main/utils/docker/Dockerfile
 
 [fury-on-minikube]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-minikube
+[fury-on-ovhcloud]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-ovhcloud
 [fury-on-eks]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-eks
 [fury-on-gke]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-gke
 
 [furyagent-repository]: https://github.com/sighupio/furyagent
-
-[provisioner-bootstrap-aws-reference]: https://docs.kubernetesfury.com/docs/cli-reference/furyctl/provisioners/aws-bootstrap/
-
-[tunnelblick]: https://tunnelblick.net/downloads.html
-[openvpn-connect]: https://openvpn.net/vpn-client/
 
 <!-- Images -->
 [kibana-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/kibana.png?raw=true
