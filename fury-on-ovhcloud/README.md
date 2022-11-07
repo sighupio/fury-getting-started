@@ -95,7 +95,9 @@ The **TF_VAR_serviceName** is for giving your openstack project Id to terraform.
 
 The **TF_VAR_keypairAdmin** variable is optionnal and will only be used if you planned to acces Kubernetes Fury Distribution from a third Instance.
 
-Initialize your environment with the needed variables:
+6. Initialize your environment with the needed variables:
+
+Source the configuration file:
 
 ```bash
 . infrastructure/utils/ovhrc
@@ -103,9 +105,75 @@ Initialize your environment with the needed variables:
 
 ## Step 1 - Automatic provisioning of the OVHcloud Managed Kubernetes Cluster
 
+The complete Kubernetes creation process is managed by terraform cli and Bash scripts.
 
+Before creating the Managed Kubernetes Cluster, we must create the private network environment.
 
+This network environment, built on vRack, is composed by a private network, an associated network, and an openstack virtual router that have the subnet gateway role.
 
+Once the network components created, you must add to the Kubernetes cluster process creation the private network and custom gateway informations.
+
+All network and Kubernetes cluster parameters are stored in the pre-configured **infrastructure/properties** file:
+
+```bash
+# Region
+export TF_VAR_region="${OS_REGION_NAME}"
+
+# Network - Private Network
+export TF_VAR_pvNetworkName="furyNw"
+export TF_VAR_pvNetworkId="20"
+
+# Network - Subnet
+export TF_VAR_subnetName="furySubnet"
+export TF_VAR_subnetCIDR="192.168.2.0/24"
+export TF_VAR_subnetDHCPStart="192.168.2.200"
+export TF_VAR_subnetDHCPEnd="192.168.2.254"
+
+# Network - Router
+export TF_VAR_rtrName="furyRouter"
+export TF_VAR_rtrIp="192.168.2.1"
+
+# SSH KeyPair
+export TF_VAR_keypairName="furyKeyPair"
+export TF_VAR_keypairPubKey="$(cat ~/.ssh/${TF_VAR_keypairName}.pub 2>>/dev/null)"
+
+# Managed Kubernetes
+export TF_VAR_k8sName="furyCluster"
+export TF_VAR_k8sVersion="1.23"
+export TF_VAR_k8sPoolName="furypool"
+export TF_VAR_k8sPoolFlavor="b2-7"
+export TF_VAR_k8sPoolDesiredNodes="3"
+export TF_VAR_k8sPoolMaxNodes="3"
+export TF_VAR_k8sPoolMinNodes="3"
+
+# Bastion Instance
+export TF_VAR_bastionName="furyBastion"
+export TF_VAR_bastionFlavor="b2-7"
+export TF_VAR_bastionImage="Ubuntu 20.04"
+export TF_VAR_bastionUser="ubuntu"
+export TF_VAR_bastionIP="192.168.2.2"
+```
+
+### Region
+The region is picked from your openstack cofiguration.
+
+### Network - Private Network
+The private network Id must be a free one.
+
+### Network - Subnet
+The class C subnet is created with a DHCP range.
+
+### Network - Router
+The router IP is the first IP of the subnet CIDR range.
+
+### SSH KeyPair
+> optionnal - Create (or import) a SSH keypair and name it here.
+
+### Managed Kubernetes
+The **Managed Kubernetes Cluster** parameters. This is the minimal configuration to test the **Kubernetes Fury Distribution**.
+
+### Bastion Instance
+> optionnal - A third instance to access and test the **Kubernetes Fury Distribution**.
 
 ## Step 2 - Download fury modules
 
