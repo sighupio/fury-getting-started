@@ -1,9 +1,8 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  labels:
-    k8s-app: prometheus-operator
   name: prometheus-operator
+  namespace: monitoring
 spec:
   template:
     spec:

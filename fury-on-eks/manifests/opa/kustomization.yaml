@@ -1,3 +1,6 @@
-resources:
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
 
-- ../../vendor/katalog/opa/gatekeeper
+resources:
+  - ../../vendor/katalog/opa/gatekeeper

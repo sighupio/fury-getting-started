@@ -180,7 +180,6 @@ executor:
 ```yaml
 ...
 executor:
-#  version: 0.13.6
   state:
    backend: s3
    config:
@@ -291,7 +290,7 @@ kind: Cluster
 metadata:
   name: fury-eks-demo
 spec:
-  version: 1.21
+  version: 1.24
   network: <VPC_ID>
   subnetworks:
   - <PRIVATE_SUBNET1_ID>
@@ -364,40 +363,23 @@ For this tutorial, use the `Furyfile.yml` located at `/demo/Furyfile.yaml`:
 
 ```yaml
 versions:
-  networking: v1.8.2
-  monitoring: v1.14.1
-  logging: v1.10.2
-  ingress: v1.12.2
-#  dr: v1.9.2
-#  opa: v1.6.2
+  networking: v1.10.0
+  monitoring: v2.0.1
+  logging: v3.0.1
+  ingress: v1.13.1
+#  dr: v1.10.1
+#  auth: v0.0.2
 
 bases:
-  - name: networking/calico
-  - name: monitoring/prometheus-operator
-  - name: monitoring/prometheus-operated
-  - name: monitoring/grafana
-  - name: monitoring/goldpinger
-  - name: monitoring/configs
-  - name: monitoring/kubeadm-sm
-  - name: monitoring/kube-proxy-metrics
-  - name: monitoring/kube-state-metrics
-  - name: monitoring/node-exporter
-  - name: monitoring/metrics-server
-  - name: monitoring/eks-sm
-  - name: monitoring/alertmanager-operated
-  - name: logging/elasticsearch-single
-  - name: logging/cerebro
-  - name: logging/curator
-  - name: logging/fluentd
-  - name: logging/kibana
-  - name: ingress/nginx
-  - name: ingress/forecastle
-  - name: ingress/cert-manager
-#  - name: dr/velero
-#  - name: opa/gatekeeper
+  - name: networking
+  - name: monitoring
+  - name: logging
+  - name: ingress
+#  - name: dr
+#  - name: opa
 
 #modules:
-#- name: dr/eks-velero
+#  - name: dr
 ```
 
 ### Download Fury modules
@@ -422,28 +404,47 @@ $ tree -d vendor -L 3
 
 vendor
 └── katalog
-    ├── ingress
-    │   ├── cert-manager
-    │   ├── forecastle
-    │   └── nginx
-    ├── logging
-    │   ├── cerebro
-    │   ├── curator
-    │   ├── elasticsearch-single
-    │   ├── fluentd
-    │   └── kibana
-    ├── monitoring
-    │   ├── alertmanager-operated
-    │   ├── configs
-    │   ├── goldpinger
-    │   ├── grafana
-    │   ├── kube-proxy-metrics
-    │   ├── kube-state-metrics
-    │   ├── node-exporter
-    │   ├── prometheus-operated
-    │   └── prometheus-operator
-    └── networking
-        └── calico
+   ├── ingress
+   │  ├── cert-manager
+   │  ├── dual-nginx
+   │  ├── external-dns
+   │  ├── forecastle
+   │  ├── nginx
+   │  └── tests
+   ├── logging
+   │  ├── cerebro
+   │  ├── configs
+   │  ├── logging-operated
+   │  ├── logging-operator
+   │  ├── loki-configs
+   │  ├── loki-single
+   │  ├── opensearch-dashboards
+   │  ├── opensearch-single
+   │  ├── opensearch-triple
+   │  └── tests
+   ├── monitoring
+   │  ├── aks-sm
+   │  ├── alertmanager-operated
+   │  ├── blackbox-exporter
+   │  ├── configs
+   │  ├── eks-sm
+   │  ├── gke-sm
+   │  ├── grafana
+   │  ├── kube-proxy-metrics
+   │  ├── kube-state-metrics
+   │  ├── kubeadm-sm
+   │  ├── node-exporter
+   │  ├── prometheus-adapter
+   │  ├── prometheus-operated
+   │  ├── prometheus-operator
+   │  ├── tests
+   │  ├── thanos
+   │  └── x509-exporter
+   └── networking
+      ├── calico
+      ├── ip-masq
+      ├── tests
+      └── tigera
 ```
 
 ## Step 3 - Installation
@@ -464,28 +465,28 @@ resources:
 This `kustomization.yaml` wraps the other `kustomization.yaml`s in subfolders. For example in `/demo/manifests/logging/kustomization.yaml`
 
 ```yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
 resources:
+  - ../../vendor/katalog/logging/cerebro
+  - ../../vendor/katalog/logging/logging-operator
+  - ../../vendor/katalog/logging/logging-operated
+  - ../../vendor/katalog/logging/configs
+  - ../../vendor/katalog/logging/opensearch-single
+  - ../../vendor/katalog/logging/opensearch-dashboards
 
-- ../../vendor/katalog/logging/cerebro
-- ../../vendor/katalog/logging/curator
-- ../../vendor/katalog/logging/elasticsearch-single
-- ../../vendor/katalog/logging/fluentd
-- ../../vendor/katalog/logging/kibana
-
-- resources/ingress.yml
+  - resources/ingress.yml
 
 patchesStrategicMerge:
-
-- patches/fluentd-resources.yml
-- patches/fluentbit-resources.yml
-- patches/elasticsearch-resources.yml
-- patches/cerebro-resources.yml
+  - patches/opensearch-resources.yml
+  - patches/cerebro-resources.yml
 ```
 
 Each `kustomization.yaml`:
 
 - references the modules downloaded in the previous section
-- patches the upstream modules (e.g. `patches/elasticsearch-resources.yml` limits the resources requested by elastic search)
+- patches the upstream modules (e.g. `patches/opensearch-resources.yml` limits the resources requested by opensearch)
 - deploys some additional custom resources (e.g. `resources/ingress.yml`)
 
 Install the modules:
@@ -508,7 +509,7 @@ In Step 3, alongside the distribution, you have deployed Kubernetes ingresses to
 
 - `forecastle.fury.info`
 - `grafana.fury.info`
-- `kibana.fury.info`
+- `opensearch-dashboards.fury.info`
 
 To access the ingresses more easily via the browser, configure your local DNS to resolve the ingresses to the internal loadbalancer IP:
 
@@ -534,7 +535,7 @@ xxx.elb.eu-west-1.amazonaws.com. 77 IN A <THIRD_IP>
 3. Add the following line to your machine's `/etc/hosts` (not the container's):
 
 ```bash
-<FIRST_IP> forecastle.fury.info cerebro.fury.info kibana.fury.info grafana.fury.info
+<FIRST_IP> forecastle.fury.info cerebro.fury.info opensearch-dashboards.fury.info grafana.fury.info
 ```
 
 Now, you can reach the ingresses directly from your browser.
@@ -545,13 +546,14 @@ Now, you can reach the ingresses directly from your browser.
 
 Navigate to <http://forecastle.fury.info> to see all the other ingresses deployed, grouped by namespace.
 
-![Forecastle][forecastle-screenshot]
+TODO REPLACE ![Forecastle][forecastle-screenshot]
 
-### Kibana
 
-[Kibana](https://github.com/elastic/kibana) is an open-source analytics and visualization platform for Elasticsearch. Kibana lets you perform advanced data analysis and visualize data in various charts, tables, and maps. You can use it to search, view, and interact with data stored in Elasticsearch indices.
+### Opensearch Dashboards
 
-Navigate to <http://kibana.fury.info> or click the Kibana icon from Forecastle.
+[Opensearch Dashboards](https://github.com/opensearch-project/OpenSearch-Dashboards) is an open-source analytics and visualization platform for Opensearch. Opensearch Dashboards lets you perform advanced data analysis and visualize data in various charts, tables, and maps. You can use it to search, view, and interact with data stored in Opensearch indices.
+
+Navigate to <http://opensearch-dashboards.fury.info> or click the Opensearch Dashboards icon from Forecastle.
 
 #### Read the logs
 
@@ -563,7 +565,7 @@ The Fury Logging module already collects data from the following indices:
 
 Click on `Discover` to see the main dashboard. On the top left corner select one of the indices to explore the logs.
 
-![Kibana][kibana-screenshot]
+TODO REPLACE ![Kibana][kibana-screenshot]
 
 ### Grafana
 
@@ -597,16 +599,16 @@ In this section, you deploy the following additional modules:
 ```yaml
 versions:
   ...
-  dr: v1.8.0
-  opa: v1.5.0
+#  dr: v1.10.1
+#  auth: v0.0.2
 
 bases:
   ...
-  - name: dr/velero
-  - name: opa/gatekeeper
+  - name: dr
+  - name: opa
 
 modules:
-- name: dr/eks-velero
+- name: dr
 ```
 
 2. Download the modules in the vendor folders with `furyctl`:
@@ -643,25 +645,28 @@ terraform output -raw velero_volume_snapshot_location > ../manifests/dr/resource
 5. Have a look at `/demo/manifests/dr/kustomization.yaml`...
 
 ```yaml
-resources:
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
 
-- ../../vendor/katalog/dr/velero/velero-aws
-- ../../vendor/katalog/dr/velero/velero-schedules
-- resources/velero-backup-storage-location.yml
-- resources/velero-volume-snapshot-location.yml
+resources:
+  - ../../vendor/katalog/dr/velero/velero-aws
+  - ../../vendor/katalog/dr/velero/velero-schedules
+  - resources/velero-backup-storage-location.yml
+  - resources/velero-volume-snapshot-location.yml
 
 patchesStrategicMerge:
-
-- patches/velero.yml
+  - patches/velero.yml
 ...
 ```
 
 ... and `/demo/manifests/opa/kustomization.yaml`
 
 ```yaml
-resources:
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
 
-- ../../vendor/katalog/opa/gatekeeper
+resources:
+  - ../../vendor/katalog/opa/gatekeeper
 ```
 
 6. Install the modules as before:

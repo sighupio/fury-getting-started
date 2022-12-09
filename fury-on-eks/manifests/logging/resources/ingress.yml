@@ -28,20 +28,20 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: "nginx"
     forecastle.stakater.com/expose: "true"
-    forecastle.stakater.com/appName: "Kibana"
-    forecastle.stakater.com/icon: "https://github.com/stakater/ForecastleIcons/raw/master/kibana.png"
-  name: kibana
+    forecastle.stakater.com/appName: "Opensearch Dashboards"
+    forecastle.stakater.com/icon: "https://avatars.githubusercontent.com/u/80134844?s=200&v=4"
+  name: opensearch-dashboards
   namespace: logging
 spec:
   rules:
-  - host: kibana.fury.info
+  - host: opensearch-dashboards.fury.info
     http:
       paths:
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: kibana
+            name: opensearch-dashboards
             port:
               name: http
 ---
