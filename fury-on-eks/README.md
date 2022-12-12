@@ -689,29 +689,45 @@ Please refer to the [OPA module's documentation][opa-module-docs] while we work 
 
 Clean up the demo environment:
 
-1. (Required **only** if you performed the optional steps) Destroy the additional Terraform resources used by Velero:
+1. Delete the namespaces containing external resources like volumes and load balancers:
+
+```bash
+kubectl delete namespace logging monitoring ingress-nginx
+```
+
+Wait until the namespaces are completeley deleted, or that:
+
+```bash
+kubectl get pvc -A
+# and 
+kubectl get svc -A
+```
+
+return no result for pvc and no LoadBalancer for svc.
+
+2. Destroy the additional Terraform resources used by Velero:
 
 ```bash
 cd /demo/terraform/
 terraform destroy
 ```
 
-2. Destroy EKS cluster:
+3. Destroy EKS cluster:
 
 ```bash
 cd /demo/infrastructure/
 furyctl cluster destroy
 ```
 
-3. Some resources are created outside Terraform, for example when you create a LoadBalancer service it will create an ELB. You can find a script to delete the target groups, load balancers, volumes, and snapshots associated with the EKS cluster using AWS CLI:
+4. Some resources are created outside Terraform, for example when you create a LoadBalancer service it will create an ELB. You can find a script to delete the target groups, load balancers, volumes, and snapshots associated with the EKS cluster using AWS CLI:
 
-> ✋🏻 Check that the `TAG_KEY` variable has the righ value before running the script. It should finihs with the cluster name.
+> ✋🏻 Check that the `TAG_KEY` variable has the right value before running the script. It should finihs with the cluster name.
 
 ```bash
 bash cleanup.sh
 ```
 
-4. Destroy network infrastructure:
+5. Destroy network infrastructure (remember to disconnect from the VPN before deleting):
 
 ```bash
 furyctl bootstrap destroy
