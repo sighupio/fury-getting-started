@@ -263,14 +263,14 @@ furyagent configure openvpn-client \
 Output:
 
 ```bash
-2021-06-07 14:37:52.169664 I | storage.go:146: Item pki/vpn-client/fury.crt found [size: 1094]
-2021-06-07 14:37:52.169850 I | storage.go:147: Saving item pki/vpn-client/fury.crt ...
-2021-06-07 14:37:52.265797 I | storage.go:146: Item pki/vpn/ca.crl found [size: 560]
-2021-06-07 14:37:52.265879 I | storage.go:147: Saving item pki/vpn/ca.crl ...
+2022-12-09 15:29:02.853807 I | storage.go:146: Item pki/vpn-client/fury.crt found [size: 1094]
+2022-12-09 15:29:02.853961 I | storage.go:147: Saving item pki/vpn-client/fury.crt ...
+2022-12-09 15:29:02.975943 I | storage.go:146: Item pki/vpn/ca.crl found [size: 560]
+2022-12-09 15:29:02.975991 I | storage.go:147: Saving item pki/vpn/ca.crl ...
 +------+------------+------------+---------+--------------------------------+
 | USER | VALID FROM |  VALID TO  | EXPIRED |            REVOKED             |
 +------+------------+------------+---------+--------------------------------+
-| fury | 2021-06-07 | 2022-06-07 | false   | false 0001-01-01 00:00:00      |
+| fury | 2022-12-09 | 2023-12-09 | false   | false 0001-01-01 00:00:00      |
 |      |            |            |         | +0000 UTC                      |
 +------+------------+------------+---------+--------------------------------+
 ```
@@ -367,19 +367,22 @@ versions:
   monitoring: v2.0.1
   logging: v3.0.1
   ingress: v1.13.1
-#  dr: v1.10.1
-#  auth: v0.0.2
+  dr: v1.10.1
+  auth: v0.0.2
+  aws: v2.0.0
 
 bases:
   - name: networking
   - name: monitoring
   - name: logging
   - name: ingress
-#  - name: dr
-#  - name: opa
+  - name: aws
+  - name: dr
+  - name: opa
 
-#modules:
-#  - name: dr
+modules:
+  - name: aws
+  - name: dr
 ```
 
 ### Download Fury modules
@@ -403,63 +406,139 @@ Output:
 $ tree -d vendor -L 3
 
 vendor
-└── katalog
-   ├── ingress
-   │  ├── cert-manager
-   │  ├── dual-nginx
-   │  ├── external-dns
-   │  ├── forecastle
-   │  ├── nginx
-   │  └── tests
-   ├── logging
-   │  ├── cerebro
-   │  ├── configs
-   │  ├── logging-operated
-   │  ├── logging-operator
-   │  ├── loki-configs
-   │  ├── loki-single
-   │  ├── opensearch-dashboards
-   │  ├── opensearch-single
-   │  ├── opensearch-triple
-   │  └── tests
-   ├── monitoring
-   │  ├── aks-sm
-   │  ├── alertmanager-operated
-   │  ├── blackbox-exporter
-   │  ├── configs
-   │  ├── eks-sm
-   │  ├── gke-sm
-   │  ├── grafana
-   │  ├── kube-proxy-metrics
-   │  ├── kube-state-metrics
-   │  ├── kubeadm-sm
-   │  ├── node-exporter
-   │  ├── prometheus-adapter
-   │  ├── prometheus-operated
-   │  ├── prometheus-operator
-   │  ├── tests
-   │  ├── thanos
-   │  └── x509-exporter
-   └── networking
-      ├── calico
-      ├── ip-masq
-      ├── tests
-      └── tigera
+├── katalog
+│  ├── aws
+│  │  ├── cluster-autoscaler
+│  │  ├── ebs-csi-driver
+│  │  ├── load-balancer-controller
+│  │  └── node-termination-handler
+│  ├── dr
+│  │  ├── tests
+│  │  └── velero
+│  ├── ingress
+│  │  ├── cert-manager
+│  │  ├── dual-nginx
+│  │  ├── external-dns
+│  │  ├── forecastle
+│  │  ├── nginx
+│  │  └── tests
+│  ├── logging
+│  │  ├── cerebro
+│  │  ├── configs
+│  │  ├── logging-operated
+│  │  ├── logging-operator
+│  │  ├── loki-configs
+│  │  ├── loki-single
+│  │  ├── opensearch-dashboards
+│  │  ├── opensearch-single
+│  │  ├── opensearch-triple
+│  │  └── tests
+│  ├── monitoring
+│  │  ├── aks-sm
+│  │  ├── alertmanager-operated
+│  │  ├── blackbox-exporter
+│  │  ├── configs
+│  │  ├── eks-sm
+│  │  ├── gke-sm
+│  │  ├── grafana
+│  │  ├── kube-proxy-metrics
+│  │  ├── kube-state-metrics
+│  │  ├── kubeadm-sm
+│  │  ├── node-exporter
+│  │  ├── prometheus-adapter
+│  │  ├── prometheus-operated
+│  │  ├── prometheus-operator
+│  │  ├── tests
+│  │  ├── thanos
+│  │  └── x509-exporter
+│  ├── networking
+│  │  ├── calico
+│  │  ├── ip-masq
+│  │  ├── tests
+│  │  └── tigera
+│  └── opa
+│     ├── gatekeeper
+│     └── tests
+└── modules
+   ├── aws
+   │  ├── iam-for-cluster-autoscaler
+   │  ├── iam-for-ebs-csi-driver
+   │  └── iam-for-load-balancer-controller
+   └── dr
+      ├── aws-velero
+      ├── azure-velero
+      └── gcp-velero
 ```
 
 ## Step 3 - Installation
 
-Each module is a Kustomize project. Kustomize allows to group together related Kubernetes resources and combines them to create more complex deployments. Moreover, it is flexible, and it enables a simple patching mechanism for additional customization.
+### Terraform project
+
+Each module can contain Kustomize bases or Terraform modules. 
+
+First of all, we need to initialize the additional Terraform project to create resources for DR (Velero), AWS (EBS CSI Driver).
+
+In the repository, you can find the main.tf file `/demo/terraform/main.yml`. In this file you need to change the values for the S3 bucket that will contain the state:
+
+```terraform
+terraform {
+#   backend "s3" {
+#     bucket: <S3_BUCKET>
+#     key: <MY_KEY> 
+#     region: <S3_BUCKET_REGION>
+#   }
+  required_version = ">= 0.12"
+
+  required_providers {
+    aws        = "=3.37.0"
+  }
+}
+
+```
+
+Then, create a file `terraform.tfvars` with the following content (Change the values accordingly to your environment):
+
+```terraform
+cluster_name = "fury-eks-demo"
+velero_bucket_name = "velero-demo-sa"
+```
+
+Then apply the terraform project:
+
+```bash
+cd /demo/terraform/
+
+make init
+make plan
+make apply
+```
+
+After everything is applied, extract the kustomize patches we need in the next step with the following command:
+
+```bash
+make generate-output
+```
+
+### Kustomize project
+
+Kustomize allows to group together related Kubernetes resources and combines them to create more complex deployments. 
+Moreover, it is flexible, and it enables a simple patching mechanism for additional customization.
 
 To deploy the Fury distribution, use the following root `kustomization.yaml` located `/demo/manifests/kustomization.yaml`:
 
 ```yaml
-resources:
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
 
-- ingress
-- logging
-- monitoring
-- networking
+resources:
+  - ingress
+  - logging
+  - monitoring
+  - networking
+  - dr
+  - opa
+  - aws
 ```
 
 This `kustomization.yaml` wraps the other `kustomization.yaml`s in subfolders. For example in `/demo/manifests/logging/kustomization.yaml`
@@ -495,7 +574,7 @@ Install the modules:
 cd /demo/manifests/
 
 make apply
-# Due to some chicken-egg 🐓🥚 problem with custom resources you have to apply again
+# Due to some chicken-egg 🐓🥚 problem with custom resources you have to apply multiple times
 make apply
 ```
 
@@ -546,7 +625,7 @@ Now, you can reach the ingresses directly from your browser.
 
 Navigate to <http://forecastle.fury.info> to see all the other ingresses deployed, grouped by namespace.
 
-TODO REPLACE ![Forecastle][forecastle-screenshot]
+![Forecastle](../utils/images/forecastle_eks.png)
 
 
 ### Opensearch Dashboards
@@ -560,8 +639,9 @@ Navigate to <http://opensearch-dashboards.fury.info> or click the Opensearch Das
 The Fury Logging module already collects data from the following indices:
 
 - `kubernetes-*`
-- `system-*`
+- `systemd-*`
 - `ingress-controller-*`
+- `events-*`
 
 Click on `Discover` to see the main dashboard. On the top left corner select one of the indices to explore the logs.
 
@@ -583,107 +663,7 @@ This is what you should see:
 
 ![Grafana][grafana-screenshot]
 
-## Step 5 (optional) - Deploy additional modules
-
-The Fury Distribution is a modular distribution. You can install other modules to extend its functionality. A list of all the available modules can be found [here][fury-docs-modules]
-
-In this section, you deploy the following additional modules:
-
-- `Fury Disaster Recovery Module` - a Disaster Recovery solution based on Velero.
-- `Fury OPA Module` - a policy engine based on OPA Gatekeeper.
-
-> The `Fury Disaster Recovery Module` requires additional infrastructure to function. These required resources are deployed via Terraform.
-
-1. Edit the `Furyfile.yml` in the `/demo` folder and add (uncomment) the new bases and modules:
-
-```yaml
-versions:
-  ...
-#  dr: v1.10.1
-#  auth: v0.0.2
-
-bases:
-  ...
-  - name: dr
-  - name: opa
-
-modules:
-- name: dr
-```
-
-2. Download the modules in the vendor folders with `furyctl`:
-
-```bash
-cd /demo/
-furyctl vendor -H
-```
-
-3. Create the resources for the Velero module using Terraform:
-
-```bash
-cd /demo/terraform/
-
-make init
-make plan
-make apply
-```
-
-4. Gather some output manifests from Terraform:
-
-```bash
-make generate-output
-```
-
-The `make` entry point is a shortcut for:
-
-```bash
-terraform output -raw velero_patch > ../manifests/dr/patches/velero.yml
-terraform output -raw velero_backup_storage_location > ../manifests/dr/resources/velero-backup-storage-location.yml
-terraform output -raw velero_volume_snapshot_location > ../manifests/dr/resources/velero-volume-snapshot-location.yml
-```
-
-5. Have a look at `/demo/manifests/dr/kustomization.yaml`...
-
-```yaml
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-resources:
-  - ../../vendor/katalog/dr/velero/velero-aws
-  - ../../vendor/katalog/dr/velero/velero-schedules
-  - resources/velero-backup-storage-location.yml
-  - resources/velero-volume-snapshot-location.yml
-
-patchesStrategicMerge:
-  - patches/velero.yml
-...
-```
-
-... and `/demo/manifests/opa/kustomization.yaml`
-
-```yaml
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-resources:
-  - ../../vendor/katalog/opa/gatekeeper
-```
-
-6. Install the modules as before:
-
-```bash
-cd /demo/manifests/dr
-make apply
-# Again our chicken-egg 🐓🥚 problem with custom resources 
-make apply
-cd /demo/manifests/opa
-make apply
-# Again our chicken-egg 🐓🥚 problem with custom resources 
-make apply
-# Again our chicken-egg 🐓🥚 problem with custom resources 
-make apply
-cd ..
-```
+## Step 5 (optional) - Advanced Distribution usage
 
 ### (optional) Create a backup with Velero
 
@@ -798,4 +778,4 @@ More about Fury:
 [kibana-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/kibana.png?raw=true
 [grafana-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/grafana.png?raw=true
 [cerebro-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/cerebro.png?raw=true
-[forecastle-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/forecastle.png?raw=true
+
