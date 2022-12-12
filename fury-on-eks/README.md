@@ -645,7 +645,7 @@ The Fury Logging module already collects data from the following indices:
 
 Click on `Discover` to see the main dashboard. On the top left corner select one of the indices to explore the logs.
 
-TODO REPLACE ![Kibana][kibana-screenshot]
+![Opensearch-Dashboards](../utils/images/opensearch_dashboards.png)
 
 ### Grafana
 
@@ -775,7 +775,6 @@ More about Fury:
 [opa-module-docs]: https://docs.kubernetesfury.com/docs/modules/opa/overview
 
 <!-- Images -->
-[kibana-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/kibana.png?raw=true
 [grafana-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/grafana.png?raw=true
 [cerebro-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/cerebro.png?raw=true
 
