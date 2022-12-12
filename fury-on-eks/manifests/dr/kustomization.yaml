@@ -10,3 +10,4 @@ resources:
 
 patchesStrategicMerge:
   - patches/velero.yml
+  - patches/velero-service-account.yml

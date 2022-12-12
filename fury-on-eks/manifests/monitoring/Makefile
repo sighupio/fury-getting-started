@@ -8,4 +8,4 @@ diff:
 
 .PHONY: apply
 apply:
-	kustomize build . | kubectl apply -f - | grep -v unchanged
+	kustomize build . | kubectl apply -f - --server-side | grep -v unchanged

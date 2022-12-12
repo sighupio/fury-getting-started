@@ -7,5 +7,6 @@ resources:
   - logging
   - monitoring
   - networking
-#  - dr
-#  - opa
+  - dr
+  - opa
+  - aws
