@@ -3,16 +3,19 @@ versions:
   monitoring: v2.0.1
   logging: v3.0.1
   ingress: v1.13.1
-#  dr: v1.10.1
-#  auth: v0.0.2
+  dr: v1.10.1
+  auth: v0.0.2
+  aws: v2.0.0
 
 bases:
   - name: networking
   - name: monitoring
   - name: logging
   - name: ingress
-#  - name: dr
-#  - name: opa
+  - name: aws
+  - name: dr
+  - name: opa
 
-#modules:
-#  - name: dr
+modules:
+  - name: aws
+  - name: dr
