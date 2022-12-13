@@ -2,13 +2,13 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
-    kubernetes.io/ingress.class: "nginx"
     forecastle.stakater.com/expose: "true"
     forecastle.stakater.com/appName: "Grafana"
     forecastle.stakater.com/icon: "https://github.com/stakater/ForecastleIcons/raw/master/grafana.png"
   name: grafana
   namespace: monitoring
 spec:
+  ingressClassName: nginx
   rules:
     - host: grafana.fury.info
       http:

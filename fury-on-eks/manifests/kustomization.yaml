@@ -1,6 +1,12 @@
-resources:
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
 
-- ingress
-- logging
-- monitoring
-- networking
+resources:
+  - ingress
+  - logging
+  - monitoring
+  - networking
+  - dr
+  - opa
+  - aws
