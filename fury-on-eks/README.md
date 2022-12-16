@@ -474,7 +474,7 @@ vendor
 
 ### Terraform project
 
-Each module can contain Kustomize bases or Terraform modules. 
+Each module can contain Kustomize bases or Terraform modules.
 
 First of all, we need to initialize the additional Terraform project to create resources for DR (Velero), AWS (EBS CSI Driver).
 
@@ -565,7 +565,7 @@ patchesStrategicMerge:
 Each `kustomization.yaml`:
 
 - references the modules downloaded in the previous section
-- patches the upstream modules (e.g. `patches/opensearch-resources.yml` limits the resources requested by opensearch)
+- patches the upstream modules (e.g. `patches/opensearch-resources.yml` limits the resources requested by OpenSearch)
 - deploys some additional custom resources (e.g. `resources/ingress.yml`)
 
 Install the modules:
@@ -590,7 +590,7 @@ In Step 3, alongside the distribution, you have deployed Kubernetes ingresses to
 - `grafana.fury.info`
 - `opensearch-dashboards.fury.info`
 
-To access the ingresses more easily via the browser, configure your local DNS to resolve the ingresses to the internal loadbalancer IP:
+To access the ingresses more easily via the browser, configure your local DNS to resolve the ingresses to the internal load balancer IP:
 
 1. Get the address of the internal load balancer:
 
@@ -625,14 +625,13 @@ Now, you can reach the ingresses directly from your browser.
 
 Navigate to <http://forecastle.fury.info> to see all the other ingresses deployed, grouped by namespace.
 
-![Forecastle](../utils/images/forecastle_eks.png)
+![Forecastle][forecastle-eks-screenshot]
 
+### OpenSearch Dashboards
 
-### Opensearch Dashboards
+[OpenSearch Dashboards](https://github.com/opensearch-project/OpenSearch-Dashboards) is an open-source analytics and visualization platform for OpenSearch. OpenSearch Dashboards lets you perform advanced data analysis and visualize data in various charts, tables, and maps. You can use it to search, view, and interact with data stored in OpenSearch indices.
 
-[Opensearch Dashboards](https://github.com/opensearch-project/OpenSearch-Dashboards) is an open-source analytics and visualization platform for Opensearch. Opensearch Dashboards lets you perform advanced data analysis and visualize data in various charts, tables, and maps. You can use it to search, view, and interact with data stored in Opensearch indices.
-
-Navigate to <http://opensearch-dashboards.fury.info> or click the Opensearch Dashboards icon from Forecastle.
+Navigate to <http://opensearch-dashboards.fury.info> or click the OpenSearch Dashboards icon from Forecastle.
 
 #### Read the logs
 
@@ -645,7 +644,7 @@ The Fury Logging module already collects data from the following indices:
 
 Click on `Discover` to see the main dashboard. On the top left corner select one of the indices to explore the logs.
 
-![Opensearch-Dashboards](../utils/images/opensearch_dashboards.png)
+![Opensearch-Dashboards][opensearch-dashboards-screenshot]
 
 ### Grafana
 
@@ -775,7 +774,6 @@ More about Fury:
 [fury-getting-started-dockerfile]: https://github.com/sighupio/fury-getting-started/blob/main/utils/docker/Dockerfile
 
 [fury-on-minikube]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-minikube
-[fury-on-eks]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-eks
 [fury-on-gke]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-gke
 
 [furyagent-repository]: https://github.com/sighupio/furyagent
@@ -787,10 +785,10 @@ More about Fury:
 [github-ssh-key-setup]: https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account
 
 [fury-docs]: https://docs.kubernetesfury.com
-[fury-docs-modules]: https://docs.kubernetesfury.com/docs/modules/
 [opa-module-docs]: https://docs.kubernetesfury.com/docs/modules/opa/overview
 
 <!-- Images -->
+<!-- `media` here is a branch. We used to store all images in that branch and reference them from other branches -->
 [grafana-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/grafana.png?raw=true
-[cerebro-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/cerebro.png?raw=true
-
+[opensearch-dashboards-screenshot]: https://github.com/sighupio/fury-getting-started/blob/main/utils/images/opensearch_dashboards.png?raw=true
+[forecastle-eks-screenshot]: https://github.com/sighupio/fury-getting-started/blob/main/utils/images/forecastle_eks.png?raw=true
