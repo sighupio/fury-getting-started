@@ -299,6 +299,7 @@ spec:
   dmzCIDRRange:
   - 10.0.0.0/16
   sshPublicKey: example-ssh-key # put your id_rsa.pub file content here
+  nodePoolsLaunchKind: "launch_templates"
   nodePools:
   - name: fury
     version: null
