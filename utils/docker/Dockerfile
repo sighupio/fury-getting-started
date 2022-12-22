@@ -1,8 +1,8 @@
 FROM alpine:3.15
 
-LABEL maintainer="alessandro.lo.manto@sighup.io"
+LABEL maintainer="Ramiro Algozino <ramiro@sighup.io>"
 
-ENV AWSCLI_VERSION 2.8.13
+ENV AWSCLI_VERSION 1.27.35
 ENV GCLOUD_VERSION 344.0.0
 ENV TERRAFORM_VERSION 0.15.4
 ENV KUBECTL_VERSION v1.24.7
@@ -85,9 +85,7 @@ RUN curl -L https://github.com/direnv/direnv/releases/download/${DIRENV_VERSION}
 
 # Create a group and user
 RUN addgroup -S fury && adduser -S fury -G fury
-RUN mkdir /demo
-RUN chown -R fury:fury /demo
-RUN chmod -R 755 /demo
+RUN mkdir /demo && chown -R fury:fury /demo && chmod -R 755 /demo
 USER fury
 
 # Configure .bashrc
