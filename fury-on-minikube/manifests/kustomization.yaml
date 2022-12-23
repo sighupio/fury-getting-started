@@ -1,37 +1,41 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
 resources:
 
   # Monitoring
   - ../vendor/katalog/monitoring/prometheus-operator
   - ../vendor/katalog/monitoring/prometheus-operated
   - ../vendor/katalog/monitoring/grafana
-  - ../vendor/katalog/monitoring/goldpinger
   - ../vendor/katalog/monitoring/kube-state-metrics
   - ../vendor/katalog/monitoring/node-exporter
   - ../vendor/katalog/monitoring/alertmanager-operated
 
   # Logging
-  - ../vendor/katalog/logging/elasticsearch-single
+  - ../vendor/katalog/logging/opensearch-single
+  - ../vendor/katalog/logging/opensearch-dashboards
+  - ../vendor/katalog/logging/logging-operator
+  - ../vendor/katalog/logging/logging-operated
+  - ../vendor/katalog/logging/configs/audit
+  - ../vendor/katalog/logging/configs/events
+  - ../vendor/katalog/logging/configs/ingress-nginx
+  - ../vendor/katalog/logging/configs/kubernetes
   - ../vendor/katalog/logging/cerebro
-  - ../vendor/katalog/logging/curator
-  - ../vendor/katalog/logging/fluentd
-  - ../vendor/katalog/logging/kibana
 
   # Ingress
-  - ../vendor/katalog/ingress/nginx
   - ../vendor/katalog/ingress/forecastle
 
   # Ingress definitions
   - resources/ingress.yml
 
+# With this patches, we customize the default configuration of the modules, 
+# for example lowering the resource requirements to make it run in minikube.
 patchesStrategicMerge:
 
   - patches/alertmanager-operated-replicas.yml
   - patches/alertmanager-operated-resources.yml
   - patches/prometheus-operated-resources.yml
-  - patches/prometheus-operator-resources.yml
   - patches/grafana-resources.yml
-  - patches/kibana-resources.yml
-  - patches/elasticsearch-resources.yml
-  - patches/fluentd-resources.yml
-  - patches/fluentbit-resources.yml
-  - patches/nginx-ingress-controller-resources.yml
+  - patches/opensearch-resources.yml
+  - patches/logging-operated-resources.yml

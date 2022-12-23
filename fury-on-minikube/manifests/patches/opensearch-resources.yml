@@ -2,14 +2,16 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: fluentd
+  name: opensearch-cluster-master
   namespace: logging
 spec:
-  replicas: 1
   template:
     spec:
       containers:
-        - name: fluentd
+        - name: opensearch
           resources:
             requests:
               cpu: 100m
+              memory: 100Mi
+            limits:
+              cpu: 500m
