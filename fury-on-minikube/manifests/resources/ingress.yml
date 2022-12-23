@@ -3,13 +3,13 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
-    kubernetes.io/ingress.class: "nginx"
     forecastle.stakater.com/expose: "true"
     forecastle.stakater.com/appName: "Grafana"
     forecastle.stakater.com/icon: "https://github.com/stakater/ForecastleIcons/raw/master/grafana.png"
   namespace: monitoring
   name: grafana
 spec:
+  ingressClassName: "nginx"
   rules:
     - host: grafana.fury.info
       http:
@@ -26,15 +26,15 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
-    kubernetes.io/ingress.class: "nginx"
     forecastle.stakater.com/expose: "true"
     forecastle.stakater.com/appName: "Forecastle"
     forecastle.stakater.com/icon: "https://raw.githubusercontent.com/stakater/Forecastle/master/assets/web/forecastle-round-100px.png"
   name: forecastle
   namespace: ingress-nginx
 spec:
+  ingressClassName: "nginx"
   rules:
-  - host: forecastle.fury.info
+  - host: directory.fury.info
     http:
       paths:
       - path: /
@@ -49,22 +49,22 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
-    kubernetes.io/ingress.class: "nginx"
     forecastle.stakater.com/expose: "true"
-    forecastle.stakater.com/appName: "Kibana"
-    forecastle.stakater.com/icon: "https://github.com/stakater/ForecastleIcons/raw/master/kibana.png"
-  name: kibana
+    forecastle.stakater.com/appName: "OpenSearch Dashboards"
+    forecastle.stakater.com/icon: "https://raw.githubusercontent.com/opensearch-project/OpenSearch-Dashboards/main/src/plugins/home/public/assets/logos/opensearch_mark_centered.svg"
+  name: opensearch-dashboards
   namespace: logging
 spec:
+  ingressClassName: "nginx"
   rules:
-  - host: kibana.fury.info
+  - host: logs.fury.info
     http:
       paths:
       - path: /
         pathType: Prefix
         backend:
             service:
-              name: kibana
+              name: opensearch-dashboards
               port: 
                 number: 5601
 ---
@@ -72,13 +72,13 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
-    kubernetes.io/ingress.class: "nginx"
     forecastle.stakater.com/expose: "true"
     forecastle.stakater.com/appName: "Alertmanager"
     forecastle.stakater.com/icon: "https://github.com/stakater/ForecastleIcons/raw/master/alert-manager.png"
   namespace: monitoring
   name: alertmanager
 spec:
+  ingressClassName: "nginx"
   rules:
   - host: alertmanager.fury.info
     http:
@@ -95,36 +95,13 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
-    kubernetes.io/ingress.class: "nginx"
-    forecastle.stakater.com/expose: "true"
-    forecastle.stakater.com/appName: "Goldpinger"
-    forecastle.stakater.com/icon: "https://avatars2.githubusercontent.com/u/1416818?s=200&v=4"
-  namespace: monitoring
-  name: goldpinger
-spec:
-  rules:
-  - host: goldpinger.fury.info
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service: 
-            name: goldpinger
-            port: 
-              number: 8080
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  annotations:
-    kubernetes.io/ingress.class: "nginx"
     forecastle.stakater.com/expose: "true"
     forecastle.stakater.com/appName: "Prometheus"
     forecastle.stakater.com/icon: "https://github.com/stakater/ForecastleIcons/raw/master/prometheus.png"
   namespace: monitoring
   name: prometheus
 spec:
+  ingressClassName: "nginx"
   rules:
     - host: prometheus.fury.info
       http:

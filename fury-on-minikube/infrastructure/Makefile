@@ -1,5 +1,5 @@
-kubernetes-version?=v1.23.1
-driver?=virtualbox
+kubernetes-version?=v1.24.9
+driver?=hyperkit
 memory?=8192
 cpu?=4
 cni?=calico
