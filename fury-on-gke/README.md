@@ -1,6 +1,6 @@
 # Fury on GKE
 
-This step-by-step tutorial helps you deploy the **Kubernetes Fury Distribution** on a GKE cluster on GCP.
+This step-by-step tutorial helps you deploy a subset of the **Kubernetes Fury Distribution** on a GKE cluster on GCP.
 
 This tutorial covers the following steps:
 
@@ -15,6 +15,8 @@ This tutorial covers the following steps:
 > ❗️ **Remember to stop all the instances by following all the steps listed in the teardown phase.**
 >
 > 💻 If you prefer trying Fury in a local environment, check out the [Fury on Minikube][fury-on-minikube] tutorial.
+
+The goal of this tutorial is to introduce you to the main concepts of KFD and how to work with its tooling.
 
 ## Prerequisites
 
@@ -43,7 +45,7 @@ docker run -ti --rm \
   registry.sighup.io/delivery/fury-getting-started
 ```
 
-3. Clone the [fury getting started repository][fury-gke-repository] containing all the example code used in this tutorial:
+3. Clone the [fury getting started repository][fury-on-gke] containing all the example code used in this tutorial:
 
 ```bash
 git clone https://github.com/sighupio/fury-getting-started
@@ -59,11 +61,7 @@ export GOOGLE_PROJECT=<YOUR_PROJECT_NAME>
 export GOOGLE_REGION=<YOUR_REGION>
 ```
 
-In alternative, you can authenticate with GCP by running `gcloud auth login <YOUR_EMAIL_ADDRESS>` in your terminal. You will be redirected to Google Login Web page. In addition to that, you have to set manually your project name:
-
-```bash
-gcloud config set project <YOUR_PROJECT_NAME>
-```
+💡 by default this guide uses `n1-standard-*` instances. Check that this type is available in the chosen region, for example, `europe-west6` (otherwise you'll have to adjust the various configuration files with a supported instance type).
 
 You are all set ✌️.
 
@@ -87,8 +85,6 @@ In the bootstrap phase, `furyctl` automatically provisions:
 - **Cloud Nat**: Enable instances in private subnets to connect to the internet or other GCP services, but prevent the internet from initiating a connection with those instances.
 - **GCP Instance** bastion host with an OpenVPN Server.
 - All the required networking gateways and routes.
-
-More details about the bootstrap provisioner can be found [here][provisioner-bootstrap-gcp-reference].
 
 #### Configure the bootstrap provisioner
 
@@ -132,11 +128,11 @@ Open the `/demo/infrastructure/bootstrap.yml` file with a text editor of your ch
   - `clusterNetwork`
 - (optional) Add the details of an **existing** GCS Bucket to hold the Terraform remote state.
 
-#### (optional) Create S3 Bucket to hold the Terraform remote
+#### (optional) Create a GCS Bucket to store the Terraform remote
 
-Altough this is a tutorial, it is always a good practice to use a remote Terraform state over a local one. In case you are not familiar with Terraform, you can skip this section.
+Although this is a tutorial, it is always a good practice to use a remote Terraform state over a local one. In case you are not familiar with Terraform, you can skip this section.
 
-The bootstrap provisioner does not create the GCS bucket for you. 
+> The bootstrap provisioner does not create the GCS bucket for you.
 
 1. You can manually create it using the `gcloud cli`:
 
@@ -215,11 +211,11 @@ Your VPN instance IPs are: [35.242.223.13]
 ...
 ```
 
-In particular have a look at VPC and subnets: these values are used in the cluster provisioning phase.
+In particular, have a look at VPC and subnets: these values are used in the cluster provisioning phase.
 
 ### Cluster provisioning phase
 
-In the cluster provisioning phase, `furyctl`  automatically deploys a battle-tested private GKE Cluster. To interact with the private GKE cluster, you first need to connect to the private network - created in the previous phase - via the bastion host.
+In the cluster provisioning phase, `furyctl` automatically deploys a battle-tested private GKE Cluster. To interact with the private GKE cluster, you first need to connect to the private network - created in the previous phase - via the bastion host.
 
 1. Create the OpenVPN credentials with the `furyagent`:
 
@@ -241,7 +237,7 @@ furyagent configure openvpn-client --list \
 
 Output:
 
-```
+```console
 2021-06-07 14:37:52.169664 I | storage.go:146: Item pki/vpn-client/fury.crt found [size: 1094]
 2021-06-07 14:37:52.169850 I | storage.go:147: Saving item pki/vpn-client/fury.crt ...
 2021-06-07 14:37:52.265797 I | storage.go:146: Item pki/vpn/ca.crl found [size: 560]
@@ -270,18 +266,19 @@ metadata:
   name: fury-gcp-demo
 provisioner: gke 
 spec:
-  version: 1.18
+  version: 1.24
   network: fury-gcp-demo
   subnetworks: 
   - 'fury-gcp-demo-cluster-subnet'
   - 'fury-gcp-demo-cluster-pod-subnet'
   - 'fury-gcp-demo-cluster-service-subnet'
   dmzCIDRRange: 10.0.0.0/16
-  sshPublicKey: example-ssh-key
+  sshPublicKey: <public-ssh-key-content>
   tags: {} 
   nodePools: 
   - name: fury
-    version: null
+    os: COS_CONTAINERD  # for Kubernetes +v1.24 we need to use a containerd-based node.
+    version: null  # uses the same as the cluster
     minSize: 3
     maxSize: 3 
     subnetworks: 
@@ -299,7 +296,8 @@ provisioner: gke
 
 Open the file with a text editor and replace:
 
-- `example-ssh-key` with your public key (e.g. `ssh-rsa KEY`)
+- `<public-ssh-key-content>` with the content of your public key (e.g. `ssh-rsa YOUR_KEY`)
+- Set the region for the subnet in the NodePools configuration.
 - (optional) Add the details of an **existing** GCS Bucket to hold the Terraform remote state. If you are using the same bucket as before, please specify a different **key**.
 
 #### Provision EKS Cluster
@@ -320,16 +318,33 @@ furyctl cluster apply
 >
 > Logs are available at `/demo/infrastructure/cluster/logs/terraform.logs`.
 
-3. When the `furyctl cluster apply` completes, test the connection with the cluster:
+3. When the `furyctl cluster apply` completes, test the connection wih the cluster:
 
 ```bash
 export KUBECONFIG=/demo/infrastructure/cluster/secrets/kubeconfig
 kubectl get nodes
 ```
 
-## Step 2 - Download fury modules
+> ℹ️ KFD Ingress Module v1.13.0 includes a validating admission webhook that checks ingress definitions before accepting them. Validating webhooks are queried by the API server when a request arrives. In GKE you need to open a firewall rule to enable the communication between the API server and the webhook.
+> The installer already does this for the cert-manager and gatekeeper webhooks, but at the time of writing this guide, the rule for the ingress webhook has not been included yet (see [this GitHub issue](https://github.com/sighupio/fury-gke-installer/issues/30)).
+> You will need to create the firewall rule manually in the mean time:
+>
+> Make sure to replace `<YOUR_CLUSTER_NAME>` with the name of your cluster before running the command:
 
-`furyctl` can do a lot more than deploying infrastructure. In this section, you use `furyctl` to download the monitoring, logging, and ingress modules of the Fury distribution.
+```bash
+gcloud compute firewall-rules create allow-nginx-ingress-admission-webhok \
+  --description="Allow request from API server to worker nodes for NGINX Ingress Validating Admission Webhook" \
+  --allow=tcp:9443 \
+  --direction=INGRESS \
+  --source-ranges="10.0.0.0/28" \
+  --project=$GOOGLE_PROJECT \
+  --network="<YOUR_CLUSTER_NAME>" \
+  --target-tags="sighup-io-gke-cluster-<YOUR_CLUSTER_NAME>"
+```
+
+## Step 2 - Download Fury modules
+
+`furyctl` can do a lot more than deploy infrastructure. In this section, you will use `furyctl` to download the monitoring, logging, and ingress modules of the Fury distribution.
 
 ### Inspect the Furyfile
 
@@ -339,32 +354,24 @@ For this tutorial, use the `Furyfile.yml` located at `/demo/Furyfile.yaml`:
 
 ```yaml
 versions:
-  networking: v1.6.0
-  monitoring: v1.12.2
-  logging: v1.8.0
-  ingress: v1.10.0
+  networking: v1.10.0
+  monitoring: v2.0.1
+  logging: v3.0.1
+  ingress: v1.13.1
+  dr: v1.10.1
+  auth: v0.0.2
+  opa: v1.7.3
 
 bases:
-  - name: networking/calico
-  - name: monitoring/prometheus-operator
-  - name: monitoring/prometheus-operated
-  - name: monitoring/alertmanager-operated
-  - name: monitoring/grafana
-  - name: monitoring/goldpinger
-  - name: monitoring/configs
-  - name: monitoring/gke-sm
-  - name: monitoring/kube-proxy-metrics
-  - name: monitoring/kube-state-metrics
-  - name: monitoring/node-exporter
-  - name: monitoring/metrics-server
-  - name: logging/elasticsearch-single
-  - name: logging/cerebro
-  - name: logging/curator
-  - name: logging/fluentd
-  - name: logging/kibana
-  - name: ingress/nginx
-  - name: ingress/cert-manager
-  - name: ingress/forecastle
+  - name: networking
+  - name: monitoring
+  - name: logging
+  - name: ingress
+  - name: dr
+  - name: opa
+
+modules:
+  - name: dr
 ```
 
 ### Download Fury modules
@@ -379,88 +386,85 @@ furyctl vendor -H
 2. Inspect the downloaded modules in the `vendor` folder:
 
 ```bash
-tree -d /demo/vendor -L 3
+tree -d /demo/vendor -L 2
 ```
 
 Output:
 
 ```bash
-$ tree -d vendor -L 3
+$ tree -d vendor -L 2
 
 vendor
-└── katalog
-    ├── ingress
-    │   ├── cert-manager
-    │   ├── forecastle
-    │   └── nginx
-    ├── logging
-    │   ├── cerebro
-    │   ├── curator
-    │   ├── elasticsearch-single
-    │   ├── fluentd
-    │   └── kibana
-    ├── monitoring
-    │   ├── alertmanager-operated
-    │   ├── configs
-    │   ├── goldpinger
-    │   ├── grafana
-    │   ├── kube-proxy-metrics
-    │   ├── kube-state-metrics
-    │   ├── node-exporter
-    │   ├── prometheus-operated
-    │   └── prometheus-operator
-    └── networking
-        └── calico
+├── katalog
+│   ├── dr
+│   ├── ingress
+│   ├── logging
+│   ├── monitoring
+│   ├── networking
+│   └── opa
+└── modules
+    └── dr
+
 ```
 
 ## Step 3 - Installation
 
-Each module is a Kustomize project. Kustomize allows to group together related Kubernetes resources and combine them to create more complex deployment. Moreover, it is flexible, and it enables a simple patching mechanism for additional customization.
+Each module is a Kustomize project. Kustomize allows grouping together related Kubernetes resources and combining them to create more complex deployments. Moreover, it is flexible, and it enables a simple patching mechanism for additional customization.
 
 To deploy the Fury distribution, use the main `manifests/demo-fury/kustomization.yaml` file:
 
 ```yaml
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
 resources:
 
-# Ingress module
+# Ingress
 - ../vendor/katalog/ingress/forecastle
 - ../vendor/katalog/ingress/nginx
 - ../vendor/katalog/ingress/cert-manager
 
-# Logging module
+# Logging
+- ../vendor/katalog/logging/opensearch-single
+- ../vendor/katalog/logging/opensearch-dashboards
+- ../vendor/katalog/logging/logging-operator
+- ../vendor/katalog/logging/logging-operated
+- ../vendor/katalog/logging/configs
 - ../vendor/katalog/logging/cerebro
-- ../vendor/katalog/logging/curator
-- ../vendor/katalog/logging/elasticsearch-single
-- ../vendor/katalog/logging/fluentd
-- ../vendor/katalog/logging/kibana
 
-# Monitoring module
-- ../vendor/katalog/monitoring/alertmanager-operated
-- ../vendor/katalog/monitoring/goldpinger
+# Monitoring
+- ../vendor/katalog/monitoring/prometheus-operator
+- ../vendor/katalog/monitoring/prometheus-operated
 - ../vendor/katalog/monitoring/grafana
-- ../vendor/katalog/monitoring/kube-proxy-metrics
 - ../vendor/katalog/monitoring/kube-state-metrics
 - ../vendor/katalog/monitoring/node-exporter
-- ../vendor/katalog/monitoring/prometheus-operated
-- ../vendor/katalog/monitoring/prometheus-operator
+- ../vendor/katalog/monitoring/alertmanager-operated
+- ../vendor/katalog/monitoring/kube-proxy-metrics
+- ../vendor/katalog/monitoring/eks-sm
 
 # Custom resources
 - resources/ingress.yml
 
+# Disaster Recovery
+# - ../vendor/katalog/dr/velero/velero-gcp
+# - ../vendor/katalog/dr/velero/velero-schedules
+# - resources/velero-backup-storage-location.yml
+# - resources/velero-volume-snapshot-location.yml
+# - resources/velero-cloud-credentials.yml
+
+# Open Policy Agent Gatekeeper
+# - ../vendor/katalog/opa/gatekeeper/
+
 patchesStrategicMerge:
-
-# Ingress module
+# Ingress
 - patches/ingress-nginx-lb-annotation.yml
-
-# Logging module
-- patches/fluentd-resources.yml
-- patches/fluentbit-resources.yml
-
-# Monitoring module
+# Logging
+- patches/logging-operated-resources.yml
+# Monitoring
 - patches/alertmanager-resources.yml
 - patches/cerebro-resources.yml
-- patches/elasticsearch-resources.yml
-- patches/prometheus-operator-resources.yml
+- patches/opensearch-resources.yml
 - patches/prometheus-resources.yml
 ```
 
@@ -476,17 +480,19 @@ Install the modules:
 cd /demo/manifests/
 
 make apply
-# Due to some chicken-egg 🐓🥚 problem with custom resources you have to apply again
+# Because we are creating some new CRDs, you need to wait a moment to give the API server time to process the new APIs and
+# re-apply to create the custom resources.
 make apply
+# An error saying that calling webhook "validate.nginx.ingress.kubernetes.io" is normal. Just wait for the NGINX Ingress Controller to be ready and re-apply.
 ```
 
 ## Step 4 - Explore the distribution
 
-🚀 The distribution is finally deployed! In this section you explore some of its features.
+🚀 The distribution is finally deployed! In this section, you explore some of its features.
 
 ### Setup local DNS
 
-1. Get the address of the internal loadbalancer:
+1. Get the address of the internal load balancer:
 
 ```bash
 kubectl get svc ingress-nginx -n ingress-nginx --no-headers | awk '{print $4}'
@@ -501,7 +507,7 @@ Output:
 3. Add the following line to your local `/etc/hosts`:
 
 ```bash
-10.1.0.5 forecastle.fury.info cerebro.fury.info kibana.fury.info grafana.fury.info
+10.1.0.5 directory.fury.info prometheus.fury.info alertmanager.fury.info logs.fury.info grafana.fury.info
 ```
 
 Now, you can reach the ingresses directly from your browser.
@@ -510,27 +516,28 @@ Now, you can reach the ingresses directly from your browser.
 
 [Forecastle](https://github.com/stakater/Forecastle) is an open-source control panel where you can access all exposed applications running on Kubernetes.
 
-Navigate to <http://forecastle.fury.info> to see all the other ingresses deployed, grouped by namespace.
+Navigate to <http://directory.fury.info> to see all the other ingresses deployed, grouped by namespace.
 
 ![Forecastle][forecastle-screenshot]
 
-### Kibana
+### OpenSearch Dashboards
 
-[Kibana](https://github.com/elastic/kibana) is an open-source analytics and visualization platform for Elasticsearch. Kibana lets you perform advanced data analysis and visualize data in various charts, tables, and maps. You can use it to search, view, and interact with data stored in Elasticsearch indices.
+[OpenSearch Dashboards](https://github.com/opensearch-project/OpenSearch-Dashboards) is an open-source analytics and visualization platform for OpenSearch. OpenSearch Dashboards lets you perform advanced data analysis and visualize data in various charts, tables, and maps. You can use it to search, view, and interact with data stored in OpenSearch indices.
 
-Navigate to <http://kibana.fury.info> or click the Kibana icon from Forecastle.
+Navigate to <http://logs.fury.info> or click the OpenSearch Dashboards icon from Forecastle.
 
 #### Read the logs
 
-The Fury Logging module already collects data from the following indeces:
+The Fury Logging module already collects data from the following indices:
 
 - `kubernetes-*`
-- `system-*`
+- `systemd-*`
 - `ingress-controller-*`
+- `events-*`
 
-Click on `Discover` to see the main dashboard. On the top left cornet select one of the indeces to explore the logs.
+Click on `Discover` to see the main dashboard. On the top left corner select one of the indices to explore the logs.
 
-![Kibana][kibana-screenshot]
+![Opensearch-Dashboards][opensearch-dashboards-screenshot]
 
 ### Grafana
 
@@ -538,7 +545,7 @@ Click on `Discover` to see the main dashboard. On the top left cornet select one
 
 Navigate to <http://grafana.fury.info> or click the Grafana icon from Forecastle.
 
-Fury provides some pre-configured dashboard to visualize the state of the cluster. Examine an example dashboard:
+Fury provides pre-configured dashboards to visualize the state of the cluster. Examine an example dashboard:
 
 1. Click on the search icon on the left sidebar.
 
@@ -557,47 +564,48 @@ We now install other modules:
 - dr
 - opa
 
-To deploy Velero as Disaster Recovery solution, we need to have credentials to interact with `aws` volumes.
+To deploy Velero as a Disaster Recovery solution, we need to have credentials to interact with GKE volumes.
 
-Let's add a module at the bottom of `Furyfile.yml`:
+1. Let's add a module at the bottom of `Furyfile.yml`:
 
 ```yaml
 versions:
   ...
-  dr: v1.7.0
-  opa: v1.3.1
+  dr: v1.10.0
+  opa: v1.7.3
 
 bases:
   ...
-  - name: dr/velero
-  - name: opa/gatekeeper
+  - name: dr
+  - name: opa
 
 modules:
-- name: dr/gcp-velero
+- name: dr
 ```
 
-And download the new vendor:
+2. And download the new vendor folders:
 
 ```bash
 furyctl vendor -H
 ```
 
-Create the resources using Terraform:
+3. Create the resources using Terraform:
 
 ```bash
-cd terraform/demo-fury
+cd /demo/terraform/demo-fury
+# Update the provided `main.tf` file with your configuration.
 terraform init
 terraform plan -out terraform.plan
 terraform apply terraform.plan
 
 # Output the resources to yaml files, so we can use them in kustomize
-terraform output -raw velero_backup_storage_location > ../../manifests/demo-fury/resources/velero-backup-storage-location.yml
-terraform output -raw velero_volume_snapshot_location > ../../manifests/demo-fury/resources/velero-volume-snapshot-location.yml
-terraform output -raw velero_cloud_credentials > ../../manifests/demo-fury/resources/velero-cloud-credentials.yml
+terraform output -raw velero_backup_storage_location > ../../manifests/resources/velero-backup-storage-location.yml
+terraform output -raw velero_volume_snapshot_location > ../../manifests/resources/velero-volume-snapshot-location.yml
+terraform output -raw velero_cloud_credentials > ../../manifests/resources/velero-cloud-credentials.yml
 
 ```
 
-Let's add the following lines to `kustomization.yaml`:
+4. Add the following lines to `kustomization.yaml`:
 
 ```yaml
 resources:
@@ -618,13 +626,60 @@ resources:
 
 ```
 
-Istall the modules with:
+5. Install the modules with:
 
 ```bash
-cd manifest/demo-fury
+cd /demo/manifest/
 
 make apply
-# If you see some errors, apply twice
+# wait for a moment for the new CRDs to be processed and re apply the manifests
+make apply
+```
+
+6. Create a backup with the `velero` command-line utility:
+
+```bash
+velero backup create --from-schedule manifests test -n kube-system
+```
+
+7. Check the backup status:
+
+```bash
+velero backup get -n kube-system
+```
+
+The output should be something like the following:
+
+```bash
+$ velero backup get -n kube-system
+NAME   STATUS      ERRORS   WARNINGS   CREATED                         EXPIRES   STORAGE LOCATION   SELECTOR
+test   Completed   0        0          2023-01-02 15:50:16 +0000 UTC   29d       default            <none>
+```
+
+7. Try to create a pod that is not compliant with the default OPA rules
+
+```bash
+kubectl run --image curlimages/curl curlero -- sleep 500
+```
+
+The creation should fail with the following error:
+
+```bash
+$ kubectl run --image curlimages/curl curlero -n kube-system -- sleep 500
+Error from server (Forbidden): admission webhook "validation.gatekeeper.sh" denied the request: [liveness-probe] Rejecting "Pod/curler" for not specifying a livenessProbe
+[readiness-probe] Rejecting "Pod/curler" for not specifying a readinessProbe
+[enforce-deployment-and-pod-security-controls] container 'curler' in the 'curler' Pod allows priviledge escalation
+[enforce-deployment-and-pod-security-controls] container 'curler' in the 'curler' Pod does not have a CPU limit set
+[enforce-deployment-and-pod-security-controls] container 'curler' in the 'curler' Pod does not have a memory limit set
+[enforce-deployment-and-pod-security-controls] container 'curler' in the 'curler' Pod is running as root
+[enforce-deployment-and-pod-security-controls] container 'curler' in the Pod 'curler' has an image 'curlimages/curl' using the latest tag
+```
+
+💡 the `kube-system` namespace is exempted from the OPA rules by default. If you try to create the same Pod in this namespace it should succeed:
+
+```bash
+$ kubectl run --image curlimages/curl curler -n kube-system -- sleep 500
+pod/curler created
 ```
 
 ## Step 6 - Teardown
@@ -633,42 +688,45 @@ To clean up the environment:
 
 ```bash
 # (Required if you performed Disaster Recovery step)
-cd terraform/demo-fury
+cd /demo/terraform/demo-fury
 terraform destroy
 
 # Destroy cluster
-cd infrastructure
+cd /demo/infrastructure
 furyctl cluster destroy
 
 # Destroy network components
-cd infrastructure
+# we need to delete the Firewall that we created manually first
+gcloud compute firewall-rules delete allow-nginx-ingress-admission-webhok
+# now we can delete the rest of the resources
+cd /demo/infrastructure
 furyctl bootstrap destroy
 
 #(Optional) Destroy bucket
-gsutil -m rm -r gs://fury-gcp-demo/terraform
-gsutil rb gs://fury-gcp-demo
+# ⚠️ replace <GCS_BUCKET> with your bucket name
+gsutil -m rm -r gs://<GCS_BUCKET>/terraform
+gsutil rb gs://<GCS_BUCKET>
 ```
 
 ## Conclusions
 
-I hope you enjoyed the tutorial... TBC
+Congratulations, you made it! 🥳🥳
 
-[fury-getting-started-repository]: https://github.com/sighupio/fury-getting-started/
+We hope you enjoyed this tour of Fury!
+
+<!-- Links -->
+
 [fury-getting-started-dockerfile]: https://github.com/sighupio/fury-getting-started/blob/main/utils/docker/Dockerfile
 
 [fury-on-minikube]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-minikube
-[fury-on-eks]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-eks
 [fury-on-gke]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-gke
 
 [furyagent-repository]: https://github.com/sighupio/furyagent
-
-[provisioner-bootstrap-aws-reference]: https://docs.kubernetesfury.com/docs/cli-reference/furyctl/provisioners/aws-bootstrap/
-
 [tunnelblick]: https://tunnelblick.net/downloads.html
 [openvpn-connect]: https://openvpn.net/vpn-client/
 
 <!-- Images -->
-[kibana-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/kibana.png?raw=true
+
 [grafana-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/grafana.png?raw=true
-[cerebro-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/cerebro.png?raw=true
-[forecastle-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/forecastle.png?raw=true
+[forecastle-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/forecastle_eks.png?raw=true
+[opensearch-dashboards-screenshot]: https://github.com/sighupio/fury-getting-started/blob/main/utils/images/opensearch_dashboards.png?raw=true
