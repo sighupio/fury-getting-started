@@ -4,7 +4,7 @@ Docker image containing all the necessary tools to deploy fury on EKS
 
 | Docker image           | Latest Tag |
 |------------------------|------------|
-| `fury-getting-started` | 0.2.0      |
+| `fury-getting-started` | 0.2.1      |
 
 ## Publish new version to Harbor
 
