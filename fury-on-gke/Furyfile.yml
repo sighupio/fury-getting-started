@@ -12,8 +12,8 @@ bases:
   - name: monitoring
   - name: logging
   - name: ingress
-  - name: dr
-  - name: opa
+#   - name: dr
+#   - name: opa
 
-modules:
-  - name: dr
+# modules:
+#   - name: dr
