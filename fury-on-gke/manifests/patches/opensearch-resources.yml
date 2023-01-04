@@ -2,16 +2,16 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: elasticsearch
+  name: opensearch-cluster-master
   namespace: logging
 spec:
   template:
     spec:
       containers:
-        - name: elasticsearch
+        - name: opensearch
           resources:
             requests:
               cpu: 100m
-              memory: 512Mi
+              memory: 100Mi
             limits:
-              cpu: 1000m
+              cpu: 500m
