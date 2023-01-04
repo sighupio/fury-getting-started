@@ -438,7 +438,7 @@ resources:
 - ../vendor/katalog/monitoring/node-exporter
 - ../vendor/katalog/monitoring/alertmanager-operated
 - ../vendor/katalog/monitoring/kube-proxy-metrics
-- ../vendor/katalog/monitoring/eks-sm
+- ../vendor/katalog/monitoring/gke-sm
 
 # Custom resources
 - resources/ingress.yml
