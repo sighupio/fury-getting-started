@@ -1,6 +1,6 @@
 # Fury on OVHcloud
 
-This step-by-step tutorial guides you to deploy the **Kubernetes Fury Distribution** on a Managed Kubernetes cluster on OVHcloud.
+This step-by-step tutorial guides you to deploy the **Kubernetes Fury Distribution** on a Managed Kubernetes cluster on **OVHcloud**.
 
 This tutorial covers the following steps:
 
@@ -24,16 +24,16 @@ To follow this tutorial, you need:
 
 - **OVHcloud Account** - You must have an active account to use OVHcloud services. Use this [guide](https://docs.ovh.com/gb/en/customer/create-ovhcloud-account/) to create one.
 - **OVHcloud Public Cloud project** - You must have a Public Cloud Project. Use this [guide](https://docs.ovh.com/gb/en/public-cloud/create_a_public_cloud_project/) to create one.
-- **OVHcloud Openstack User** - To manage the network environment with the Terraform provider, you must have an Openstack user. Use this [guide](https://docs.ovh.com/gb/en/public-cloud/creation-and-deletion-of-openstack-user/) to create one.
+- **OVHcloud OpenStack User** - To manage the network environment with the Terraform provider, you must have an OpenStack user. Use this [guide](https://docs.ovh.com/gb/en/public-cloud/creation-and-deletion-of-openstack-user/) to create one.
 
 ## Step 1 - Automatic provisioning of a Managed Kubernetes Cluster in a private network
 
-We are using the `terraform` cli to automaticly deploy the private network, and then the Managed Kubernetes Cluster.
+We are using the `terraform` CLI to automatically deploy the private network, and then use it for the Managed Kubernetes Cluster.
 
 | Terraform Provider | Credentials |
 |---|---|
 | [OVH Provider](https://registry.terraform.io/providers/ovh/ovh/latest/docs) | [OVHcloud API](https://docs.ovh.com/gb/en/api/first-steps-with-ovh-api/) credentials |
-| [Openstack Provider](https://registry.terraform.io/providers/terraform-provider-openstack/openstack/latest/docs) | [Openstack user](https://docs.ovh.com/sg/en/public-cloud/creation-and-deletion-of-openstack-user/) credentials |
+| [OpenStack Provider](https://registry.terraform.io/providers/terraform-provider-openstack/openstack/latest/docs) | [OpenStack user](https://docs.ovh.com/sg/en/public-cloud/creation-and-deletion-of-openstack-user/) credentials |
 
 ### Pre-requisites
 
@@ -43,7 +43,7 @@ Click on the desired tool to see how to install it:
 
 <details><summary>1 - furyctl</summary>
 
-Install the latest `furyctl` cli from the [Github Furyctl Realise page](https://github.com/sighupio/furyctl/releases).
+Install the latest `furyctl` version from its [Github Furyctl Release page](https://github.com/sighupio/furyctl/releases).
 
 Example on an Ubuntu distribution:
 
@@ -53,11 +53,13 @@ wget -q "https://github.com/sighupio/furyctl/releases/download/v0.9.0/furyctl-$(
 && sudo mv /tmp/furyctl /usr/local/bin/furyctl
 ```
 
+> See [furyctl's readme](https://github.com/sighupio/furyctl) for more installation methods.
+
 </details>
 
-<details><summary>2 - terraform cli</summary>
+<details><summary>2 - terraform CLI</summary>
 
-Install the latest `terraform` cli from the [Hashicorp official download page](https://developer.hashicorp.com/terraform/downloads).
+Install the latest `terraform` CLI from the [Hashicorp official download page](https://developer.hashicorp.com/terraform/downloads).
 
 Example on an Ubuntu distribution:
 
@@ -71,7 +73,7 @@ sudo apt-get update && sudo apt-get install terraform
 
 <details><summary>3 - kubectl</summary>
 
-Install the `kubectl` cli to manage the Managed Kubernetes Cluster, by following the [Official Kubernetes Documentation](https://kubernetes.io/docs/tasks/tools/).
+Install the `kubectl` CLI to manage the Managed Kubernetes Cluster, by following the [Official Kubernetes Documentation](https://kubernetes.io/docs/tasks/tools/).
 
 Example on an Ubuntu distribution:
 
@@ -85,7 +87,7 @@ curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stabl
 
 <details><summary>4 - kustomize v3.5.3</summary>
 
-Install the `kustomize` v3.5.3 cli, by following the [Official Kubernetes Documentation](https://kubectl.docs.kubernetes.io/installation/kustomize/).
+Install the `kustomize` v3.5.3 CLI, by following the [Official Kubernetes Documentation](https://kubectl.docs.kubernetes.io/installation/kustomize/).
 
 Example on an Ubuntu distribution:
 
@@ -98,6 +100,16 @@ wget https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2F
 ```
 
 </details>
+
+Or use the `fury-getting-started` docker image:
+
+```bash
+docker run -ti --rm \
+  -v $PWD:/demo \
+  registry.sighup.io/delivery/fury-getting-started
+```
+
+Or use the provided `infrastructure/install_dependencies_ubuntu_debian.sh` script to run all the installation commands at once.
 
 ### Variables
 
@@ -146,9 +158,9 @@ export OVH_CLOUD_PROJECT_SERVICE="xxxxxxxxxxxxxxxxxxxxx"
 
 That's all you need to use the OVHcloud Terraform Provider.
 
-#### 2 - OVHcloud Openstack User variables
+#### 2 - OVHcloud OpenStack User variables
 
-[Get your Openstack user's `openrc` file](https://docs.ovh.com/gb/en/public-cloud/set-openstack-environment-variables/#step-1-retrieve-the-variables) to extract and to set necessary variables:
+[Get your OpenStack user's `openrc` file](https://docs.ovh.com/gb/en/public-cloud/set-openstack-environment-variables/#step-1-retrieve-the-variables) to extract and to set necessary variables:
 
 ```bash
 export OS_AUTH_URL=https://auth.cloud.ovh.net/v3
@@ -162,7 +174,7 @@ export OS_PASSWORD="xxxxxxxxxxxxxxxxxxx"
 export OS_REGION_NAME="xxx"
 ```
 
-You are ready to use the Openstack Terraform Provider.
+You are ready to use the OpenStack Terraform Provider.
 
 #### 3 - (Optional) Create a variables file from template
 
@@ -171,7 +183,7 @@ You can create an `ovhrc` file from the `ovhrc.template` template, to store your
 Example:
 
 ```bash
-# Openstack vars from openrc file
+# OpenStack vars from openrc file
 export OS_AUTH_URL=https://auth.cloud.ovh.net/v3
 export OS_IDENTITY_API_VERSION=3
 export OS_USER_DOMAIN_NAME=${OS_USER_DOMAIN_NAME:-"Default"}
@@ -351,13 +363,13 @@ Wait a few minutes until the end of the deployement.
 
 ### Configure your kubectl environment
 
-Once the Managed Kubernetes Cluster created, in the `terraform` folder, you get the associated `kubeconfig` file. Set the KUBECONFIG variable value like this:
+Once the Managed Kubernetes Cluster has been created, you will get the associated `kubeconfig` file in the `terraform` folder. Set the KUBECONFIG environment variable value like this:
 
 ```bash
-export KUBECONFIG="$(pwd)/kubeconfig"
+export KUBECONFIG="$PWD/kubeconfig"
 ```
 
-Your `kubectl` cli is ready to use.
+Your `kubectl` CLI is ready to use.
 
 ### Kustomize project
 
@@ -432,7 +444,7 @@ To access the ingresses more easily via the browser, configure your local DNS to
 1. Get the address of the external load balancer:
 
 ```bash
-kubectl get svc -n ingress-nginx ingress-nginx --no-headers | awk '{print $4}'
+kubectl get svc -n ingress-nginx ingress-nginx -ojsonpath='{.spec.externalIPs[*]}'
 ```
 
 2. Add the following line to your machine's `/etc/hosts` (not the container's):
@@ -501,7 +513,7 @@ terraform destroy -var-file=variables.tfvars
 
 Congratulations, you made it! 🥳🥳
 
-We hope you enjoyed this tour of Fury!
+We hope you enjoyed this tour of Fury on OVHcloud!
 
 ### Issues/Feedback
 
