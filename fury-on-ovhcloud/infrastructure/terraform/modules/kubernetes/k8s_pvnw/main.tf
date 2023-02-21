@@ -1,6 +1,7 @@
 resource "ovh_cloud_project_kube" "kube" {
-  name   = var.kube.name
-  region = var.region
+  name    = var.kube.name
+  version = var.kube.version
+  region  = var.region
 
   private_network_id = data.openstack_networking_network_v2.my_private_network.id
 

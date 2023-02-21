@@ -6,6 +6,7 @@ region = "GRA7"
 
 kube = {
   name            = "mykubernetesCluster"
+  version         = "1.24"
   pv_network_name = "myNetwork"
   gateway_ip      = "192.168.20.1"
 }

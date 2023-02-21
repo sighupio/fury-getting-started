@@ -41,6 +41,7 @@ variable "kube" {
   description = "Managed Kubernetes Cluster parameters"
   type = object({
     name            = string
+    version         = optional(string)
     pv_network_name = string
     gateway_ip      = string
   })
