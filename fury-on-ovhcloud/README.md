@@ -148,7 +148,7 @@ export OVH_ENDPOINT=ovh-eu
 export OVH_BASEURL="https://eu.api.ovh.com/1.0"
 ```
 
-The last variable needed by the provider is your Public cloud Id. You get it directly from your [OVHcloud Public Cloud dashboard](https://www.ovh.com/manager/#/public-cloud/pci/projects/xxxxxxxxxxxxxxxxxxxxxxx), the `xxxxxxxxxxxxxx` pert of the url or on the dashboard just under the project name.
+The last variable needed by the provider is your Public cloud Id. You can get it from your [OVHcloud Public Cloud dashboard](https://www.ovh.com/manager/#/public-cloud/pci/projects/xxxxxxxxxxxxxxxxxxxxxxx), its the the `xxxxxxxxxxxxxx` part of the URL or copy it from the dashboard just under the project name.
 
 Example:
 
