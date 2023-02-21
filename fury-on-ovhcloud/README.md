@@ -418,7 +418,7 @@ Install the modules:
 cd manifests/
 
 make apply
-# Due to some chicken-egg 🐓🥚 problem with custom resources you have to apply multiple times
+# Due to some CRDs being created, the first time you have to run make apply multiple times. Run it until you see no more errors.
 make apply
 ```
 
