@@ -129,7 +129,7 @@ export OVH_APPLICATION_SECRET="xxxxxxxxxxxxxxxxx"
 export OVH_CONSUMER_KEY="xxxxxxxxxxxxxxxxxxxxxxx"
 ```
 
-You also need to define the API endpoint and base url. Choose the values inside this table according to your localization:
+You also need to define the API endpoint and base URL. Choose the values inside this table according to your localization:
 
 | OVH_ENDPOINT | OVH_BASEURL |
 |---|---|
