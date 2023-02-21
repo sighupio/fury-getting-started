@@ -121,7 +121,7 @@ Give your application a name, a description, and a validity date, then add the r
 
 This returns the 3 values: `Application key`, `Application secret` and `Consumer key`.
 
-Use this values to set up sytems variables like this:
+Use these values to set up sytem variables like this:
 
 ```bash
 export OVH_APPLICATION_KEY="xxxxxxxxxxxxxxxxxxxx"
