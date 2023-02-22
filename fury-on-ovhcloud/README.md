@@ -209,88 +209,7 @@ Then simply source this file to load all variables into your session:
 source ./ovhrc
 ```
 
-## Step 2 - Download fury modules
-
-`furyctl` can do a lot more than deploying infrastructure. In this section, you use `furyctl` to download the monitoring, logging, and ingress modules of the Fury distribution.
-
-### Inspect the Furyfile
-
-`furyctl` needs a `Furyfile.yml` to know which modules to download.
-
-For this tutorial, use the `Furyfile.yml` located at `Furyfile.yaml`:
-
-```yaml
-versions:
-  monitoring: v2.0.1
-  logging: v3.0.1
-  ingress: v1.13.1
-
-bases:
-  - name: monitoring
-  - name: logging
-  - name: ingress
-```
-
-### Download Fury modules
-
-1. Download the Fury modules with `furyctl`:
-
-```bash
-furyctl vendor -H
-```
-
-2. Inspect the downloaded modules in the `vendor` folder:
-
-```bash
-tree -d vendor -L 3
-```
-
-Output:
-
-```bash
-$ tree -d vendor -L 3
-
-vendor
-└── katalog
-    ├── ingress
-    │   ├── cert-manager
-    │   ├── dual-nginx
-    │   ├── external-dns
-    │   ├── forecastle
-    │   ├── nginx
-    │   └── tests
-    ├── logging
-    │   ├── cerebro
-    │   ├── configs
-    │   ├── logging-operated
-    │   ├── logging-operator
-    │   ├── loki-configs
-    │   ├── loki-single
-    │   ├── opensearch-dashboards
-    │   ├── opensearch-single
-    │   ├── opensearch-triple
-    │   └── tests
-    └── monitoring
-        ├── aks-sm
-        ├── alertmanager-operated
-        ├── blackbox-exporter
-        ├── configs
-        ├── eks-sm
-        ├── gke-sm
-        ├── grafana
-        ├── kubeadm-sm
-        ├── kube-proxy-metrics
-        ├── kube-state-metrics
-        ├── node-exporter
-        ├── prometheus-adapter
-        ├── prometheus-operated
-        ├── prometheus-operator
-        ├── tests
-        ├── thanos
-        └── x509-exporter
-```
-
-## Step 3 - Installation
+### Deploy the Kubernetes cluster
 
 We use Terraform to deploy the network and the Managed Kubernetes Cluster. A `variables.tfvars` variable file is present with some default values that you can use as this or change the values if needed:
 
@@ -364,7 +283,89 @@ Once the Managed Kubernetes Cluster has been created, you will get the associate
 export KUBECONFIG="$PWD/kubeconfig"
 ```
 
-Your `kubectl` CLI is ready to use.
+Your `kubectl` CLI is ready to use
+
+
+## Step 2 - Installation
+
+In this section, you use `furyctl` to download the monitoring, logging, and ingress modules of the Fury distribution.
+
+### Inspect the Furyfile
+
+`furyctl` needs a `Furyfile.yml` to know which modules to download.
+
+For this tutorial, use the `Furyfile.yml`:
+
+```yaml
+versions:
+  monitoring: v2.0.1
+  logging: v3.0.1
+  ingress: v1.13.1
+
+bases:
+  - name: monitoring
+  - name: logging
+  - name: ingress
+```
+
+### Download Fury modules
+
+1. Download the Fury modules with `furyctl`:
+
+```bash
+furyctl vendor -H
+```
+
+2. Inspect the downloaded modules in the `vendor` folder:
+
+```bash
+tree -d vendor -L 3
+```
+
+Output:
+
+```bash
+$ tree -d vendor -L 3
+
+vendor
+└── katalog
+    ├── ingress
+    │   ├── cert-manager
+    │   ├── dual-nginx
+    │   ├── external-dns
+    │   ├── forecastle
+    │   ├── nginx
+    │   └── tests
+    ├── logging
+    │   ├── cerebro
+    │   ├── configs
+    │   ├── logging-operated
+    │   ├── logging-operator
+    │   ├── loki-configs
+    │   ├── loki-single
+    │   ├── opensearch-dashboards
+    │   ├── opensearch-single
+    │   ├── opensearch-triple
+    │   └── tests
+    └── monitoring
+        ├── aks-sm
+        ├── alertmanager-operated
+        ├── blackbox-exporter
+        ├── configs
+        ├── eks-sm
+        ├── gke-sm
+        ├── grafana
+        ├── kubeadm-sm
+        ├── kube-proxy-metrics
+        ├── kube-state-metrics
+        ├── node-exporter
+        ├── prometheus-adapter
+        ├── prometheus-operated
+        ├── prometheus-operator
+        ├── tests
+        ├── thanos
+        └── x509-exporter
+```
 
 ### Kustomize project
 
@@ -422,7 +423,7 @@ make apply
 make apply
 ```
 
-## Step 4 - Explore the distribution
+## Step 3 - Explore the distribution
 
 🚀 The distribution is finally deployed! In this section, you explore some of its features.
 
