@@ -250,6 +250,7 @@ router = {
 
 kube = {
   name            = "furykubernetesCluster"
+  version         = "1.24"
   pv_network_name = "furyNetwork"
   gateway_ip      = "10.0.0.1"
 }
@@ -267,7 +268,7 @@ pool = {
 - `network`: The network name.
 - `subnet`: The subnet parameters, like the CIDR IP format value and DHCP range.
 - `router`: The router name.
-- `kube`: The Managed Kubernetes Cluster, such as its name and essentially network information.
+- `kube`: The Managed Kubernetes Cluster, such as its name, its version, and essentially network information.
 - `pool`: The Kubernetes node pool parameters.
 
 Deploy the infrastructure with:
