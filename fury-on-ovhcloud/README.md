@@ -498,7 +498,7 @@ Click on `Discover` to see the main dashboard. On the top left corner select one
 
 ![Opensearch-Dashboards][opensearch-dashboards-screenshot]
 
-## Step 5 - Teardown
+## Step 4 - Teardown
 
 Clean up the demo environment:
 
