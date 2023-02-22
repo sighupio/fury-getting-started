@@ -25,7 +25,6 @@ To follow this tutorial, you need:
 - **OVHcloud Account** - You must have an active account to use OVHcloud services. Use this [guide](https://docs.ovh.com/gb/en/customer/create-ovhcloud-account/) to create one.
 - **OVHcloud Public Cloud project** - You must have a Public Cloud Project. Use this [guide](https://docs.ovh.com/gb/en/public-cloud/create_a_public_cloud_project/) to create one.
 - **OVHcloud OpenStack User** - To manage the network environment with the Terraform provider, you must have an OpenStack user. Use this [guide](https://docs.ovh.com/gb/en/public-cloud/creation-and-deletion-of-openstack-user/) to create one.
-- **OVHcloud vRack** - Enables to route traffic between OVHcloud dedicated servers as well as other OVHcloud services. Use this [guide](https://docs.ovh.com/ca/en/publiccloud/network-services/public-cloud-vrack/)
 
 ## Step 1 - Automatic provisioning of a Managed Kubernetes Cluster in a private network
 
@@ -109,12 +108,6 @@ docker run -ti --rm \
   -v $PWD:/demo \
   registry.sighup.io/delivery/fury-getting-started
 ```
-
-> ⚠️ You need to update the included `terraform` version. Use the following command:
->
-> ```bash
-> export TERRAFORM_VERSION="1.3.6" && curl -L https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip -o /tmp/terraform_${TERRAFORM_VERSION}_linux_amd64.zip && unzip /tmp/terraform_${TERRAFORM_VERSION}_linux_amd64.zip -d /tmp && rm /tmp/terraform_${TERRAFORM_VERSION}_linux_amd64.zip && alias terraform=/tmp/terraform
->```
 
 Or use the provided `infrastructure/install_dependencies_ubuntu_debian.sh` script to run all the installation commands at once.
 
@@ -447,7 +440,7 @@ To access the ingresses more easily via the browser, configure your local DNS to
 1. Get the address of the external load balancer:
 
 ```bash
-kubectl get svc -n ingress-nginx ingress-nginx -ojsonpath='{.status.loadBalancer.ingress[*].ip}'
+kubectl get svc -n ingress-nginx ingress-nginx -ojsonpath='{.spec.externalIPs[*]}'
 ```
 
 2. Add the following line to your machine's `/etc/hosts` (not the container's):
@@ -468,25 +461,6 @@ Navigate to <http://forecastle.fury.info> to see all the other ingresses deploye
 
 ![Forecastle][forecastle-eks-screenshot]
 
-### OpenSearch Dashboards
-
-[OpenSearch Dashboards](https://github.com/opensearch-project/OpenSearch-Dashboards) is an open-source analytics and visualization platform for OpenSearch. OpenSearch Dashboards lets you perform advanced data analysis and visualize data in various charts, tables, and maps. You can use it to search, view, and interact with data stored in OpenSearch indices.
-
-Navigate to <http://opensearch-dashboards.fury.info> or click the OpenSearch Dashboards icon from Forecastle.
-
-#### Read the logs
-
-The Fury Logging module already collects data from the following indices:
-
-- `kubernetes-*`
-- `systemd-*`
-- `ingress-controller-*`
-- `events-*`
-
-Click on `Discover` to see the main dashboard. On the top left corner select one of the indices to explore the logs.
-
-![Opensearch-Dashboards][opensearch-dashboards-screenshot]
-
 ### Grafana
 
 [Grafana](https://github.com/grafana/grafana) is an open-source platform for monitoring and observability. Grafana allows you to query, visualize, alert on and understand your metrics.
@@ -502,6 +476,27 @@ Fury provides some pre-configured dashboards to visualize the state of the clust
 This is what you should see:
 
 ![Grafana][grafana-screenshot]
+
+### OpenSearch Dashboards
+
+[OpenSearch Dashboards](https://github.com/opensearch-project/OpenSearch-Dashboards) is an open-source analytics and visualization platform for OpenSearch. OpenSearch Dashboards lets you perform advanced data analysis and visualize data in various charts, tables, and maps. You can use it to search, view, and interact with data stored in OpenSearch indices.
+
+Navigate to <http://opensearch-dashboards.fury.info> or click the OpenSearch Dashboards icon from Forecastle.
+
+> :warning: please beware that some background jobs need to run to finish OpenSearch configuration. If you get a screen with a "Start by adding your data" title, please wait some minutes and try again.
+
+#### Read the logs
+
+The Fury Logging module already collects data from the following indices:
+
+- `kubernetes-*`
+- `systemd-*`
+- `ingress-controller-*`
+- `events-*`
+
+Click on `Discover` to see the main dashboard. On the top left corner select one of the indices to explore the logs.
+
+![Opensearch-Dashboards][opensearch-dashboards-screenshot]
 
 ## Step 5 - Teardown
 
