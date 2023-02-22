@@ -273,7 +273,7 @@ terraform plan -var-file=variables.tfvars
 terraform apply -var-file=variables.tfvars
 ```
 
-Wait a few minutes until the end of the deployement.
+Wait a few minutes until the end of the deployment.
 
 ### Configure your kubectl environment
 
