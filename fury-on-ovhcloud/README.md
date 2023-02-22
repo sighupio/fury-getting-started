@@ -503,7 +503,7 @@ Click on `Discover` to see the main dashboard. On the top left corner select one
 Clean up the demo environment:
 
 ```bash
-cd ./terraform/
+cd ../infrastructure/terraform/
 terraform destroy -var-file=variables.tfvars
 ```
 
