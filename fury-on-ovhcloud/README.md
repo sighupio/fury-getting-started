@@ -110,6 +110,12 @@ docker run -ti --rm \
   registry.sighup.io/delivery/fury-getting-started
 ```
 
+> ⚠️ You need to update the included `terraform` version. Use the following command:
+>
+> ```bash
+> export TERRAFORM_VERSION="1.3.6" && curl -L https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip -o /tmp/terraform_${TERRAFORM_VERSION}_linux_amd64.zip && unzip /tmp/terraform_${TERRAFORM_VERSION}_linux_amd64.zip -d /tmp && rm /tmp/terraform_${TERRAFORM_VERSION}_linux_amd64.zip && alias terraform=/tmp/terraform
+>```
+
 Or use the provided `infrastructure/install_dependencies_ubuntu_debian.sh` script to run all the installation commands at once.
 
 ### Variables
