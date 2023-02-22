@@ -25,6 +25,7 @@ To follow this tutorial, you need:
 - **OVHcloud Account** - You must have an active account to use OVHcloud services. Use this [guide](https://docs.ovh.com/gb/en/customer/create-ovhcloud-account/) to create one.
 - **OVHcloud Public Cloud project** - You must have a Public Cloud Project. Use this [guide](https://docs.ovh.com/gb/en/public-cloud/create_a_public_cloud_project/) to create one.
 - **OVHcloud OpenStack User** - To manage the network environment with the Terraform provider, you must have an OpenStack user. Use this [guide](https://docs.ovh.com/gb/en/public-cloud/creation-and-deletion-of-openstack-user/) to create one.
+- **OVHcloud vRack** - Enables to route traffic between OVHcloud dedicated servers as well as other OVHcloud services. Use this [guide](https://docs.ovh.com/ca/en/publiccloud/network-services/public-cloud-vrack/)
 
 ## Step 1 - Automatic provisioning of a Managed Kubernetes Cluster in a private network
 
