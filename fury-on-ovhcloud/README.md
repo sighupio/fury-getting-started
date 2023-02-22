@@ -447,7 +447,7 @@ To access the ingresses more easily via the browser, configure your local DNS to
 1. Get the address of the external load balancer:
 
 ```bash
-kubectl get svc -n ingress-nginx ingress-nginx -ojsonpath='{.spec.externalIPs[*]}'
+kubectl get svc -n ingress-nginx ingress-nginx -ojsonpath='{.status.loadBalancer.ingress[*].ip}'
 ```
 
 2. Add the following line to your machine's `/etc/hosts` (not the container's):
