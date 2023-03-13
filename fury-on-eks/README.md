@@ -763,6 +763,7 @@ In case your ran into any problems feel free to open an issue here on GitHub.
 More tutorials:
 
 - [Fury on GKE][fury-on-gke]
+- [Fury on OVHcloud][fury-on-ovhcloud]
 - [Fury on Minikube][fury-on-minikube]
 
 More about Fury:
@@ -776,6 +777,7 @@ More about Fury:
 
 [fury-on-minikube]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-minikube
 [fury-on-gke]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-gke
+[fury-on-ovhcloud]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-ovhcloud
 
 [furyagent-repository]: https://github.com/sighupio/furyagent
 

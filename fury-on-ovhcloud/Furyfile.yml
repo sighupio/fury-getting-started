@@ -1,0 +1,9 @@
+versions:
+  monitoring: v2.0.1
+  logging: v3.0.1
+  ingress: v1.13.1
+
+bases:
+  - name: monitoring
+  - name: logging
+  - name: ingress

@@ -313,6 +313,7 @@ More tutorials:
 
 - [Fury on EKS][fury-on-eks]
 - [Fury on GKE][fury-on-gke]
+- [Fury on OVHcloud][fury-on-ovhcloud]
 
 More about Fury:
 
@@ -325,6 +326,7 @@ More about Fury:
 [fury-on-minikube]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-minikube
 [fury-on-eks]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-eks
 [fury-on-gke]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-gke
+[fury-on-ovhcloud]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-ovhcloud
 
 [furyagent-repository]: https://github.com/sighupio/furyagent
 
