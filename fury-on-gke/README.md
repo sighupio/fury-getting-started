@@ -264,24 +264,24 @@ In the repository, you can find a template for this file at `infrastructure/clus
 kind: Cluster
 metadata:
   name: fury-gcp-demo
-provisioner: gke 
+provisioner: gke
 spec:
   version: 1.24
   network: fury-gcp-demo
-  subnetworks: 
+  subnetworks:
   - 'fury-gcp-demo-cluster-subnet'
   - 'fury-gcp-demo-cluster-pod-subnet'
   - 'fury-gcp-demo-cluster-service-subnet'
   dmzCIDRRange: 10.0.0.0/16
   sshPublicKey: <public-ssh-key-content>
-  tags: {} 
-  nodePools: 
+  tags: {}
+  nodePools:
   - name: fury
     os: COS_CONTAINERD  # for Kubernetes +v1.24 we need to use a containerd-based node.
     version: null  # uses the same as the cluster
     minSize: 3
-    maxSize: 3 
-    subnetworks: 
+    maxSize: 3
+    subnetworks:
     - "europe-west3-a"
     instanceType: "n1-standard-2"
     volumeSize: 50
@@ -332,12 +332,12 @@ kubectl get nodes
 > Make sure to replace `<YOUR_CLUSTER_NAME>` with the name of your cluster before running the command:
 
 ```bash
-gcloud compute firewall-rules create allow-nginx-ingress-admission-webhok \
+gcloud compute firewall-rules create allow-nginx-ingress-admission-webhook \
   --description="Allow request from API server to worker nodes for NGINX Ingress Validating Admission Webhook" \
   --allow=tcp:9443 \
   --direction=INGRESS \
   --source-ranges="10.0.0.0/28" \
-  --project=$GOOGLE_PROJECT \
+  --project="${GOOGLE_PROJECT}" \
   --network="<YOUR_CLUSTER_NAME>" \
   --target-tags="sighup-io-gke-cluster-<YOUR_CLUSTER_NAME>"
 ```
@@ -694,7 +694,7 @@ furyctl cluster destroy
 
 # Destroy network components
 # we need to delete the Firewall that we created manually first
-gcloud compute firewall-rules delete allow-nginx-ingress-admission-webhok
+gcloud compute firewall-rules delete allow-nginx-ingress-admission-webhook
 # now we can delete the rest of the resources
 cd /demo/infrastructure
 furyctl bootstrap destroy
