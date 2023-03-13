@@ -337,7 +337,7 @@ gcloud compute firewall-rules create allow-nginx-ingress-admission-webhook \
   --allow=tcp:9443 \
   --direction=INGRESS \
   --source-ranges="10.0.0.0/28" \
-  --project=$GOOGLE_PROJECT \
+  --project="${GOOGLE_PROJECT}" \
   --network="<YOUR_CLUSTER_NAME>" \
   --target-tags="sighup-io-gke-cluster-<YOUR_CLUSTER_NAME>"
 ```
