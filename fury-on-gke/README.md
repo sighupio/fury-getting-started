@@ -675,10 +675,7 @@ terraform destroy
 cd /demo/infrastructure
 furyctl cluster destroy
 
-# Destroy network components
-# we need to delete the Firewall that we created manually first
-gcloud compute firewall-rules delete allow-nginx-ingress-admission-webhook
-# now we can delete the rest of the resources
+# Destroy the rest of the resources
 cd /demo/infrastructure
 furyctl bootstrap destroy
 
