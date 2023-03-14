@@ -109,6 +109,8 @@ spec:
     subnetCIDR: 172.16.0.0/16
     sshUsers:
     - <GITHUB_USER>
+  region: europe-west1
+  project: sighup-main
 # executor:
 #   state:
 #     backend: gcs
