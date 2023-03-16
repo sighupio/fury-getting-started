@@ -1,13 +1,13 @@
 terraform {
 #   backend "s3" {
 #     bucket: <S3_BUCKET>
-#     key: <MY_KEY> 
+#     key: <MY_KEY>
 #     region: <S3_BUCKET_REGION>
 #   }
   required_version = ">= 0.12"
 
   required_providers {
-    aws        = "=3.37.0"
+    aws        = "3.56.0"
   }
 }
 

@@ -25,7 +25,7 @@ To follow this tutorial, you need:
 
 - **AWS Access Credentials** of an AWS Account with the following [IAM permissions][terraform-aws-eks-iam-permissions].
 - **Docker** - the tutorial uses a [Docker image][fury-getting-started-dockerfile] containing `furyctl` and all the necessary tools to follow it.
-- **OpenVPN Client** - [Tunnelblick][tunnelblick] (on macOS) or [OpenVPN Connect][openvpn-connect] (for other OS) are recommended.
+- **OpenVPN Client** (required for private clusters) - [Tunnelblick][tunnelblick] (on macOS) or [OpenVPN Connect][openvpn-connect] (for other OS) are recommended.
 - **AWS S3 Bucket** (optional) to store the Terraform state.
 - **Github** account with [SSH key configured][github-ssh-key-setup].
 
@@ -88,6 +88,8 @@ In the bootstrap phase, `furyctl` automatically provisions:
 - **EC2 instance** bastion host with an OpenVPN Server
 - All the required networking gateways and routes
 
+Keep in mind that both the VPN and VPC are optional. If you already have a VPC or a VPN server, you can skip one or both of these steps.
+
 More details about the bootstrap provisioner can be found [here][provisioner-bootstrap-aws-reference].
 
 #### Configure the bootstrap provisioner
@@ -102,15 +104,29 @@ metadata:
   name: fury-eks-demo
 spec:
   networkCIDR: 10.0.0.0/16
-  publicSubnetsCIDRs:
-  - 10.0.1.0/24
-  - 10.0.2.0/24
-  - 10.0.3.0/24
-  privateSubnetsCIDRs:
-  - 10.0.101.0/24
-  - 10.0.102.0/24
-  - 10.0.103.0/24
-  vpn:
+  # the following two fields are deprecated(but they still work), use the ones beneath vpc instead
+  # publicSubnetsCIDRs:
+  # - 10.0.1.0/24
+  # - 10.0.2.0/24
+  # - 10.0.3.0/24
+  # privateSubnetsCIDRs:
+  # - 10.0.101.0/24
+  # - 10.0.102.0/24
+  # - 10.0.103.0/24
+  vpc:
+    enabled: true
+    publicSubnetsCIDRs:
+    - 10.0.1.0/24
+    - 10.0.2.0/24
+    - 10.0.3.0/24
+    privateSubnetsCIDRs:
+    - 10.0.101.0/24
+    - 10.0.102.0/24
+    - 10.0.103.0/24
+  vpn: # necessary only for private clusters
+    # vpcID: <VPC_ID> # if vpc.enabled is false, then you need to specify the desired VPC ID here
+    # publicSubnets: [] # if vpc.enabled is false, then you need to specify the desired public subnets here
+    enabled: true # if false, you can skip the rest of the parameters
     instances: 1
     port: 1194
     instanceType: t3.micro
@@ -132,7 +148,7 @@ provisioner: aws
 
 Open the `/demo/infrastructure/bootstrap.yml` file with a text editor of your choice and:
 
-- Replace the field `<GITHUB_USER>` with your actual GitHub username
+- If you wish to setup the vpn server, then make sure to replace the field `<GITHUB_USER>` with your actual GitHub username.
 - Ensure that the VPC and subnets ranges are not already in use. If so, specify different values in the fields:
   - `networkCIDR`
   - `publicSubnetsCIDRs`
@@ -155,9 +171,9 @@ export S3_BUCKET_REGION=$AWS_DEFAULT_REGION # You can use the same region of bef
 
 ```bash
 aws s3api create-bucket \
-  --bucket $S3_BUCKET \
-  --region $S3_BUCKET_REGION \
-  --create-bucket-configuration LocationConstraint=$S3_BUCKET_REGION
+  --bucket "${S3_BUCKET}" \
+  --region "${S3_BUCKET_REGION}" \
+  --create-bucket-configuration LocationConstraint="${S3_BUCKET_REGION}"
 ```
 
 > ℹ️  You might need to give permissions on S3 to the user.
@@ -238,9 +254,9 @@ These values are used in the cluster provisioning phase.
 
 ### Cluster provisioning phase
 
-In the cluster provisioning phase, `furyctl` automatically deploys a battle-tested private EKS Cluster. To interact with the private EKS cluster, connect first to the private network via the OpenVPN server in the bastion host.
+In the cluster provisioning phase, `furyctl` automatically deploys a battle-tested EKS Cluster. If you wish to create it private, you will need to connect to its private network via the OpenVPN server in the bastion host.
 
-#### Connect to the private network
+#### (required for private clusters) Connect to the private network
 
 1. Create the `fury.ovpn` OpenVPN credentials file with `furyagent`:
 
@@ -304,7 +320,7 @@ spec:
   - name: fury
     version: null
     minSize: 3
-    maxSize: 3 
+    maxSize: 3
     instanceType: t3.large
     volumeSize: 50
 executor:
@@ -485,13 +501,13 @@ In the repository, you can find the main.tf file `/demo/terraform/main.yml`. In 
 terraform {
 #   backend "s3" {
 #     bucket: <S3_BUCKET>
-#     key: <MY_KEY> 
+#     key: <MY_KEY>
 #     region: <S3_BUCKET_REGION>
 #   }
   required_version = ">= 0.12"
 
   required_providers {
-    aws        = "=3.37.0"
+    aws        = "=3.56.0"
   }
 }
 
@@ -522,7 +538,7 @@ make generate-output
 
 ### Kustomize project
 
-Kustomize allows to group together related Kubernetes resources and combines them to create more complex deployments. 
+Kustomize allows to group together related Kubernetes resources and combines them to create more complex deployments.
 Moreover, it is flexible, and it enables a simple patching mechanism for additional customization.
 
 To deploy the Fury distribution, use the following root `kustomization.yaml` located `/demo/manifests/kustomization.yaml`:
@@ -699,7 +715,7 @@ Wait until the namespaces are completeley deleted, or that:
 
 ```bash
 kubectl get pvc -A
-# and 
+# and
 kubectl get svc -A
 ```
 

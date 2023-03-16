@@ -3,15 +3,29 @@ metadata:
   name: fury-eks-demo
 spec:
   networkCIDR: 10.0.0.0/16
-  publicSubnetsCIDRs:
-  - 10.0.1.0/24
-  - 10.0.2.0/24
-  - 10.0.3.0/24
-  privateSubnetsCIDRs:
-  - 10.0.101.0/24
-  - 10.0.102.0/24
-  - 10.0.103.0/24
-  vpn:
+  # the following two fields are deprecated(but they still work), use the ones beneath vpc instead
+  # publicSubnetsCIDRs:
+  # - 10.0.1.0/24
+  # - 10.0.2.0/24
+  # - 10.0.3.0/24
+  # privateSubnetsCIDRs:
+  # - 10.0.101.0/24
+  # - 10.0.102.0/24
+  # - 10.0.103.0/24
+  vpc:
+    enabled: true # if false, you can skip the rest of the parameters
+    publicSubnetsCIDRs:
+    - 10.0.1.0/24
+    - 10.0.2.0/24
+    - 10.0.3.0/24
+    privateSubnetsCIDRs:
+    - 10.0.101.0/24
+    - 10.0.102.0/24
+    - 10.0.103.0/24
+  vpn: # necessary only for private clusters
+    # vpcID: <VPC_ID> # if vpc.enabled is false, then you need to specify the desired VPC ID here
+    # publicSubnets: [] # if vpc.enabled is false, then you need to specify the desired public subnets here
+    enabled: true # if false, you can skip the rest of the parameters
     instances: 1
     port: 1194
     instanceType: t3.micro
