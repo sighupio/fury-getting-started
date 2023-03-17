@@ -80,7 +80,7 @@ The provisioning process is divided into two phases:
 1. **Bootstrap** provisioning phase
 2. **Cluster** provisioning phase
 
-### Boostrap provisioning phase
+### bootstrap provisioning phase
 
 In the bootstrap phase, `furyctl` automatically provisions:
 
@@ -141,7 +141,7 @@ executor:
   #   backend: s3
   #   config:
   #     bucket: <S3_BUCKET>
-  #     key: furyctl/boostrap
+  #     key: furyctl/bootstrap
   #     region: <S3_BUCKET_REGION>
 provisioner: aws
 ```
@@ -187,7 +187,7 @@ executor:
    backend: s3
    config:
      bucket: <S3_BUCKET>
-     key: fury/boostrap
+     key: fury/bootstrap
      region: <S3_BUCKET_REGION>
 ```
 
@@ -200,7 +200,7 @@ executor:
    backend: s3
    config:
      bucket: fury-demo-eks # example value
-     key: fury/boostrap
+     key: fury/bootstrap
      region: eu-central-1  # example value
 ```
 

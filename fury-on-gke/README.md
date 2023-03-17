@@ -77,7 +77,7 @@ The provisioning process is divided into two phases:
 1. **Bootstrap** provisioning phase
 2. **Cluster** provisioning phase
 
-### Boostrap provisioning phase
+### bootstrap provisioning phase
 
 In the bootstrap phase, `furyctl` automatically provisions:
 

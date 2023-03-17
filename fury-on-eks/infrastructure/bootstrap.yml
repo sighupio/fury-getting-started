@@ -40,6 +40,6 @@ executor:
   #   backend: s3
   #   config:
   #     bucket: <S3_BUCKET>
-  #     key: fury/boostrap
+  #     key: fury/bootstrap
   #     region: <S3_BUCKET_REGION>
 provisioner: aws
