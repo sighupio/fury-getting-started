@@ -312,8 +312,12 @@ spec:
   - <PRIVATE_SUBNET1_ID>
   - <PRIVATE_SUBNET2_ID>
   - <PRIVATE_SUBNET3_ID>
-  dmzCIDRRange:
-  - 10.0.0.0/16
+  clusterEndpointPrivateAccess: true
+  clusterEndpointPrivateAccessCidrs:
+  - "10.0.0.0/16"
+  clusterEndpointPublicAccess: true
+  clusterEndpointPublicAccessCidrs:
+  - "0.0.0.0/0"
   sshPublicKey: example-ssh-key # put your id_rsa.pub file content here
   nodePoolsLaunchKind: "launch_templates"
   nodePools:

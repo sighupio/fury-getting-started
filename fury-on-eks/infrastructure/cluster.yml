@@ -8,15 +8,23 @@ spec:
   - <PRIVATE_SUBNET1_ID>
   - <PRIVATE_SUBNET2_ID>
   - <PRIVATE_SUBNET3_ID>
-  dmzCIDRRange:
-  - 10.0.0.0/16
+  # The following field is deprecated and will be removed in a future release.
+  # It is replaced by clusterEndpointPrivateAccessCidrs.
+  # dmzCIDRRange:
+  # - 10.0.0.0/16
+  clusterEndpointPrivateAccess: true
+  clusterEndpointPrivateAccessCidrs:
+  - "10.0.0.0/16"
+  clusterEndpointPublicAccess: true
+  clusterEndpointPublicAccessCidrs:
+  - "0.0.0.0/0"
   sshPublicKey: example-ssh-key
   nodePoolsLaunchKind: "launch_templates"
   nodePools:
   - name: fury
     version: null
     minSize: 3
-    maxSize: 3 
+    maxSize: 3
     instanceType: t3.large
     volumeSize: 50
 executor:
