@@ -3,12 +3,14 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-
   # Monitoring
   - ../vendor/katalog/monitoring/prometheus-operator
   - ../vendor/katalog/monitoring/prometheus-operated
+  - ../vendor/katalog/monitoring/prometheus-adapter
   - ../vendor/katalog/monitoring/grafana
   - ../vendor/katalog/monitoring/kube-state-metrics
+  - ../vendor/katalog/monitoring/kube-proxy-metrics
+  - ../vendor/katalog/monitoring/kubeadm-sm
   - ../vendor/katalog/monitoring/node-exporter
   - ../vendor/katalog/monitoring/alertmanager-operated
 
@@ -17,11 +19,8 @@ resources:
   - ../vendor/katalog/logging/opensearch-dashboards
   - ../vendor/katalog/logging/logging-operator
   - ../vendor/katalog/logging/logging-operated
-  - ../vendor/katalog/logging/configs/audit
-  - ../vendor/katalog/logging/configs/events
-  - ../vendor/katalog/logging/configs/ingress-nginx
-  - ../vendor/katalog/logging/configs/kubernetes
-  - ../vendor/katalog/logging/cerebro
+  - ../vendor/katalog/logging/configs
+  - ../vendor/katalog/logging/minio-ha
 
   # Ingress
   - ../vendor/katalog/ingress/forecastle
@@ -29,10 +28,9 @@ resources:
   # Ingress definitions
   - resources/ingress.yml
 
-# With this patches, we customize the default configuration of the modules, 
+# With this patches, we customize the default configuration of the modules,
 # for example lowering the resource requirements to make it run in minikube.
 patchesStrategicMerge:
-
   - patches/alertmanager-operated-replicas.yml
   - patches/alertmanager-operated-resources.yml
   - patches/prometheus-operated-resources.yml
