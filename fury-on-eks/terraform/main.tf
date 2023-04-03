@@ -1,13 +1,13 @@
 terraform {
-#   backend "s3" {
-#     bucket: <S3_BUCKET>
-#     key: <MY_KEY> 
-#     region: <S3_BUCKET_REGION>
-#   }
-  required_version = ">= 0.12"
+  # backend "s3" {
+  #   bucket = "fury-demo-eks"
+  #   key    = "fury/distribution"
+  #   region = "eu-west-1"
+  # }
+  required_version = ">= 0.15.4"
 
   required_providers {
-    aws        = "=3.37.0"
+    aws = "=3.37.0"
   }
 }
 
@@ -36,6 +36,6 @@ module "velero" {
 }
 
 module "ebs_csi_driver_iam_role" {
-  source             = "../vendor/modules/aws/iam-for-ebs-csi-driver"
-  cluster_name       = var.cluster_name
+  source       = "../vendor/modules/aws/iam-for-ebs-csi-driver"
+  cluster_name = var.cluster_name
 }
