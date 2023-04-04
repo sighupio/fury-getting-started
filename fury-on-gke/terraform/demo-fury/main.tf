@@ -3,10 +3,10 @@ terraform {
   #   bucket = "<GCS_BUCKET>"
   #   prefix = "terraform/velero"
   # }
-  required_version = ">= 0.12"
+  required_version = ">= 0.15.4"
 
   required_providers {
-    google        = "=3.55.0"
+    google     = ">= 3.55.0"
   }
 }
 

@@ -1,19 +1,18 @@
 versions:
-  networking: v1.10.0
-  monitoring: v2.0.1
-  logging: v3.0.1
-  ingress: v1.13.1
-  dr: v1.10.1
-  auth: v0.0.2
-  opa: v1.7.3
+  networking: v1.12.2
+  monitoring: v2.1.0
+  logging: v3.1.3
+  ingress: v1.14.1
+  dr: v1.11.0
+  opa: v1.8.0
 
 bases:
   - name: networking
   - name: monitoring
   - name: logging
   - name: ingress
-#   - name: dr
-#   - name: opa
+  - name: dr
+  - name: opa
 
-# modules:
-#   - name: dr
+modules:
+  - name: dr
