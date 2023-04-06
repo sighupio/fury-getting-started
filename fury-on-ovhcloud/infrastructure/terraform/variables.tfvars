@@ -28,7 +28,7 @@ router = {
 kube = {
   name            = "furykubernetesCluster"
   pv_network_name = "furyNetwork"
-  version         = "1.24"
+  version         = "1.25"
   gateway_ip      = "10.0.0.1"
 }
 
