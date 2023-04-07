@@ -4,3 +4,4 @@ kind: Kustomization
 
 resources:
   - ../../vendor/katalog/opa/gatekeeper
+  - resources/ingress.yml
