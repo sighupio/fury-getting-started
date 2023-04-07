@@ -1,17 +1,18 @@
-FROM alpine:3.15
+FROM alpine:3.17
 
 LABEL maintainer="Ramiro Algozino <ramiro@sighup.io>"
 
-ENV AWSCLI_VERSION 1.27.35
+ENV GLIBC_VER: 2.35-r0
+ENV AWSCLI_VERSION 2.8.12
 ENV GCLOUD_VERSION 412.0.0
 ENV TERRAFORM_VERSION 0.15.4
-ENV KUBECTL_VERSION v1.24.7
+ENV KUBECTL_VERSION v1.25.8
 ENV KUSTOMIZE_VERSION v3.5.3
-ENV FURYCTL_VERSION v0.9.0
+ENV FURYCTL_VERSION v0.10.0
 ENV FURYAGENT_VERSION v0.3.0
 ENV VELERO_VERSION v1.10.0
-ENV DIRENV_VERSION v2.28.0
-ENV HELM_VERSION v3.9.0
+ENV DIRENV_VERSION v2.32.2
+ENV HELM_VERSION v3.11.2
 
 RUN apk --update --no-cache add \
   bash \
@@ -35,7 +36,17 @@ RUN apk --update --no-cache add \
   bash-completion
 
 RUN pip3 install --upgrade pip
-RUN pip3 install requests awscli==${AWSCLI_VERSION}
+
+RUN curl -sL https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub -o /etc/apk/keys/sgerrand.rsa.pub && \
+    curl -sLO https://github.com/sgerrand/alpine-pkg-glibc/releases/download/$${GLIBC_VER}/glibc-$${GLIBC_VER}.apk && \
+    curl -sLO https://github.com/sgerrand/alpine-pkg-glibc/releases/download/$${GLIBC_VER}/glibc-bin-$${GLIBC_VER}.apk && \
+    curl -sLO https://github.com/sgerrand/alpine-pkg-glibc/releases/download/$${GLIBC_VER}/glibc-i18n-$${GLIBC_VER}.apk && \
+    apk add --force-overwrite --virtual .glibc glibc-$${GLIBC_VER}.apk glibc-bin-$${GLIBC_VER}.apk glibc-i18n-$${GLIBC_VER}.apk && \
+    /usr/glibc-compat/bin/localedef -i en_US -f UTF-8 en_US.UTF-8 && \
+    curl -sL https://awscli.amazonaws.com/awscli-exe-linux-x86_64-$${AWSCLI_VERSION}.zip -o awscliv2.zip && \
+    unzip awscliv2.zip && \
+    aws/install && \
+    apk add gcompat || true
 
 # Install gcloud
 RUN curl -L https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${GCLOUD_VERSION}-linux-x86_64.tar.gz -o /tmp/google-cloud-sdk-${GCLOUD_VERSION}-linux-x86_64.tar.gz && \

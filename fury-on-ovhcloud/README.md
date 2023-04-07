@@ -31,9 +31,9 @@ To follow this tutorial, you need:
 
 We are using the `terraform` CLI to automatically deploy the private network, and then use it for the Managed Kubernetes Cluster.
 
-| Terraform Provider | Credentials |
-|---|---|
-| [OVH Provider](https://registry.terraform.io/providers/ovh/ovh/latest/docs) | [OVHcloud API](https://docs.ovh.com/gb/en/api/first-steps-with-ovh-api/) credentials |
+| Terraform Provider                                                                                               | Credentials                                                                                                    |
+| ---------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| [OVH Provider](https://registry.terraform.io/providers/ovh/ovh/latest/docs)                                      | [OVHcloud API](https://docs.ovh.com/gb/en/api/first-steps-with-ovh-api/) credentials                           |
 | [OpenStack Provider](https://registry.terraform.io/providers/terraform-provider-openstack/openstack/latest/docs) | [OpenStack user](https://docs.ovh.com/sg/en/public-cloud/creation-and-deletion-of-openstack-user/) credentials |
 
 ### Pre-requisites
@@ -138,13 +138,13 @@ export OVH_CONSUMER_KEY="xxxxxxxxxxxxxxxxxxxxxxx"
 
 You also need to define the API endpoint and base URL. Choose the values inside this table according to your localization:
 
-| OVH_ENDPOINT | OVH_BASEURL |
-|---|---|
-| ovh-eu | https://eu.api.ovh.com/1.0 |
-| ovh-us | https://api.us.ovhcloud.com/1.0 |
-| ovh-ca | https://ca.api.ovh.com/1.0 |
-| kimsufi-eu | https://eu.api.kimsufi.com/1.0 |
-| kimsufi-ca | https://ca.api.kimsufi.com/1.0 |
+| OVH_ENDPOINT  | OVH_BASEURL                       |
+| ------------- | --------------------------------- |
+| ovh-eu        | https://eu.api.ovh.com/1.0        |
+| ovh-us        | https://api.us.ovhcloud.com/1.0   |
+| ovh-ca        | https://ca.api.ovh.com/1.0        |
+| kimsufi-eu    | https://eu.api.kimsufi.com/1.0    |
+| kimsufi-ca    | https://ca.api.kimsufi.com/1.0    |
 | soyoustart-eu | https://eu.api.soyoustart.com/1.0 |
 | soyoustart-ca | https://ca.api.soyoustart.com/1.0 |
 
@@ -183,9 +183,9 @@ export OS_REGION_NAME="xxx"
 
 You are ready to use the OpenStack Terraform Provider.
 
-#### 3 - (Optional) Create a variables file from template
+#### 3 - (Optional) Create a variables file from the template
 
-You can create an `ovhrc` file from the `ovhrc.template` template, to store your variables.
+You can create an `ovhrc` file from the `ovhrc.template` template to store your variables.
 
 Example:
 
@@ -250,7 +250,7 @@ router = {
 
 kube = {
   name            = "furykubernetesCluster"
-  version         = "1.24"
+  version         = "1.25"
   pv_network_name = "furyNetwork"
   gateway_ip      = "10.0.0.1"
 }
@@ -377,10 +377,10 @@ vendor
 
 ### Kustomize project
 
-Kustomize allows to group together related Kubernetes resources and combines them to create more complex deployments. 
+Kustomize allows grouping related Kubernetes resources and combining them to create more complex deployments.
 Moreover, it is flexible, and it enables a simple patching mechanism for additional customization.
 
-To deploy the Fury distribution, use the following root `kustomization.yaml` located `manifests/kustomization.yaml`:
+To deploy the Fury distribution, use the following root `kustomization.yaml` located at `manifests/kustomization.yaml`:
 
 ```yaml
 ---
@@ -393,7 +393,7 @@ resources:
   - monitoring
 ```
 
-This `kustomization.yaml` wraps the other `kustomization.yaml`s in subfolders. For example in `manifests/logging/kustomization.yaml`
+This `kustomization.yaml` wraps other `kustomization.yaml` files present in each module subfolder. For example in `/demo/manifests/logging/kustomization.yaml` you'll find:
 
 ```yaml
 ---
@@ -407,6 +407,7 @@ resources:
   - ../../vendor/katalog/logging/configs
   - ../../vendor/katalog/logging/opensearch-single
   - ../../vendor/katalog/logging/opensearch-dashboards
+  - ../../vendor/katalog/logging/minio-ha
 
   - resources/ingress.yml
 
@@ -415,11 +416,11 @@ patchesStrategicMerge:
   - patches/cerebro-resources.yml
 ```
 
-Each `kustomization.yaml`:
+Each `kustomization.yaml` file:
 
 - references the modules downloaded in the previous section
-- patches the upstream modules (e.g. `patches/opensearch-resources.yml` limits the resources requested by OpenSearch)
-- deploys some additional custom resources (e.g. `resources/ingress.yml`)
+- patches the upstream modules that we downloaded with a custom configuration for this environment (e.g. `patches/opensearch-resources.yml` limits the resources requested by OpenSearch)
+- deploys some additional custom resources not included in the modules (e.g. `resources/ingress.yml`)
 
 Install the modules:
 
@@ -493,18 +494,45 @@ Navigate to <http://opensearch-dashboards.fury.info> or click the OpenSearch Das
 
 > :warning: please beware that some background jobs need to run to finish OpenSearch configuration. If you get a screen with a "Start by adding your data" title, please wait some minutes and try again.
 
-#### Read the logs
+#### Manually Create OpenSearch Dashboards Indeces (optional)
 
-The Fury Logging module already collects data from the following indices:
+If when you access OpenSearch Dashboards you get welcomed with the following message:
 
-- `kubernetes-*`
-- `systemd-*`
-- `ingress-controller-*`
-- `events-*`
+![opensearch-dashboards-welcome][opensearch-dashboards-welcome]
 
-Click on `Discover` to see the main dashboard. On the top left corner select one of the indices to explore the logs.
+this means that the Indexes have not been created yet. This is expected the first time you deploy the logging stack. We deploy a set of cron jobs that take care of creating them but they may not have run yet (they run every hour).
+
+You can trigger them manually with the following commands:
+
+```bash
+kubectl create job -n logging --from cronjob/index-patterns-cronjob manual-indexes
+kubectl create job -n logging --from cronjob/ism-policy-cronjob manual-ism-policy
+```
+
+Wait a moment for the jobs to finish and try refreshing the OpenSearch Dashboard page.
+
+#### Discover the logs
+
+To work with the logs arriving into the system, click on "OpenSearch Dashboards" icon on the main page, and then on the "Discover" option or navigate through the side ("hamburger") menu and select `Discover` (see image below).
+
+![opensearch-dashboards-discover][opensearch-dashboards-discover]
 
 ![Opensearch-Dashboards][opensearch-dashboards-screenshot]
+
+Follow the next steps to query the logs collected by the logging stack:
+
+![opensearch-dashboards-index][opensearch-dashboards-index]
+
+You can choose between different index options:
+
+- `audit-*` Kubernetes API server audit logs.
+- `events-*`: Kubernetes events.
+- `infra-*`: logs for infrastructural components deployed as part of KFD
+- `ingress-controller-*`: logs from the NGINX Ingress Controllers running in the cluster.
+- `kubernetes-*`: logs for applications running in the cluster that are not part of KFD. *Notice that this index will most likely be empty until you deploy an application*.
+- `systemd-*` logs collected from a selection of systemd services running in the nodes like containerd and kubelet.
+
+Once you selected your desired index, then you can search them by writing queries in the search box. You can also filter the results by some criteria, like pod name, namespaces, etc.
 
 ## Step 4 - Teardown
 
@@ -523,7 +551,7 @@ We hope you enjoyed this tour of Fury on OVHcloud!
 
 ### Issues/Feedback
 
-In case your ran into any problems feel free to open an issue here on GitHub.
+In case you ran into any problems feel free to [open an issue in GitHub](https://github.com/sighupio/fury-getting-started/issues/new).
 
 ### Where to go next?
 

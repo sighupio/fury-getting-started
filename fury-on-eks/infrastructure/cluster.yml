@@ -2,23 +2,23 @@ kind: Cluster
 metadata:
   name: fury-eks-demo
 spec:
-  version: 1.24
+  version: 1.25
   network: <VPC_ID>
   subnetworks:
-  - <PRIVATE_SUBNET1_ID>
-  - <PRIVATE_SUBNET2_ID>
-  - <PRIVATE_SUBNET3_ID>
+    - <PRIVATE_SUBNET1_ID>
+    - <PRIVATE_SUBNET2_ID>
+    - <PRIVATE_SUBNET3_ID>
   dmzCIDRRange:
-  - 10.0.0.0/16
-  sshPublicKey: example-ssh-key
+    - 10.0.0.0/16
+  sshPublicKey: example-ssh-key # ⚠️ change me
   nodePoolsLaunchKind: "launch_templates"
   nodePools:
-  - name: fury
-    version: null
-    minSize: 3
-    maxSize: 3 
-    instanceType: t3.large
-    volumeSize: 50
+    - name: fury
+      version: null
+      minSize: 3
+      maxSize: 3
+      instanceType: t3.large
+      volumeSize: 50
 executor:
   # state:
   #   backend: s3

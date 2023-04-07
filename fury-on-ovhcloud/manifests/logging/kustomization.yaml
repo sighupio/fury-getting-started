@@ -9,6 +9,7 @@ resources:
   - ../../vendor/katalog/logging/configs
   - ../../vendor/katalog/logging/opensearch-single
   - ../../vendor/katalog/logging/opensearch-dashboards
+  - ../../vendor/katalog/logging/minio-ha
 
   - resources/ingress.yml
 
