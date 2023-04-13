@@ -92,7 +92,7 @@ kind: EKSCluster
 metadata:
   name: <CLUSTER_NAME>
 spec:
-  distributionVersion: "v1.23.3"
+  distributionVersion: "v1.25.1"
   toolsConfiguration:
     terraform:
       state:
