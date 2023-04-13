@@ -167,10 +167,6 @@ From this, `furyctl` will automatically provision:
 
 More details about the infrastructure provisioner can be found [here][provisioner-infrastructure-aws-reference].
 
-> ⏱ This phase may take some minutes.
->
-> Logs are available at `/demo/infrastructure/bootstrap/logs/terraform.logs`.
-
 ### Kubernetes section
 
 The Kubernetes section of the `furyctl.yaml` file contains the following parameters:
@@ -268,6 +264,14 @@ furyctl create cluster
 2. Upon being prompted to connect to the VPN, simply open the .ovpn file via your OpenVPN Client application.
 
 3. Connect to the OpenVPN Server via the chosen OpenVPN Client and continue by pressing `enter`
+
+4. Once connected to the VPN the process will continue to provision the cluster and the distribution.
+
+> ⏱ The process will take several minutes to complete, you can follow the progress in detail by running the following command:
+>
+> ```bash
+> tail -f /root/.furyctl/furyctl.log
+> ```
 
 🚀 Success! The distribution is fully deployed. Proceed to the next section to explore the various features it has to offer.
 
