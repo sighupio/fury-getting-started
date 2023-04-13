@@ -288,7 +288,7 @@ To access the ingresses more easily via the browser, configure your local DNS to
 1. Get the IP address of the internal load balancer:
 
 ```bash
-dig $(kubectl get svc ingress-nginx -n ingress-nginx --no-headers | awk '{print $4}')
+dig $(kubectl get svc ingress-nginx-internal -n ingress-nginx --no-headers | awk '{print $4}')
 ```
 
 Output:
