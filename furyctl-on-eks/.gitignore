@@ -1,2 +1,2 @@
-vendor
-infrastructure/fury.ovpn
+kubeconfig
+*.ovpn
