@@ -3,7 +3,7 @@ kind: EKSCluster
 metadata:
   name: <CLUSTER_NAME>
 spec:
-  distributionVersion: "v1.25.1"
+  distributionVersion: "v1.25.2"
   toolsConfiguration:
     terraform:
       state:
@@ -43,7 +43,7 @@ spec:
       privateAccess: true
       publicAccess: false
       privateAccessCidrs: ['0.0.0.0/0']
-      publicAccessCidrs: ['0.0.0.0/0']
+      publicAccessCidrs: []
     nodePools:
       - name: infra
         size:

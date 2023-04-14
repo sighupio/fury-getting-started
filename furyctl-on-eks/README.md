@@ -21,7 +21,7 @@ To follow this tutorial, you need:
 
 - **AWS Access Credentials** of an AWS Account with the following [IAM permissions][terraform-aws-eks-iam-permissions].
 - **Docker** - the tutorial uses a [Docker image][fury-getting-started-dockerfile] containing `furyctl` and all the necessary tools to follow it.
-- **OpenVPN Client** - [Tunnelblick][tunnelblick] (on macOS) or [OpenVPN Connect][openvpn-connect] (for other OS) are recommended, [OpenVPN client][openvpn-client] is required
+- **OpenVPN Client** - [Tunnelblick][tunnelblick] (on macOS) or [OpenVPN Connect][openvpn-connect] (for other OSes) are recommended, [OpenVPN client][openvpn-client] is required
 when using the flag `--vpn-auto-connect` in the `furyctl create/delete cluster` command.
 - **AWS S3 Bucket** to store the Terraform state.
 - **GitHub** account with [SSH key configured][github-ssh-key-setup].
@@ -68,7 +68,7 @@ You are all set ✌️.
 
 `furyctl` is a command-line tool developed by SIGHUP to support:
 
-- the automatic provisioning of Kubernetes clusters in various cloud environments
+- the automatic provisioning of Kubernetes clusters in a number of cloud environments
 - the installation of the Fury distribution
 
 The configuration of the Fury cluster is governed by the `furyctl.yaml` file, which for the purposes of this tutorial 
@@ -76,7 +76,7 @@ is located in `/demo/furyctl.yaml`
 This file contains the information needed to set up the cluster and the
 configuration and consists of the following sections:
 
-- **infrastructure**: contains the information related to the infrastructure provisioning phase.
+- **infrastructure**: contains the information related to the infrastructure (VPC and VPN) provisioning phase.
 - **kubernetes**: contains the information related to the provisioning phase of the Kubernetes cluster.
 - **distribution**: contains information related to the provisioning phase of the distribution.
 
