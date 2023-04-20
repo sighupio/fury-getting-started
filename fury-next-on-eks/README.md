@@ -1,4 +1,4 @@
-# Furyctl next on EKS
+# Fury on EKS with furyctl next
 
 This step-by-step tutorial guides you to deploy the **Kubernetes Fury Distribution** (KFD) on an EKS cluster on AWS using the *next* version of furyctl.
 
@@ -12,7 +12,7 @@ This tutorial covers the following steps:
 
 > ⚠️ AWS **charges you** to provision the resources used in this tutorial. You should be charged only a few dollars, but we are not responsible for any costs that incur.
 >
-> ❗️ **Remember to stop all the instances by following all the steps listed in the [teardown phase](#step-4---teardown).**
+> ❗️ **Remember to stop all the instances by following all the steps listed in the [teardown phase](#step-5---teardown).**
 
 ## Prerequisites
 
@@ -108,7 +108,7 @@ kind: EKSCluster
 metadata:
   name: <CLUSTER_NAME>
 spec:
-  distributionVersion: "v1.25.1"
+  distributionVersion: "v1.25.2"
   toolsConfiguration:
     terraform:
       state:
@@ -178,6 +178,8 @@ From this, `furyctl` will automatically provision:
 - **Virtual Private Cloud (VPC)** in a specified CIDR range with public and private subnets
 - **EC2 instance** bastion host with an OpenVPN Server
 - All the required networking gateways and routes
+
+> 💡 **Advanced**: you can bring your own VPC and VPN instead of creating it with furyctl. Both are optional.
 
 More details about the infrastructure provisioner can be found [here][provisioner-infrastructure-aws-reference].
 
@@ -261,7 +263,7 @@ The Distribution section of the `furyctl.yaml` file contains the following param
             bucketName: <S3_VELERO_BUCKET_NAME>
 ```
 
-Replace the field `<S3_VELERO_BUCKET_NAME>` with the name of the S3 bucket that will be used to store the Velero backups.
+Replace the field `<S3_VELERO_BUCKET_NAME>` with the name of the S3 bucket that will be used to store the Velero backups. Notice that **`furyctl` will create this bucket for you**.
 You can configure the existing modules or add new ones (take a look to the [docs][fury-distribution-eks-reference]) should you prefer.
 
 From these parameters, `furyctl` will automatically configure and deploy the battle-tested Kubernetes Fury Distribution.
@@ -278,14 +280,14 @@ furyctl create cluster
 
 2. Upon being prompted to connect to the VPN, simply open the .ovpn file via your OpenVPN Client application.
 
-3. Connect to the OpenVPN Server via the chosen OpenVPN Client and continue by pressing `enter`
+3. Connect to the OpenVPN Server via the chosen OpenVPN Client and continue by pressing the <kbd>⏎ Enter</kbd> key.
 
 4. Once connected to the VPN the process will continue to provision the cluster and the distribution.
 
 > ⏱ The process will take several minutes to complete, you can follow the progress in detail by running the following command:
 >
 > ```bash
-> tail -f /root/.furyctl/furyctl.log
+> tail -f /root/.furyctl/furyctl.log | jq
 > ```
 
 🚀 Success! The distribution is fully deployed. Proceed to the next section to explore the various features it has to offer.
@@ -323,13 +325,16 @@ xxx.elb.eu-west-1.amazonaws.com. 77 IN A <THIRD_IP>
 
 ```
 
-3. Add the following line to your machine's `/etc/hosts` (not the container's):
+3. Add the following line to your machine's `/etc/hosts`:
 
 ```bash
 <FIRST_IP> directory.internal.demo.example.dev cerebro.internal.demo.example.dev opensearch-dashboards.internal.demo.example.dev grafana.internal.demo.example.dev gpm.internal.demo.example.dev
 ```
 
 Now, you can reach the ingresses directly from your browser.
+
+> 💡 **Advanced**: if you have a delegated zone already configured in Route53, you can use a subdomain of that zone instead of `demo.example.dev` and the DNS should just work.
+
 
 ### Forecastle
 
@@ -462,7 +467,7 @@ Clean up the demo environment:
 furyctl delete cluster
 ```
 
-2. Write 'yes' and hit enter, when prompted to confirm the deletion.
+2. Write 'yes' and hit <kbd>⏎ Enter</kbd>, when prompted to confirm the deletion.
 
 3. (Optional) Destroy the S3 bucket holding the Terraform state
 
@@ -471,12 +476,6 @@ aws s3api delete-objects --bucket $S3_BUCKET \
   --delete "$(aws s3api list-object-versions --bucket $S3_BUCKET --query='{Objects: Versions[].{Key:Key,VersionId:VersionId}}')"
 
 aws s3api delete-bucket --bucket $S3_BUCKET
-```
-
-4. Exit from the docker container:
-
-```bash
-exit
 ```
 
 ## Conclusions
