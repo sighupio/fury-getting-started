@@ -181,7 +181,7 @@ From this, `furyctl` will automatically provision:
 
 > 💡 **Advanced**: you can bring your own VPC and VPN instead of creating it with furyctl. Both are optional.
 
-More details about the infrastructure provisioner can be found [here][provisioner-infrastructure-aws-reference].
+More details about the infrastructure provisioner can be found [here][provisioner-infrastructure-aws-reference-vpc] and [here][provisioner-infrastructure-aws-reference-vpn].
 
 ### Kubernetes section
 
@@ -510,7 +510,8 @@ More about Fury:
 
 [furyagent-repository]: https://github.com/sighupio/furyagent
 
-[provisioner-infrastructure-aws-reference]: https://github.com/sighupio/fury-eks-installer/tree/master/modules/vpc-and-vpn
+[provisioner-infrastructure-aws-reference-vpc]: https://github.com/sighupio/fury-eks-installer/tree/develop/modules/vpc
+[provisioner-infrastructure-aws-reference-vpn]: https://github.com/sighupio/fury-eks-installer/tree/develop/modules/vpn
 [provisioner-kubernetes-aws-reference]: https://github.com/sighupio/fury-eks-installer/tree/master/modules/eks
 
 [tunnelblick]: https://tunnelblick.net/downloads.html
