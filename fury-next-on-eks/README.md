@@ -1,6 +1,6 @@
-# Furyctl alpha on EKS
+# Furyctl next on EKS
 
-This step-by-step tutorial guides you to deploy the **Kubernetes Fury Distribution** (KFD) on an EKS cluster on AWS using an alpha version of furyctl.
+This step-by-step tutorial guides you to deploy the **Kubernetes Fury Distribution** (KFD) on an EKS cluster on AWS using the *next* version of furyctl.
 
 This tutorial covers the following steps:
 
@@ -35,7 +35,7 @@ when using the flag `--vpn-auto-connect` in the `furyctl create/delete cluster` 
 
 ```bash
 mkdir -p /tmp/fury-getting-started && git -C /tmp/fury-getting-started clone https://github.com/sighupio/fury-getting-started/ .
-cd /tmp/fury-getting-started/fury-alpha-on-eks
+cd /tmp/fury-getting-started/fury-next-on-eks
 ```
 
 3. Download the `furyctl` binary:
@@ -82,7 +82,7 @@ You are all set ✌️.
 - the installation of the Fury distribution
 
 The configuration of the Fury cluster is governed by the `furyctl.yaml` file, which for the purposes of this tutorial 
-is located at `/tmp/fury-getting-started/fury-alpha-on-eks/furyctl.yaml`.
+is located at `/tmp/fury-getting-started/fury-next-on-eks/furyctl.yaml`.
 
 > ℹ️ You can also create a sample configuration file by running the following command:
 > ```bash
@@ -121,7 +121,7 @@ spec:
     env: "fury-getting-started"
 ```
 
-Open the `/tmp/fury-getting-started/fury-alpha-on-eks/furyctl.yaml` file with a text editor of your choice and replace the field `<CLUSTER_NAME>` with a name of your choice for the cluster, and the field `<CLUSTER_REGION>` with the AWS region where you want to deploy the cluster. 
+Open the `/tmp/fury-getting-started/fury-next-on-eks/furyctl.yaml` file with a text editor of your choice and replace the field `<CLUSTER_NAME>` with a name of your choice for the cluster, and the field `<CLUSTER_REGION>` with the AWS region where you want to deploy the cluster. 
 If you already have a S3 bucket to store the Terraform state, replace the field `<S3_TFSTATE_BUCKET>`, `<S3_TFSTATE_BUCKET_KEY_PREFIX>`, `<S3_TFSTATE_BUCKET_REGION>`
 with the data from the bucket, otherwise you can create a new one by following the following steps:
 
