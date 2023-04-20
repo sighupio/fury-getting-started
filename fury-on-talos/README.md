@@ -486,7 +486,7 @@ More about Fury:
 [talos-linux]: https://talos.dev
 [talos-docs]: https://www.talos.dev/v1.0/
 [talosctl-docs]: https://www.talos.dev/v1.0/reference/cli/
-[fury-getting-started-dockerfile]: https://github.com/sighupio/fury-getting-started/blob/main/utils/docker/Dockerfile
+[fury-getting-started-dockerfile]: https://github.com/sighupio/fury-getting-started/blob/main/utils/docker/furyctl/Dockerfile
 [rancher-local-path]: https://github.com/rancher/local-path-provisioner
 [furyctl-repo]: https://github.com/sighupio/furyctl
 [furyctl-docs]: https://docs.kubernetesfury.com/docs/infrastructure/furyctl

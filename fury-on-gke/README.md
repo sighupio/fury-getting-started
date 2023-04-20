@@ -695,7 +695,7 @@ We hope you enjoyed this tour of Fury!
 
 <!-- Links -->
 
-[fury-getting-started-dockerfile]: https://github.com/sighupio/fury-getting-started/blob/main/utils/docker/Dockerfile
+[fury-getting-started-dockerfile]: https://github.com/sighupio/fury-getting-started/blob/main/utils/docker/furyctl/Dockerfile
 
 [fury-on-minikube]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-minikube
 [fury-on-gke]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-gke

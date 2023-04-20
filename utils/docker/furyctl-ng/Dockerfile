@@ -1,0 +1,83 @@
+FROM alpine:3.17
+
+LABEL maintainer="Ramiro Algozino <ramiro@sighup.io>"
+
+ENV GLIBC_VER 2.35-r0
+ENV AWSCLI_VERSION 2.8.12
+ENV KUBECTL_VERSION v1.25.8
+ENV FURYCTL_VERSION v0.25.0-alpha.1
+ENV VELERO_VERSION v1.10.0
+ENV DIRENV_VERSION v2.32.2
+ENV HELM_VERSION v3.11.2
+
+RUN apk --update --no-cache add \
+  bash \
+  ca-certificates \
+  curl \
+  jq \
+  git \
+  openssh-client \
+  python3 \
+  py3-pip \
+  openvpn \
+  tar \
+  wget \
+  vim \
+  nano \
+  make \
+  make \
+  tree \
+  bind-tools \
+  openssl \
+  bash-completion
+
+RUN pip3 install --upgrade pip
+
+RUN curl -sL https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub -o /etc/apk/keys/sgerrand.rsa.pub && \
+    curl -sLO https://github.com/sgerrand/alpine-pkg-glibc/releases/download/${GLIBC_VER}/glibc-${GLIBC_VER}.apk && \
+    curl -sLO https://github.com/sgerrand/alpine-pkg-glibc/releases/download/${GLIBC_VER}/glibc-bin-${GLIBC_VER}.apk && \
+    curl -sLO https://github.com/sgerrand/alpine-pkg-glibc/releases/download/${GLIBC_VER}/glibc-i18n-${GLIBC_VER}.apk && \
+    apk add --force-overwrite --virtual .glibc glibc-${GLIBC_VER}.apk glibc-bin-${GLIBC_VER}.apk glibc-i18n-${GLIBC_VER}.apk && \
+    /usr/glibc-compat/bin/localedef -i en_US -f UTF-8 en_US.UTF-8 && \
+    curl -sL https://awscli.amazonaws.com/awscli-exe-linux-x86_64-${AWSCLI_VERSION}.zip -o awscliv2.zip && \
+    unzip awscliv2.zip && \
+    aws/install && \
+    apk add gcompat || true
+
+# Install kubectl
+RUN curl -L https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl -o /usr/local/bin/kubectl && \
+    chmod +x /usr/local/bin/kubectl
+
+# Install helm
+RUN curl -LOs https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz && \
+  tar -zxvf helm-${HELM_VERSION}-linux-amd64.tar.gz && \
+  mv linux-amd64/helm /usr/local/bin/helm && \
+  rm -rf linux-amd64/
+
+# Install furyctl
+RUN curl -LOs https://github.com/sighupio/furyctl/releases/download/${FURYCTL_VERSION}/furyctl_Linux_x86_64.tar.gz && \
+    tar -zxvf furyctl_Linux_x86_64.tar.gz && \
+    mv furyctl /usr/local/bin/furyctl && \
+    chmod +x /usr/local/bin/furyctl
+
+# Install velero cli
+RUN curl -L https://github.com/vmware-tanzu/velero/releases/download/${VELERO_VERSION}/velero-${VELERO_VERSION}-linux-amd64.tar.gz -o /tmp/velero-${VELERO_VERSION}-linux-amd64.tar.gz && \
+    tar -zxf /tmp/velero-${VELERO_VERSION}-linux-amd64.tar.gz -C /tmp/ && \
+    mv /tmp/velero-${VELERO_VERSION}-linux-amd64/velero /usr/local/bin && \
+    rm /tmp/velero-${VELERO_VERSION}-linux-amd64.tar.gz && rm -rf /tmp/velero-${VELERO_VERSION}-linux-amd64
+
+# Install direnv
+RUN curl -L https://github.com/direnv/direnv/releases/download/${DIRENV_VERSION}/direnv.linux-amd64 -o /usr/local/bin/direnv && \
+  chmod +x /usr/local/bin/direnv
+
+# Create a group and user
+RUN addgroup -S fury && adduser -S fury -G fury
+RUN mkdir /demo && chown -R fury:fury /demo && chmod -R 755 /demo
+USER fury
+
+# Configure .bashrc
+COPY src/.bashrc /home/fury/
+
+WORKDIR /demo
+
+CMD ["/bin/bash"]

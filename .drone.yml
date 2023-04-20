@@ -26,5 +26,20 @@ steps:
       tags:
         - latest
         - ${DRONE_TAG}
-      context: ./utils/docker/
-      dockerfile: ./utils/docker/Dockerfile
+      context: ./utils/docker/furyctl/
+      dockerfile: ./utils/docker/furyctl/Dockerfile
+  - name: docker-build-ng
+    image: plugins/docker
+    settings:
+      debug: true
+      username:
+        from_secret: REGISTRY_USERNAME
+      password:
+        from_secret: REGISTRY_PASSWORD
+      registry: registry.sighup.io
+      repo: registry.sighup.io/delivery/fury-getting-started-ng
+      tags:
+        - latest
+        - ${DRONE_TAG}
+      context: ./utils/docker/furyctl-ng/
+      dockerfile: ./utils/docker/furyctl-ng/Dockerfile

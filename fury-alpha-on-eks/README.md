@@ -1,13 +1,14 @@
-# Furyctl on EKS
+# Furyctl alpha on EKS
 
-This step-by-step tutorial guides you to deploy the **Kubernetes Fury Distribution** (KFD) on an EKS cluster on AWS.
+This step-by-step tutorial guides you to deploy the **Kubernetes Fury Distribution** (KFD) on an EKS cluster on AWS using an alpha version of furyctl.
 
 This tutorial covers the following steps:
 
 1. Configure the EKS cluster with the configuration file `furyctl.yaml`
 2. Deploy an EKS Kubernetes cluster on AWS with `furyctl`
-3. Explore the Fury Kubernetes Distribution
-4. Teardown of the environment
+3. Explore the Kubernetes Fury Distribution
+4. Advanced Distribution usage
+5. Teardown of the environment
 
 > ⚠️ AWS **charges you** to provision the resources used in this tutorial. You should be charged only a few dollars, but we are not responsible for any costs that incur.
 >
@@ -35,7 +36,7 @@ when using the flag `--vpn-auto-connect` in the `furyctl create/delete cluster` 
 
 ```bash
 git clone https://github.com/sighupio/fury-getting-started/
-cd fury-getting-started/fury-on-eks
+cd fury-getting-started/fury-alpha-on-eks
 ```
 
 3. Run the `fury-getting-started` docker image:
@@ -43,7 +44,7 @@ cd fury-getting-started/fury-on-eks
 ```bash
 docker run -ti --rm \
   -v $PWD:/demo \
-  registry.sighup.io/delivery/fury-getting-started
+  registry.sighup.io/delivery/fury-getting-started-ng
 ```
 
 4. Setup your AWS credentials by exporting the following environment variables:
@@ -72,7 +73,7 @@ You are all set ✌️.
 - the installation of the Fury distribution
 
 The configuration of the Fury cluster is governed by the `furyctl.yaml` file, which for the purposes of this tutorial 
-is located in `/demo/furyctl.yaml`
+is located at `/demo/furyctl.yaml`
 This file contains the information needed to set up the cluster and the
 configuration and consists of the following sections:
 
@@ -148,15 +149,13 @@ The infrastructure section of the `furyctl.yaml` file contains the following par
     vpn:
       vpnClientsSubnetCidr: 192.168.200.0/24
       ssh:
-        publicKeys:
-          - <SSH_PUBLIC_KEY>
         githubUsersName:
           - <GITHUB_USER>
         allowedFromCidrs:
           - 0.0.0.0/0
 ```
 
-Replace the field `<GITHUB_USER>` with your actual GitHub username, and the field `<SSH_PUBLIC_KEY>` with the public key you want to use to access the bastion host.
+Replace the field `<GITHUB_USER>` with your actual GitHub username, the public key from you github account will be used to access the bastion host.
 You can choose different subnet CIDRs should you prefer.
 
 From this, `furyctl` will automatically provision:
@@ -200,7 +199,7 @@ The Kubernetes section of the `furyctl.yaml` file contains the following paramet
 Replace the field `<SSH_PUBLIC_KEY>` with the public key you want to use to access the worker nodes.
 You can add different nodePools, or edit the existing one should you prefer.
 
-From this `furyctl` automatically deploys a battle-tested private EKS Cluster.
+From these parameters `furyctl` will automatically deploy a battle-tested **private** EKS Cluster with 3 tainted worker nodes to be used for infrastructural components.
 
 More details about the kubernetes provisioner can be found [here][provisioner-kubernetes-aws-reference].
 
@@ -249,13 +248,13 @@ The Distribution section of the `furyctl.yaml` file contains the following param
 Replace the field `<S3_VELERO_BUCKET_NAME>` with the name of the S3 bucket that will be used to store the Velero backups.
 You can configure the existing modules or add new ones (take a look to the [docs][fury-distribution-eks-reference]) should you prefer.
 
-From this `furyctl` automatically deploys a battle-tested Fury Kubernetes Distribution.
+From these parameters, `furyctl` will automatically configure and deploy the battle-tested Kubernetes Fury Distribution.
 
-## Step 2 - Provisioning an EKS Cluster Automatically with Furyctl
+## Step 2 - Provisioning an EKS Cluster Automatically with furyctl
 
-In this section, you will utilize Furyctl to automatically provision an EKS Cluster, making the deployment process streamlined.
+In this section, you will utilize furyctl to automatically provision an EKS Cluster, making the deployment process streamlined.
 
-1. Start by running the Furyctl command to create the cluster:
+1. Start by running the furyctl command to create the cluster:
 
 ```bash
 furyctl create cluster
@@ -489,7 +488,7 @@ More about Fury:
 <!-- Links -->
 [terraform-aws-eks-iam-permissions]: https://github.com/terraform-aws-modules/terraform-aws-eks/blob/v17.24.0/docs/iam-permissions.md
 [fury-getting-started-repository]: https://github.com/sighupio/fury-getting-started/
-[fury-getting-started-dockerfile]: https://github.com/sighupio/fury-getting-started/blob/main/utils/docker/Dockerfile
+[fury-getting-started-dockerfile]: https://github.com/sighupio/fury-getting-started/blob/main/utils/docker/furyctl-ng/Dockerfile
 
 [fury-on-minikube]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-minikube
 [fury-on-gke]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-gke

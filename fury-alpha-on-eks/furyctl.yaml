@@ -13,7 +13,7 @@ spec:
           region: <S3_TFSTATE_BUCKET_REGION>
   region: <CLUSTER_REGION>
   tags:
-    env: "test"
+    env: "fury-getting-started"
   infrastructure:
     vpc:
       network:
@@ -27,22 +27,20 @@ spec:
             - 10.0.20.0/24
             - 10.0.30.0/24
             - 10.0.40.0/24
-      vpn:
-        vpnClientsSubnetCidr: 192.168.200.0/24
-        ssh:
-          publicKeys:
-            - <SSH_PUBLIC_KEY>
-          githubUsersName:
-            - <GITHUB_USER>
-          allowedFromCidrs:
-            - 0.0.0.0/0
+    vpn:
+      vpnClientsSubnetCidr: 192.168.200.0/24
+      ssh:
+        githubUsersName:
+          - <GITHUB_USER>
+        allowedFromCidrs:
+          - 0.0.0.0/0
   kubernetes:
     nodePoolsLaunchKind: "launch_templates"
     nodeAllowedSshPublicKey: <SSH_PUBLIC_KEY>
     apiServer:
       privateAccess: true
       publicAccess: false
-      privateAccessCidrs: ['0.0.0.0/0']
+      privateAccessCidrs: []
       publicAccessCidrs: []
     nodePools:
       - name: infra
