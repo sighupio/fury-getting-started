@@ -21,7 +21,6 @@ This tutorial assumes some basic familiarity with Kubernetes and AWS. Some exper
 To follow this tutorial, you need:
 
 - **AWS Access Credentials** of an AWS Account with the following [IAM permissions][terraform-aws-eks-iam-permissions].
-- **Docker** - the tutorial uses a [Docker image][fury-getting-started-dockerfile] containing `furyctl` and all the necessary tools to follow it.
 - **OpenVPN Client** - [Tunnelblick][tunnelblick] (on macOS) or [OpenVPN Connect][openvpn-connect] (for other OSes) are recommended, [OpenVPN client][openvpn-client] is required
 when using the flag `--vpn-auto-connect` in the `furyctl create/delete cluster` command.
 - **AWS S3 Bucket** to store the Terraform state.
@@ -35,19 +34,29 @@ when using the flag `--vpn-auto-connect` in the `furyctl create/delete cluster` 
 2. Clone the [fury getting started repository][fury-getting-started-repository] containing the example code used in this tutorial:
 
 ```bash
-git clone https://github.com/sighupio/fury-getting-started/
-cd fury-getting-started/fury-alpha-on-eks
+mkdir -p /tmp/fury-getting-started && git -C /tmp/fury-getting-started clone https://github.com/sighupio/fury-getting-started/ .
+cd /tmp/fury-getting-started/fury-alpha-on-eks
 ```
 
-3. Run the `fury-getting-started` docker image:
+3. Download the `furyctl` binary:
 
 ```bash
-docker run -ti --rm \
-  -v $PWD:/demo \
-  registry.sighup.io/delivery/fury-getting-started-ng
+curl -L "https://github.com/sighupio/furyctl/releases/download/v0.25.0-alpha.1/furyctl_Darwin_x86_64.tar.gz" -o /tmp/furyctl.tar.gz && tar xfz /tmp/furyctl.tar.gz -C /tmp
 ```
 
-4. Setup your AWS credentials by exporting the following environment variables:
+4. Move the `furyctl` binary to a directory in your `PATH`:
+
+```bash
+mv /tmp/furyctl /usr/local/bin/furyctl
+```
+
+5. Make the `furyctl` binary executable:
+
+```bash
+chmod +x /usr/local/bin/furyctl
+```
+
+6. Setup your AWS credentials by exporting the following environment variables:
 
 ```bash
 export AWS_PROFILE=<YOUR_AWS_PROFILE_NAME>
@@ -73,19 +82,25 @@ You are all set ✌️.
 - the installation of the Fury distribution
 
 The configuration of the Fury cluster is governed by the `furyctl.yaml` file, which for the purposes of this tutorial 
-is located at `/demo/furyctl.yaml`
-This file contains the information needed to set up the cluster and the
-configuration and consists of the following sections:
+is located at `/tmp/fury-getting-started/fury-alpha-on-eks/furyctl.yaml`.
 
+> ℹ️ You can also create a sample configuration file by running the following command:
+> ```bash
+> furyctl create config --version v1.25.2 -c custom-furyctl.yaml
+> ```
+> and edit the `custom-furyctl.yaml` file to fit your needs, when you are done you can use the `--config` flag to specify the path to the configuration file in the
+> following commands.
+
+This file contains the information needed to set up the cluster and consists of the following sections:
+
+- **global**: contains the information about cluster metadata, tools configuration, and the region where the cluster will be deployed.
 - **infrastructure**: contains the information related to the infrastructure (VPC and VPN) provisioning phase.
 - **kubernetes**: contains the information related to the provisioning phase of the Kubernetes cluster.
 - **distribution**: contains information related to the provisioning phase of the distribution.
 
-There is also an initial part that defines settings common to all sections.
+### Global section
 
-### Initial section
-
-The initial section of the `furyctl.yaml` file contains the following parameters:
+The global section of the `furyctl.yaml` file contains the following parameters:
 
 ```yaml
 apiVersion: kfd.sighup.io/v1alpha2
@@ -103,10 +118,10 @@ spec:
           region: <S3_TFSTATE_BUCKET_REGION>
   region: <CLUSTER_REGION>
   tags:
-    env: "test"
+    env: "fury-getting-started"
 ```
 
-Open the `/demo/furyctl.yaml` file with a text editor of your choice and replace the field `<CLUSTER_NAME>` with a name of your choice for the cluster, and the field `<CLUSTER_REGION>` with the AWS region where you want to deploy the cluster. 
+Open the `/tmp/fury-getting-started/fury-alpha-on-eks/furyctl.yaml` file with a text editor of your choice and replace the field `<CLUSTER_NAME>` with a name of your choice for the cluster, and the field `<CLUSTER_REGION>` with the AWS region where you want to deploy the cluster. 
 If you already have a S3 bucket to store the Terraform state, replace the field `<S3_TFSTATE_BUCKET>`, `<S3_TFSTATE_BUCKET_KEY_PREFIX>`, `<S3_TFSTATE_BUCKET_REGION>`
 with the data from the bucket, otherwise you can create a new one by following the following steps:
 
@@ -173,11 +188,12 @@ The Kubernetes section of the `furyctl.yaml` file contains the following paramet
 ```yaml
   kubernetes:
     nodePoolsLaunchKind: "launch_templates"
-    nodeAllowedSshPublicKey: <SSH_PUBLIC_KEY>
+    nodeAllowedSshPublicKey: "{file://~/.ssh/id_rsa.pub}"
     apiServer:
       privateAccess: true
       publicAccess: false
-      privateAccessCidrs: ['0.0.0.0/0']
+      privateAccessCidrs: []
+      publicAccessCidrs: []
     nodePools:
       - name: infra
         size:
@@ -196,7 +212,7 @@ The Kubernetes section of the `furyctl.yaml` file contains the following paramet
           k8s.io/cluster-autoscaler/node-template/taint/node.kubernetes.io/role: "infra:NoSchedule"
 ```
 
-Replace the field `<SSH_PUBLIC_KEY>` with the public key you want to use to access the worker nodes.
+Replace the field `"{file://~/.ssh/id_rsa.pub}"` with the path to the public key you want to use to access the worker nodes.
 You can add different nodePools, or edit the existing one should you prefer.
 
 From these parameters `furyctl` will automatically deploy a battle-tested **private** EKS Cluster with 3 tainted worker nodes to be used for infrastructural components.
@@ -488,7 +504,6 @@ More about Fury:
 <!-- Links -->
 [terraform-aws-eks-iam-permissions]: https://github.com/terraform-aws-modules/terraform-aws-eks/blob/v17.24.0/docs/iam-permissions.md
 [fury-getting-started-repository]: https://github.com/sighupio/fury-getting-started/
-[fury-getting-started-dockerfile]: https://github.com/sighupio/fury-getting-started/blob/main/utils/docker/furyctl-ng/Dockerfile
 
 [fury-on-minikube]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-minikube
 [fury-on-gke]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-gke

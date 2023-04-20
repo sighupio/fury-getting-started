@@ -36,7 +36,7 @@ spec:
           - 0.0.0.0/0
   kubernetes:
     nodePoolsLaunchKind: "launch_templates"
-    nodeAllowedSshPublicKey: <SSH_PUBLIC_KEY>
+    nodeAllowedSshPublicKey: "{file://~/.ssh/id_rsa.pub}"
     apiServer:
       privateAccess: true
       publicAccess: false
