@@ -2,7 +2,7 @@ FROM alpine:3.17
 
 LABEL maintainer="Ramiro Algozino <ramiro@sighup.io>"
 
-ENV GLIBC_VER: 2.35-r0
+ENV GLIBC_VER 2.35-r0
 ENV AWSCLI_VERSION 2.8.12
 ENV GCLOUD_VERSION 412.0.0
 ENV TERRAFORM_VERSION 0.15.4
