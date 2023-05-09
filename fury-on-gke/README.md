@@ -452,7 +452,7 @@ vendor
 
 Each module can contain Kustomize bases or Terraform modules.
 
-First of all, we need to initialize the additional Terraform project to create resources for the DR (Velero).
+First of all, we need to initialize the additional Terraform project to create resources needed by Velero in the Disaster Recovery module.
 
 In the repository, you can find the main.tf file `/demo/terraform/main.yml`. In this file you need to change the values for the GCS bucket that will contain the state:
 
