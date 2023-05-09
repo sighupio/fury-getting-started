@@ -328,16 +328,6 @@ export KUBECONFIG=/demo/infrastructure/cluster/secrets/kubeconfig
 kubectl get nodes
 ```
 
-> ℹ️ KFD Ingress Module v1.14.1 includes a validating admission webhook that checks ingress definitions before accepting them. Validating webhooks are queried by the API server each time a request arrives. In GKE you need to create a firewall rule to enable the communication between the API server and the webhook.
-> The installer already does this for the cert-manager and gatekeeper webhooks, but at the time of writing this guide, the rule creation for the ingress webhook has not been automated yet (see [this GitHub issue](https://github.com/sighupio/fury-gke-installer/issues/30)).
-> You will need to create the firewall rule manually in the mean time:
->
-> Make sure to replace `<YOUR_CLUSTER_NAME>` with the name of your cluster before running the command:
-
-```sh
-make create-firewall-rule SOURCE_RANGE=10.0.0.0/28 PROJECT=your-project-id NETWORK=your-network-name TAG=your-cluster-tag PORT=9443
-```
-
 ## Step 2 - Download Fury modules
 
 `furyctl` can do a lot more than deploy infrastructure. In this section, you will use `furyctl` to download the monitoring, logging, and ingress modules of the Fury distribution.
