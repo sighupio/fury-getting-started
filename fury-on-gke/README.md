@@ -723,7 +723,7 @@ We hope you enjoyed this tour of Fury!
 
 ### Issues/Feedback
 
-In case your ran into any problems feel free to open an issue here on GitHub.
+In case you ran into any problems feel free to [open an issue in GitHub](https://github.com/sighupio/fury-getting-started/issues/new).
 
 ### Where to go next?
 
