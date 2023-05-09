@@ -6,6 +6,5 @@ resources:
   - ingress
   - logging
   - monitoring
-  - networking
   - dr
   - opa
