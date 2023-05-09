@@ -474,7 +474,7 @@ terraform {
 
 ```
 
-Then, create a file `terraform.tfvars` with the following content (Change the values accordingly to your environment):
+Then, create a file `terraform.tfvars` with the following content (change the values accordingly to your environment):
 
 ```terraform
 velero_bucket_name = "velero-gke-demo-sa"
