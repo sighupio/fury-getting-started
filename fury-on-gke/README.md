@@ -641,9 +641,38 @@ velero backup get -n kube-system
 
 ### (optional) Enforce a Policy with OPA Gatekeeper
 
-This section is under construction.
+OPA Gatekeeper has been deployed as part of the distribution, [the module comes with a set of policies pre-defined][opa-module-docs].
 
-Please refer to the [OPA module's documentation][opa-module-docs] while we work on this part of the guide. Sorry for the inconvenience.
+To test drive the default rules, try to create a simple deployment in the `default` namespace:
+
+```bash
+kubectl run --image busybox bad-pod -n default
+```
+
+You should get an error from Gatekeeper saying that the pod is not compliant with the current policies.
+
+Gatekeeper runs as a Validating Admission Webhook, meaning that all the requests to the Kubernetes API server are validated first by Gatekeeper before saving them to the cluster's state.
+
+If you list the pods in the `default` namespace, the list it should be empty, confirming that the pod creation was actually rejected:
+
+```console
+$ kubectl get pods -n default
+No resources found in default namespace.
+```
+
+Some namespaces are exempted from the default policies, for exmaple `kube-system`. Try to create the same pod in the `kube-system` namespace and it should succeed.
+
+```bash
+kubectl run --image busybox bad-pod -n kube-system
+```
+
+Output should be:
+
+```console
+pod/bad-pod created
+```
+
+> 💡 **TIP** Gatekeeper Policy Manger, a simple readonly web UI to easily see the deployed policies and their status is installed as part of the OPA module. You can access it at <http://gpm.fury.info/>
 
 ## Step 6 - Teardown
 
