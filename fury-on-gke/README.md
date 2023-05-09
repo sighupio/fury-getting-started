@@ -32,7 +32,7 @@ To follow this tutorial, you need:
 - **Docker** - a [Docker image][fury-getting-started-dockerfile] containing `furyctl` and all the necessary tools is provided.
 - **OpenVPN Client** - [Tunnelblick][tunnelblick] (on macOS) or [OpenVPN Connect][openvpn-connect] (for other OS) are recommended.
 - **Google Cloud Storage** (optional) to hold the Terraform state.
-- **Github** account with [SSH key configured][github-ssh-key-setup].
+- **GitHub** account with [SSH key configured][github-ssh-key-setup].
 
 ### Setup and initialize the environment
 
