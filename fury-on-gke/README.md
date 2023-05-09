@@ -480,7 +480,7 @@ Then, create a file `terraform.tfvars` with the following content (Change the va
 velero_bucket_name = "velero-gke-demo-sa"
 ```
 
-Then apply the terraform project:
+Then apply the Terraform project:
 
 ```bash
 cd /demo/terraform/
