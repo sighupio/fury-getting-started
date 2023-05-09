@@ -583,7 +583,7 @@ Output:
 3. Add the following line to your local `/etc/hosts` (not the container's):
 
 ```bash
-10.1.0.5 directory.fury.info prometheus.fury.info alertmanager.fury.info opensearch-dashboards.fury.info grafana.fury.info
+<LB-IP-ADDRESS> directory.fury.info prometheus.fury.info alertmanager.fury.info opensearch-dashboards.fury.info grafana.fury.info
 ```
 
 Now, you can reach the ingresses directly from your browser.
