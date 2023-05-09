@@ -524,11 +524,12 @@ kind: Kustomization
 
 resources:
   - ../../vendor/katalog/logging/cerebro
-  - ../../vendor/katalog/logging/logging-operator
-  - ../../vendor/katalog/logging/logging-operated
-  - ../../vendor/katalog/logging/configs
   - ../../vendor/katalog/logging/opensearch-single
   - ../../vendor/katalog/logging/opensearch-dashboards
+  - ../../vendor/katalog/logging/logging-operator
+  - ../../vendor/katalog/logging/logging-operated
+  - ../../vendor/katalog/logging/minio-ha
+  - ../../vendor/katalog/logging/configs
 
   - resources/ingress.yml
 
