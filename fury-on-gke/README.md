@@ -499,7 +499,7 @@ make generate-output
 Kustomize allows grouping related Kubernetes resources and combining them to create more complex deployments. 
 Moreover, it is flexible, and it enables a simple patching mechanism for additional customization.
 
-To deploy the Fury distribution, use the following root `kustomization.yaml` located `/demo/manifests/kustomization.yaml`:
+To deploy the Fury distribution, use the following root `kustomization.yaml` located at `/demo/manifests/kustomization.yaml`:
 
 ```yaml
 ---
