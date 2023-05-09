@@ -1,10 +1,10 @@
-# Fury on Minikube
+# Fury on minikube
 
 This step-by-step tutorial helps you deploy a subset of the **Kubernetes Fury Distribution** on a local minikube cluster.
 
 This tutorial covers the following steps:
 
-1. Deploy a local Minikube cluster.
+1. Deploy a local minikube cluster.
 2. Download the latest version of Fury with `furyctl`.
 3. Install Fury distribution.
 4. Explore some features of the distribution.
@@ -20,7 +20,7 @@ This tutorial assumes some basic familiarity with Kubernetes.
 
 To follow this tutorial, you need:
 
-- **Minikube** - follow the [installation guide](https://minikube.sigs.k8s.io/docs/start/). This guide is based on Minikube with the VirtualBox driver.
+- **minikube** - follow the [installation guide](https://minikube.sigs.k8s.io/docs/start/). This guide is based on minikube with the VirtualBox driver.
 - **Docker** - we provide you with a [Docker image][fury-getting-started-dockerfile] containing `furyctl` and all the necessary tools.
 
 ### Setup and initialize the environment
@@ -45,7 +45,7 @@ cd $REPO_DIR/infrastructure
 make setup
 ```
 
-> ⚠️ This command will spin up by default a single-node Kubernetes v1.24.9 cluster, using VirtualBox driver, with 4 CPUs, 8GB RAM and 20 GB Disk. Take a look at the [Makefile](infrastructure/Makefile) to change the default values.
+> ⚠️ This command will spin up by default a single-node Kubernetes v1.25.8 cluster, using VirtualBox driver, with 4 CPUs, 8GB RAM and 20 GB Disk. Take a look at the [Makefile](infrastructure/Makefile) to change the default values.
 >
 > You can also pass custom parameters, for example:
 >
@@ -53,7 +53,7 @@ make setup
 > make setup cpu=4 memory=4096 driver=hyperkit
 > ```
 
-1. Run the `fury-getting-started` container:
+2. Run the `fury-getting-started` container:
 
 ```bash
 docker run -ti --rm \
@@ -63,22 +63,24 @@ docker run -ti --rm \
   registry.sighup.io/delivery/fury-getting-started
 ```
 
-3. Test the connection to the Minikube cluster:
+3. Test the connection to the minikube cluster:
 
-```bash
+```console
 kubectl get nodes
 ```
 
 Output:
 
-```bash
+```console
 NAME       STATUS   ROLES           AGE    VERSION
-minikube   Ready    control-plane   104s   v1.24.9
+minikube   Ready    control-plane   104s   v1.25.8
 ```
 
-## Step 2 - Download fury modules
+> 💡 **TIP**: the `kubectl` command has been aliased to `k` inside the container.
 
-`furyctl` can do a lot more than deploying infrastructure. In this section, you use `furyctl` to download the monitoring, logging, and ingress modules of the Fury distribution.
+## Step 2 - Download Fury modules
+
+`furyctl` can do a lot more than deploy infrastructure. In this section, you use `furyctl` to download the monitoring, logging, and ingress modules of the Fury distribution.
 
 To learn more about `furyctl` and its features, head to the [documentation site][furyctl-docs].
 
@@ -90,18 +92,20 @@ For this tutorial, use the `Furyfile.yml` located at `/demo/Furyfile.yaml`, here
 
 ```yaml
 versions:
-  monitoring: v2.0.1
-  logging: v3.0.1
-  ingress: v1.13.1
+  monitoring: v2.1.0
+  logging: v3.1.3
+  ingress: v1.14.1
 
 bases:
   - name: monitoring/prometheus-operator
   - name: monitoring/prometheus-operated
+  - name: monitoring/prometheus-adapter
   - name: monitoring/alertmanager-operated
   - name: monitoring/grafana
   - name: monitoring/kubeadm-sm
   - name: monitoring/configs
   - name: monitoring/kube-state-metrics
+  - name: monitoring/kube-proxy-metrics
   - name: monitoring/node-exporter
   
   - name: logging/opensearch-single
@@ -109,12 +113,17 @@ bases:
   - name: logging/logging-operator
   - name: logging/logging-operated
   - name: logging/configs
-  - name: logging/cerebro
+  - name: logging/minio-ha
 
-  - name: ingress/nginx
   - name: ingress/cert-manager
   - name: ingress/forecastle
 ```
+
+> 💡 **TIP**: you can also download the `Furyfile.yml` and a sample `kustomization.yaml` for a specific version of the Kubernetes Fury Distribution with the folllowing command:
+>
+> ```console
+> furyctl init --version v1.25.0
+> ```
 
 ### Download Fury modules
 
@@ -143,7 +152,7 @@ Output:
 
 ## Step 3 - Installation
 
-Each module is a Kustomize project. Kustomize allows to group together related Kubernetes resources and combine them to create more complex deployments. Moreover, it is flexible, and it enables a simple patching mechanism for additional customization.
+Each module is a [Kustomize](https://kustomize.io/) project. Kustomize allows grouping related Kubernetes resources and combining them to create more complex deployments. Moreover, it is flexible, and it enables a simple patching mechanism for additional customization.
 
 To deploy the Fury distribution, use the following root `kustomization.yaml` located `/demo/manifests/kustomization.yaml`:
 
@@ -157,8 +166,11 @@ resources:
   # Monitoring
   - ../vendor/katalog/monitoring/prometheus-operator
   - ../vendor/katalog/monitoring/prometheus-operated
+  - ../vendor/katalog/monitoring/prometheus-adapter
   - ../vendor/katalog/monitoring/grafana
   - ../vendor/katalog/monitoring/kube-state-metrics
+  - ../vendor/katalog/monitoring/kube-proxy-metrics
+  - ../vendor/katalog/monitoring/kubeadm-sm
   - ../vendor/katalog/monitoring/node-exporter
   - ../vendor/katalog/monitoring/alertmanager-operated
 
@@ -167,11 +179,8 @@ resources:
   - ../vendor/katalog/logging/opensearch-dashboards
   - ../vendor/katalog/logging/logging-operator
   - ../vendor/katalog/logging/logging-operated
-  - ../vendor/katalog/logging/configs/audit
-  - ../vendor/katalog/logging/configs/events
-  - ../vendor/katalog/logging/configs/ingress-nginx
-  - ../vendor/katalog/logging/configs/kubernetes
-  - ../vendor/katalog/logging/cerebro
+  - ../vendor/katalog/logging/configs
+  - ../vendor/katalog/logging/minio-ha
 
   # Ingress
   - ../vendor/katalog/ingress/forecastle
@@ -193,8 +202,8 @@ patchesStrategicMerge:
 This `kustomization.yaml`:
 
 - references the modules downloaded in the previous section
-- patches the upstream modules (e.g. `patches/opensearch-resources.yml` limits the resources requested by OpenSearch)
-- deploys some additional custom resources (e.g. `resources/ingress.yml`)
+- patches the modules that we downloaded with a custom configuration for this environment (e.g. `patches/opensearch-resources.yml` limits the resources requested by OpenSearch)
+- deploys some additional custom resources not included in the modules (e.g. `resources/ingress.yml`)
 
 Install the modules:
 
@@ -205,6 +214,14 @@ make apply
 # Wait a moment to let the Kubernetes API server process the new APIs defined by the CRDs and for the NGINX Ingress Controller pod to be ready and apply again
 make apply
 ```
+
+Wait for all the pods to become ready:
+
+```console
+watch kubectl get pods -A
+```
+
+Press <kbd>⌃ Control</kbd> + <kbd>C</kbd> to exit the watch command once all the pods are in `Running` state.
 
 ## Step 4 - Explore the distribution
 
@@ -218,7 +235,7 @@ In Step 3, alongside the distribution, you have deployed Kubernetes ingresses to
 - `grafana.fury.info`
 - `logs.fury.info`
 
-To access the ingresses more easily via the browser, configure your local DNS to resolve the ingresses to the external Minikube IP:
+To access the ingresses more easily via the browser, configure your local DNS to resolve the ingresses to the external minikube IP:
 
 > ℹ️ the following commands should be executed in another terminal of your host. Not inside the fury-getting-started container.
 
@@ -252,19 +269,50 @@ Navigate to <http://directory.fury.info> to see all the other ingresses deployed
 
 Navigate to <http://logs.fury.info> or click the OpenSearch Dashboards icon in Forecastle.
 
-> ℹ️ you might get a message saying that the Indexes have not been created yet. This is expected for some minutes the first time you deploy the logging stack. There are some jobs defined that take care of creating them but may not have run yet.
+#### Manually Create OpenSearch Dashboards Indeces (optional)
 
-#### Read the logs
+If when you access OpenSearch Dashboards you get welcomed with the following message:
 
-To work with the logs arriving into the system, click on "OpenSearch Dashbaords" icon in the main page, and then on the "Discover" option or navigate through the side ("hamburger") menu and select `Discover`.
+![opensearch-dashboards-welcome][opensearch-dashboards-welcome]
+
+this means that the Indexes have not been created yet. This is expected the first time you deploy the logging stack. We deploy a set of cron jobs that take care of creating them but they may not have run yet (they run every hour).
+
+You can trigger them manually with the following commands:
+
+```bash
+kubectl create job -n logging --from cronjob/index-patterns-cronjob manual-indexes
+kubectl create job -n logging --from cronjob/ism-policy-cronjob manual-ism-policy
+```
+
+Wait a moment for the jobs to finish and try refreshing OpenSearch Dashboard page.
+
+#### Discover the logs
+
+To work with the logs arriving into the system, click on "OpenSearch Dashboards" icon on the main page, and then on the "Discover" option or navigate through the side ("hamburger") menu and select `Discover` (see image below).
+
+![opensearch-dashboards-discover][opensearch-dashboards-discover]
 
 ![opensearch-dashboards][opensearch-dashboards-screenshot]
 
-You can choose here between different index options on the left side (Kubernetes logs, systemd logs, audit logs, etc.) and then search them by writing queries in the search box. You can also filter the results by some criteria, like pod name, namespaces, etc.
+Follow the next steps to query the logs collected by the logging stack:
+
+![opensearch-dashboards-index][opensearch-dashboards-index]
+
+You can choose between different index options:
+
+- `audit-*` Kubernetes API server audit logs.
+- `events-*`: Kubernetes events.
+- `infra-*`: logs for infrastructural components deployed as part of KFD
+- `ingress-controller-*`: logs from the NGINX Ingress Controllers running in the cluster.
+- `kubernetes-*`: logs for applications running in the cluster that are not part of KFD. *Notice that this index will most likely be empty until you deploy an application*.
+- `systemd-*` logs collected form a selection of systemd services running in the nodes like containerd and kubelet.
+
+Once you selected your desired index, then you can search them by writing queries in the search box. You can also filter the results by some criteria, like pod name, namespaces, etc.
+
 
 ### Grafana
 
-[Grafana](https://github.com/grafana/grafana) is an open-source platform for monitoring and observability. Grafana allows you to query, visualize, alert on and understand your metrics.
+[Grafana](https://github.com/grafana/grafana) is an open-source platform for monitoring and observability. Grafana allows you to query, visualize, alert, and understand your metrics.
 
 Navigate to <http://grafana.fury.info> or click the Grafana icon from Forecastle.
 
@@ -278,6 +326,8 @@ This is what you should see:
 
 ![Grafana][grafana-screenshot]
 
+Make sure to select a namespace that has pods running and then select one of those pods.
+
 Take a look around and test the other dashboards available.
 
 ## Step 6 - Tear down
@@ -285,14 +335,14 @@ Take a look around and test the other dashboards available.
 1. Stop the docker container:
 
 ```bash
-# Execute this command inside the Docker container
+# ⚠️ Execute this command inside the Docker container
 exit
 ```
 
 2. Delete the minikube cluster:
 
 ```bash
-# Execute these commands from your local system, outside the Docker container
+# ⚠️ Execute these commands from your local system, outside the Docker container
 cd $REPO_DIR/infrastructure
 make delete
 ```
@@ -305,7 +355,7 @@ We hope you enjoyed this tour of Fury!
 
 ### Issues/Feedback
 
-In case your ran into any problems feel free to [open an issue in GitHub](https://github.com/sighupio/fury-getting-started/issues/new).
+In case you ran into any problems feel free to [open an issue in GitHub](https://github.com/sighupio/fury-getting-started/issues/new).
 
 ### Where to go next?
 
@@ -343,5 +393,8 @@ More about Fury:
 
 <!-- Images -->
 [opensearch-dashboards-screenshot]: https://github.com/sighupio/fury-getting-started/blob/main/utils/images/opensearch_dashboards.png?raw=true
+[opensearch-dashboards-welcome]: https://github.com/sighupio/fury-getting-started/blob/main/utils/images/opensearch-dashboards_welcome.png?raw=true
+[opensearch-dashboards-discover]: https://github.com/sighupio/fury-getting-started/blob/main/utils/images/opensearch-dashboards_discover.png?raw=true
+[opensearch-dashboards-index]: https://github.com/sighupio/fury-getting-started/blob/main/utils/images/opensearch-dashboards_index.png?raw=true
 [grafana-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/grafana.png?raw=true
-[forecastle-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/forecastle.png?raw=true
+[forecastle-screenshot]: https://github.com/sighupio/fury-getting-started/blob/main/utils/images/forecastle.png?raw=true

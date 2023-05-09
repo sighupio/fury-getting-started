@@ -1,0 +1,95 @@
+apiVersion: kfd.sighup.io/v1alpha2
+kind: EKSCluster
+metadata:
+  name: <CLUSTER_NAME>
+spec:
+  distributionVersion: "v1.25.2"
+  toolsConfiguration:
+    terraform:
+      state:
+        s3:
+          bucketName: <S3_TFSTATE_BUCKET>
+          keyPrefix: <S3_TFSTATE_BUCKET_KEY_PREFIX>
+          region: <S3_TFSTATE_BUCKET_REGION>
+  region: <CLUSTER_REGION>
+  tags:
+    env: "fury-getting-started"
+  infrastructure:
+    vpc:
+      network:
+        cidr: 10.0.0.0/16
+        subnetsCidrs:
+          private:
+            - 10.0.182.0/24
+            - 10.0.172.0/24
+            - 10.0.162.0/24
+          public:
+            - 10.0.20.0/24
+            - 10.0.30.0/24
+            - 10.0.40.0/24
+    vpn:
+      vpnClientsSubnetCidr: 192.168.200.0/24
+      ssh:
+        githubUsersName:
+          - <GITHUB_USER>
+        allowedFromCidrs:
+          - 0.0.0.0/0
+  kubernetes:
+    nodePoolsLaunchKind: "launch_templates"
+    nodeAllowedSshPublicKey: "{file://~/.ssh/id_rsa.pub}"
+    apiServer:
+      privateAccess: true
+      publicAccess: false
+      privateAccessCidrs: []
+      publicAccessCidrs: []
+    nodePools:
+      - name: infra
+        size:
+          min: 3
+          max: 3
+        instance:
+          type: t3.xlarge
+        labels:
+          nodepool: infra
+          node.kubernetes.io/role: infra
+        taints:
+          - node.kubernetes.io/role=infra:NoSchedule
+        tags:
+          k8s.io/cluster-autoscaler/node-template/label/nodepool: "infra"
+          k8s.io/cluster-autoscaler/node-template/label/node.kubernetes.io/role: "infra"
+          k8s.io/cluster-autoscaler/node-template/taint/node.kubernetes.io/role: "infra:NoSchedule"
+  distribution:
+    modules:
+      ingress:
+        baseDomain: internal.demo.example.dev
+        nginx:
+          type: dual
+          tls:
+            provider: certManager
+        certManager:
+          clusterIssuer:
+            name: letsencrypt-fury
+            email: admin@example.dev
+            type: dns01
+        dns:
+          public:
+            name: demo.example.dev
+            create: true
+          private:
+            create: true
+            name: internal.demo.example.dev
+      logging:
+        opensearch:
+          type: single
+          resources:
+            limits:
+              cpu: 2000m
+              memory: 4G
+            requests:
+              cpu: 300m
+              memory: 1G
+      dr:
+        velero:
+          eks:
+            region: eu-west-1
+            bucketName: <S3_VELERO_BUCKET_NAME>

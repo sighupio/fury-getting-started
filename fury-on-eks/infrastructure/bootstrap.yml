@@ -4,13 +4,13 @@ metadata:
 spec:
   networkCIDR: 10.0.0.0/16
   publicSubnetsCIDRs:
-  - 10.0.1.0/24
-  - 10.0.2.0/24
-  - 10.0.3.0/24
+    - 10.0.1.0/24
+    - 10.0.2.0/24
+    - 10.0.3.0/24
   privateSubnetsCIDRs:
-  - 10.0.101.0/24
-  - 10.0.102.0/24
-  - 10.0.103.0/24
+    - 10.0.101.0/24
+    - 10.0.102.0/24
+    - 10.0.103.0/24
   vpn:
     instances: 1
     port: 1194
@@ -20,7 +20,7 @@ spec:
     dhParamsBits: 2048
     subnetCIDR: 172.16.0.0/16
     sshUsers:
-    - <GITHUB_USER>
+      - <GITHUB_USER>
 executor:
   # state:
   #   backend: s3

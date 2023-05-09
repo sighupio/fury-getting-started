@@ -1,5 +1,5 @@
-kubernetes-version?=v1.24.9
-driver?=hyperkit
+kubernetes-version?=v1.25.8
+driver?=virtualbox
 memory?=8192
 cpu?=4
 cni?=calico
@@ -21,7 +21,6 @@ minikube:
 
 .PHONY: addons
 addons:
-	minikube addons enable metrics-server
 	minikube addons enable ingress
 
 .PHONY: delete
