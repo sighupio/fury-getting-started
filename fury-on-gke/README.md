@@ -594,18 +594,45 @@ Navigate to <http://directory.fury.info> to see all the other ingresses deployed
 
 Navigate to <http://opensearch-dashboards.fury.info> or click the OpenSearch Dashboards icon from Forecastle.
 
-#### Read the logs
+#### Manually Create OpenSearch Dashboards Indeces (optional)
 
-The Fury Logging module already collects data from the following indices:
+If when you access OpenSearch Dashboards you get welcomed with the following message:
 
-- `kubernetes-*`
-- `systemd-*`
-- `ingress-controller-*`
-- `events-*`
+![opensearch-dashboards-welcome][opensearch-dashboards-welcome]
 
-Click on `Discover` to see the main dashboard. On the top left corner select one of the indices to explore the logs.
+this means that the Indexes have not been created yet. This is expected the first time you deploy the logging stack. We deploy a set of cron jobs that take care of creating them but they may not have run yet (they run every hour).
+
+You can trigger them manually with the following commands:
+
+```bash
+kubectl create job -n logging --from cronjob/index-patterns-cronjob manual-indexes
+kubectl create job -n logging --from cronjob/ism-policy-cronjob manual-ism-policy
+```
+
+Wait a moment for the jobs to finish and try refreshing the OpenSearch Dashboard page.
+
+#### Discover the logs
+
+To work with the logs arriving into the system, click on "OpenSearch Dashboards" icon on the main page, and then on the "Discover" option or navigate through the side ("hamburger") menu and select `Discover` (see image below).
+
+![opensearch-dashboards-discover][opensearch-dashboards-discover]
 
 ![Opensearch-Dashboards][opensearch-dashboards-screenshot]
+
+Follow the next steps to query the logs collected by the logging stack:
+
+![opensearch-dashboards-index][opensearch-dashboards-index]
+
+You can choose between different index options:
+
+- `audit-*` Kubernetes API server audit logs.
+- `events-*`: Kubernetes events.
+- `infra-*`: logs for infrastructural components deployed as part of KFD
+- `ingress-controller-*`: logs from the NGINX Ingress Controllers running in the cluster.
+- `kubernetes-*`: logs for applications running in the cluster that are not part of KFD. *Notice that this index will most likely be empty until you deploy an application*.
+- `systemd-*` logs collected from a selection of systemd services running in the nodes like containerd and kubelet.
+
+Once you selected your desired index, then you can search them by writing queries in the search box. You can also filter the results by some criteria, like pod name, namespaces, etc.
 
 ### Grafana
 
