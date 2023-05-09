@@ -550,7 +550,7 @@ Install the modules:
 cd /demo/manifests/
 
 make apply
-# Due to some chicken-egg 🐓🥚 problem with custom resources you have to apply multiple times
+# Wait a moment for the Kubernetes API server to process the new CRDs and for the nginx-ingress-contorllers to become READY, and then run again the apply command.
 make apply
 ```
 
