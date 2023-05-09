@@ -516,7 +516,7 @@ resources:
   - aws
 ```
 
-This `kustomization.yaml` wraps the other `kustomization.yaml`s in subfolders. For example in `/demo/manifests/logging/kustomization.yaml`
+This `kustomization.yaml` wraps other `kustomization.yaml` files present in each module subfolder. For example in `/demo/manifests/logging/kustomization.yaml` you'll find:
 
 ```yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
