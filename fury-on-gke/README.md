@@ -459,9 +459,9 @@ Inside the repository, you can find a Terraform file at `/demo/terraform/main.tf
 ```terraform
 terraform {
 #   backend "s3" {
-#     bucket: <GCS_BUCKET>
-#     key: <MY_KEY> 
-#     region: <GCS_BUCKET_REGION>
+#     bucket = <GCS_BUCKET>
+#     key    = <MY_KEY> 
+#     region = <GCS_BUCKET_REGION>
 #   }
   required_version = ">= 0.15.4"
 
