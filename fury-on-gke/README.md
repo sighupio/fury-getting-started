@@ -53,7 +53,7 @@ docker run -ti --rm \
   registry.sighup.io/delivery/fury-getting-started
 ```
 
-4. Setup your GCP credentials by exporting the following environment variables:
+4. Set up your GCP credentials by exporting the following environment variables:
 
 ```bash
 export GOOGLE_CREDENTIALS=<PATH_TO_YOUR_CREDENTIALS_JSON>
@@ -179,7 +179,7 @@ cd infrastructure
 furyctl bootstrap init
 ```
 
-In case you run into errors, you can re-initialize the bootstrap provisioner by adding the  `--reset` flag:
+In case you run into errors, you can re-initialize the bootstrap provisioner by adding the `--reset` flag:
 
 ```bash
 furyctl bootstrap init --reset
@@ -381,55 +381,55 @@ $ tree -d vendor -L 3
 
 vendor
 ├── katalog
-│   ├── dr
-│   │   ├── tests
-│   │   └── velero
-│   ├── ingress
-│   │   ├── cert-manager
-│   │   ├── dual-nginx
-│   │   ├── external-dns
-│   │   ├── forecastle
-│   │   ├── nginx
-│   │   └── tests
-│   ├── logging
-│   │   ├── cerebro
-│   │   ├── configs
-│   │   ├── logging-operated
-│   │   ├── logging-operator
-│   │   ├── loki-configs
-│   │   ├── loki-distributed
-│   │   ├── minio-ha
-│   │   ├── opensearch-dashboards
-│   │   ├── opensearch-single
-│   │   ├── opensearch-triple
-│   │   └── tests
-│   ├── monitoring
-│   │   ├── aks-sm
-│   │   ├── alertmanager-operated
-│   │   ├── blackbox-exporter
-│   │   ├── configs
-│   │   ├── eks-sm
-│   │   ├── gke-sm
-│   │   ├── grafana
-│   │   ├── karma
-│   │   ├── kube-proxy-metrics
-│   │   ├── kube-state-metrics
-│   │   ├── kubeadm-sm
-│   │   ├── node-exporter
-│   │   ├── prometheus-adapter
-│   │   ├── prometheus-operated
-│   │   ├── prometheus-operator
-│   │   ├── tests
-│   │   ├── thanos
-│   │   └── x509-exporter
-│   ├── networking
-│   │   ├── calico
-│   │   ├── ip-masq
-│   │   ├── tests
-│   │   └── tigera
-│   └── opa
-│       ├── gatekeeper
-│       └── tests
+│   ├── dr
+│   │   ├── tests
+│   │   └── velero
+│   ├── ingress
+│   │   ├── cert-manager
+│   │   ├── dual-nginx
+│   │   ├── external-dns
+│   │   ├── forecastle
+│   │   ├── nginx
+│   │   └── tests
+│   ├── logging
+│   │   ├── cerebro
+│   │   ├── configs
+│   │   ├── logging-operated
+│   │   ├── logging-operator
+│   │   ├── loki-configs
+│   │   ├── loki-distributed
+│   │   ├── minio-ha
+│   │   ├── opensearch-dashboards
+│   │   ├── opensearch-single
+│   │   ├── opensearch-triple
+│   │   └── tests
+│   ├── monitoring
+│   │   ├── aks-sm
+│   │   ├── alertmanager-operated
+│   │   ├── blackbox-exporter
+│   │   ├── configs
+│   │   ├── eks-sm
+│   │   ├── gke-sm
+│   │   ├── grafana
+│   │   ├── karma
+│   │   ├── kube-proxy-metrics
+│   │   ├── kube-state-metrics
+│   │   ├── kubeadm-sm
+│   │   ├── node-exporter
+│   │   ├── prometheus-adapter
+│   │   ├── prometheus-operated
+│   │   ├── prometheus-operator
+│   │   ├── tests
+│   │   ├── thanos
+│   │   └── x509-exporter
+│   ├── networking
+│   │   ├── calico
+│   │   ├── ip-masq
+│   │   ├── tests
+│   │   └── tigera
+│   └── opa
+│       ├── gatekeeper
+│       └── tests
 └── modules
     └── dr
         ├── aws-velero
@@ -488,7 +488,7 @@ make generate-output
 
 ### Kustomize project
 
-Kustomize allows grouping related Kubernetes resources and combining them to create more complex deployments. 
+Kustomize allows grouping related Kubernetes resources and combining them to create more complex deployments.
 Moreover, it is flexible, and it enables a simple patching mechanism for additional customization.
 
 To deploy the Fury distribution, use the following root `kustomization.yaml` located at `/demo/manifests/kustomization.yaml`:
@@ -594,13 +594,13 @@ Navigate to <http://directory.fury.info> to see all the other ingresses deployed
 
 Navigate to <http://opensearch-dashboards.fury.info> or click the OpenSearch Dashboards icon from Forecastle.
 
-#### Manually Create OpenSearch Dashboards Indeces (optional)
+#### Manually Create OpenSearch Dashboards Indices (optional)
 
 If when you access OpenSearch Dashboards you get welcomed with the following message:
 
 ![opensearch-dashboards-welcome][opensearch-dashboards-welcome]
 
-this means that the Indexes have not been created yet. This is expected the first time you deploy the logging stack. We deploy a set of cron jobs that take care of creating them but they may not have run yet (they run every hour).
+this means that the Indexes have not been created yet. This is expected the first time you deploy the logging stack. We deploy a set of cron jobs that take care of creating them, but they may not have run yet (they run every hour).
 
 You can trigger them manually with the following commands:
 
@@ -687,7 +687,7 @@ $ kubectl get pods -n default
 No resources found in default namespace.
 ```
 
-Some namespaces are exempted from the default policies, for exmaple `kube-system`. Try to create the same pod in the `kube-system` namespace and it should succeed.
+Some namespaces are exempted from the default policies, for example `kube-system`. Try to create the same pod in the `kube-system` namespace and it should succeed.
 
 ```bash
 kubectl run --image busybox bad-pod -n kube-system
@@ -711,7 +711,7 @@ Clean up the demo environment:
 kubectl delete namespace logging monitoring ingress-nginx
 ```
 
-Wait until the namespaces are completeley deleted, or that:
+Wait until the namespaces are completely deleted, or that:
 
 ```bash
 kubectl get pvc -A
@@ -736,7 +736,7 @@ cd /demo/infrastructure
 furyctl cluster destroy
 ```
 
-4.  Destroy the firewall-rules we have made for nginx ingress:
+4. Destroy the firewall-rules we have made for nginx ingress:
   
 ```bash
 cd /demo/infrastructure
@@ -800,9 +800,13 @@ More about Fury:
 [tunnelblick]: https://tunnelblick.net/downloads.html
 [openvpn-connect]: https://openvpn.net/vpn-client/
 [github-ssh-key-setup]: https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account
+[opa-module-docs]: https://docs.kubernetesfury.com/docs/modules/opa/overview
 
 <!-- Images -->
 
 [grafana-screenshot]: https://github.com/sighupio/fury-getting-started/blob/main/utils/images/grafana.png?raw=true
 [forecastle-screenshot]: https://github.com/sighupio/fury-getting-started/blob/main/utils/images/forecastle_eks.png?raw=true
 [opensearch-dashboards-screenshot]: https://github.com/sighupio/fury-getting-started/blob/main/utils/images/opensearch_dashboards.png?raw=true
+[opensearch-dashboards-welcome]: https://github.com/sighupio/fury-getting-started/blob/main/utils/images/opensearch-dashboards_welcome.png?raw=true
+[opensearch-dashboards-discover]: https://github.com/sighupio/fury-getting-started/blob/main/utils/images/opensearch-dashboards_discover.png?raw=true
+[opensearch-dashboards-index]: https://github.com/sighupio/fury-getting-started/blob/main/utils/images/opensearch-dashboards_index.png?raw=true
