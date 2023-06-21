@@ -41,7 +41,7 @@ cd /tmp/fury-getting-started/fury-next-on-eks
 3. Download the `furyctl` binary:
 
 ```bash
-curl -L "https://github.com/sighupio/furyctl/releases/download/v0.25.0-alpha.1/furyctl_$(uname -s)_x86_64.tar.gz" -o /tmp/furyctl.tar.gz && tar xfz /tmp/furyctl.tar.gz -C /tmp
+curl -L "https://github.com/sighupio/furyctl/releases/download/v0.25.0-alpha.1/furyctl-$(uname -s)-amd64.tar.gz" -o /tmp/furyctl.tar.gz && tar xfz /tmp/furyctl.tar.gz -C /tmp
 ```
 
 4. Move the `furyctl` binary to a directory in your `PATH`:
