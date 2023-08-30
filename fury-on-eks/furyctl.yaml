@@ -3,7 +3,7 @@ kind: EKSCluster
 metadata:
   name: <CLUSTER_NAME>
 spec:
-  distributionVersion: "v1.25.2"
+  distributionVersion: "v1.25.6"
   toolsConfiguration:
     terraform:
       state:
@@ -27,21 +27,14 @@ spec:
             - 10.0.20.0/24
             - 10.0.30.0/24
             - 10.0.40.0/24
-    vpn:
-      vpnClientsSubnetCidr: 192.168.200.0/24
-      ssh:
-        githubUsersName:
-          - <GITHUB_USER>
-        allowedFromCidrs:
-          - 0.0.0.0/0
   kubernetes:
     nodePoolsLaunchKind: "launch_templates"
     nodeAllowedSshPublicKey: "{file://~/.ssh/id_rsa.pub}"
     apiServer:
-      privateAccess: true
-      publicAccess: false
+      privateAccess: false
+      publicAccess: true
       privateAccessCidrs: []
-      publicAccessCidrs: []
+      publicAccessCidrs: ["0.0.0.0/0"]
     nodePools:
       - name: infra
         size:
@@ -58,7 +51,27 @@ spec:
           k8s.io/cluster-autoscaler/node-template/label/nodepool: "infra"
           k8s.io/cluster-autoscaler/node-template/label/node.kubernetes.io/role: "infra"
           k8s.io/cluster-autoscaler/node-template/taint/node.kubernetes.io/role: "infra:NoSchedule"
+      - name: workers
+        size:
+          min: 1
+          max: 3
+        instance:
+          type: t3.large
+        labels:
+          nodepool: workers
+          node.kubernetes.io/role: workers
+        taints: []
+        tags:
+          k8s.io/cluster-autoscaler/node-template/label/nodepool: "workers"
+          k8s.io/cluster-autoscaler/node-template/label/node.kubernetes.io/role: "workers"
   distribution:
+    common:
+      nodeSelector:
+        node.kubernetes.io/role: infra
+      tolerations:
+        - effect: NoSchedule
+          key: node.kubernetes.io/role
+          value: infra
     modules:
       ingress:
         baseDomain: internal.demo.example.dev
@@ -79,6 +92,7 @@ spec:
             create: true
             name: internal.demo.example.dev
       logging:
+        type: opensearch
         opensearch:
           type: single
           resources:
@@ -89,7 +103,6 @@ spec:
               cpu: 300m
               memory: 1G
       dr:
-        velero:
-          eks:
-            region: eu-west-1
-            bucketName: <S3_VELERO_BUCKET_NAME>
+        type: none
+      policy:
+        type: none
