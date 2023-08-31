@@ -224,6 +224,13 @@ The Distribution section of the `furyctl.yaml` file contains the following param
 
 ```yaml
   distribution:
+    common:
+      nodeSelector:
+        node.kubernetes.io/role: infra
+      tolerations:
+        - effect: NoSchedule
+          key: node.kubernetes.io/role
+          value: infra
     modules:
       ingress:
         baseDomain: internal.demo.example.dev
@@ -245,9 +252,10 @@ The Distribution section of the `furyctl.yaml` file contains the following param
             create: true
       logging:
         type: loki
-          minio:
-            storageSize: 50Gi 
+        minio:
+          storageSize: 50Gi 
       dr:
+        type: eks
         velero:
           eks:
             region: eu-west-1
@@ -281,8 +289,41 @@ furyctl create cluster --outdir $PWD
 > ```bash
 > tail -f .furyctl/furyctl.log | jq
 > ```
+> `--outdir` flag is used to define in which directory to create the hidden `.furyctl` folder that contains all the required files to install the cluster. 
+> If not provided, a `.furyctl` folder will be created in the user home.
+
+The output should be similar to the following:
+
+```bash
+INFO Downloading distribution...                  
+INFO Validating configuration file...             
+INFO Downloading dependencies...                  
+INFO Validating dependencies...                   
+INFO Creating cluster...                          
+INFO Creating infrastructure...                   
+WARN Creating cloud resources, this could take a while... 
+INFO Creating Kubernetes Fury cluster...          
+WARN Creating cloud resources, this could take a while... 
+INFO Saving furyctl configuration file in the cluster... 
+INFO Saving distribution configuration file in the cluster... 
+INFO Installing Kubernetes Fury Distribution...   
+WARN Creating cloud resources, this could take a while... 
+INFO Checking that the cluster is reachable...    
+INFO Applying manifests...                        
+INFO Saving furyctl configuration file in the cluster... 
+INFO Saving distribution configuration file in the cluster... 
+INFO Kubernetes Fury cluster created successfully 
+INFO Please remember to kill the VPN connection when you finish doing operations on the cluster 
+INFO To connect to the cluster, set the path to your kubeconfig with 'export KUBECONFIG=/private/tmp/fury-getting-started/fury-on-eks/kubeconfig' or use the '--kubeconfig /private/tmp/fury-getting-started/fury-on-eks/kubeconfig' flag in following executions
+```
 
 🚀 Success! The distribution is fully deployed. Proceed to the next section to explore the various features it has to offer.
+
+To interact with the cluster a `kubeconfig` has been created on the folder, make it usable with `kubectl` with:
+
+```bash
+export KUBECONFIG=$PWD/kubeconfig
+```
 
 ## Step 3 - Explore the Fury Kubernetes Distribution
 
@@ -292,15 +333,16 @@ In the previous section, alongside the distribution, you have deployed Kubernete
 
 - `directory.internal.demo.example.dev`
 - `gpm.internal.demo.example.dev`
-- `cerebro.internal.demo.example.dev`
 - `grafana.internal.demo.example.dev`
 - `prometheus.internal.demo.example.dev`
 - `alertmanager.internal.demo.example.dev`
-- TBD
 
-These ingresses are reachable from the private network, since we configure nginx to use a dual battery, one exposed to the internet and one private.
+These ingresses are only reachable from the private network, since in this example we configured nginx to use a dual battery, one exposed to the internet and one private.
 
-To reach the LoadBalancer that is exposing the services, you need to connect via VPN (check if the dns setting for the VPN is correct) and you should be able to resolve these URLs and reach them.
+To reach the LoadBalancer that is exposing the services, you need to connect via VPN and you should be able to resolve these URLs and reach them.
+
+To connect to the VPN, after the installation, an `<CLUSTER_NAME>-<YOURUSER>.ovpn` file with you username will be created in the folder where `furyctl` was executed. 
+Use an OpenVPN client to connect to the VPN, and check that the DNS is working after the connection. If it's not, you need to set up the VPN to resolve DNS in full-dns mode.
 
 ### Forecastle
 
@@ -313,7 +355,6 @@ Navigate to <http://directory.internal.demo.example.dev> to see all the other in
 ### Grafana
 
 [Grafana](https://github.com/grafana/grafana) is an open-source platform for monitoring and observability. Grafana allows you to query, visualize, alert, and understand your metrics.
-
 
 Navigate to <http://grafana.internal.demo.example.dev> or click the Grafana icon from Forecastle.
 
@@ -393,7 +434,7 @@ Clean up the demo environment:
 1. Delete the EKS cluster and all the related aws resources:
 
 ```bash
-furyctl delete cluster
+furyctl delete cluster --outdir $PWD
 ```
 
 2. Write 'yes' and hit <kbd>⏎ Enter</kbd>, when prompted to confirm the deletion.

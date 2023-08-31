@@ -110,6 +110,7 @@ spec:
         minio:
           storageSize: 50Gi 
       dr:
+        type: eks
         velero:
           eks:
             region: eu-west-1
