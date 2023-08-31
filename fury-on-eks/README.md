@@ -35,25 +35,9 @@ mkdir -p /tmp/fury-getting-started && git -C /tmp/fury-getting-started clone htt
 cd /tmp/fury-getting-started/fury-on-eks
 ```
 
-3. Download the `furyctl` binary:
+3. Install `furyctl` binary: https://github.com/sighupio/furyctl#installation
 
-```bash
-curl -L "https://github.com/sighupio/furyctl/releases/download/v0.25.2/furyctl-$(uname -s)-$(uname -m).tar.gz" | tar xzf - -C /tmp
-```
-
-4. Move the `furyctl` binary to a directory in your `PATH`:
-
-```bash
-mv /tmp/furyctl /usr/local/bin/furyctl
-```
-
-5. Make the `furyctl` binary executable:
-
-```bash
-chmod +x /usr/local/bin/furyctl
-```
-
-6. Setup your AWS credentials by exporting the following environment variables:
+4. Setup your AWS credentials by exporting the following environment variables:
 
 ```bash
 export AWS_PROFILE=<YOUR_AWS_PROFILE_NAME>
@@ -75,7 +59,7 @@ You are all set ✌️.
 
 `furyctl` is a command-line tool developed by SIGHUP to support:
 
-- the automatic provisioning of Kubernetes clusters in a number of cloud environments
+- the automatic provisioning of Kubernetes clusters
 - the installation of the Fury distribution
 
 The configuration of the Fury cluster is governed by the `furyctl.yaml` file, which for the purposes of this tutorial 
@@ -87,6 +71,7 @@ is located at `/tmp/fury-getting-started/fury-on-eks/furyctl.yaml`.
 > ```
 > and edit the `custom-furyctl.yaml` file to fit your needs, when you are done you can use the `--config` flag to specify the path to the configuration file in the
 > following commands.
+> In this demo we will stick to the `furyctl.yaml` file.
 
 This file contains the information needed to set up the cluster and consists of the following sections:
 
@@ -158,6 +143,20 @@ The infrastructure section of the `furyctl.yaml` file contains the following par
             - 10.0.20.0/24
             - 10.0.30.0/24
             - 10.0.40.0/24
+    vpn:
+      instances: 1
+      port: 1194
+      instanceType: t3.micro
+      diskSize: 50
+      operatorName: sighup
+      dhParamsBits: 2048
+      vpnClientsSubnetCidr: 172.16.0.0/16
+      ssh:
+        publicKeys: []
+        githubUsersName:
+          - <YOURGITHUBUSERNAME>
+        allowedFromCidrs:
+          - 0.0.0.0/0
 ```
 
 You can choose different subnet CIDRs should you prefer.
@@ -165,11 +164,8 @@ You can choose different subnet CIDRs should you prefer.
 From this, `furyctl` will automatically provision:
 
 - **Virtual Private Cloud (VPC)** in a specified CIDR range with public and private subnets
+- **VPN server**, to access the private subnets and load-balancers
 - All the required networking gateways and routes
-
-> 💡 **Advanced**: you can bring your own VPC and VPN instead of creating it with furyctl. Both are optional.
-
-More details about the infrastructure provisioner can be found [here][provisioner-infrastructure-aws-reference-vpc] and [here][provisioner-infrastructure-aws-reference-vpn].
 
 ### Kubernetes section
 
@@ -181,7 +177,7 @@ The Kubernetes section of the `furyctl.yaml` file contains the following paramet
     nodeAllowedSshPublicKey: "{file://~/.ssh/id_rsa.pub}"
     apiServer:
       privateAccess: true
-      publicAccess: false
+      publicAccess: true
       privateAccessCidrs: []
       publicAccessCidrs: []
     nodePools:
@@ -202,7 +198,7 @@ The Kubernetes section of the `furyctl.yaml` file contains the following paramet
           k8s.io/cluster-autoscaler/node-template/taint/node.kubernetes.io/role: "infra:NoSchedule"
       - name: workers
         size:
-          min: 0
+          min: 1
           max: 3
         instance:
           type: t3.large
@@ -220,9 +216,7 @@ The Kubernetes section of the `furyctl.yaml` file contains the following paramet
 Replace the field `"{file://~/.ssh/id_rsa.pub}"` with the path to the public key you want to use to access the worker nodes.
 You can add different nodePools, or edit the existing one should you prefer.
 
-From these parameters `furyctl` will automatically deploy a battle-tested **publiuc** EKS Cluster with 3 tainted worker nodes to be used for infrastructural components and a dynamic number of untainted workers nodes.
-
-More details about the kubernetes provisioner can be found [here][provisioner-kubernetes-aws-reference].
+From these parameters `furyctl` will automatically deploy a battle-tested **public** EKS Cluster with 3 tainted worker nodes to be used for infrastructural components and a dynamic number of untainted workers nodes.
 
 ### Distribution section
 
@@ -247,25 +241,25 @@ The Distribution section of the `furyctl.yaml` file contains the following param
             name: demo.example.dev
             create: true
           private:
-            create: true
             name: internal.demo.example.dev
+            create: true
       logging:
-        opensearch:
-          type: single
-          resources:
-            limits:
-              cpu: 2000m
-              memory: 4G
-            requests:
-              cpu: 300m
-              memory: 1G
+        type: loki
+          minio:
+            storageSize: 50Gi 
       dr:
         velero:
           eks:
             region: eu-west-1
             bucketName: <S3_VELERO_BUCKET_NAME>
       policy:
-        type: none
+        type: gatekeeper
+      auth:
+        provider: 
+          type: basicAuth
+          basicAuth:
+            username: admin
+            password: password
 ```
 
 Replace the field `<S3_VELERO_BUCKET_NAME>` with the name of the S3 bucket that will be used to store the Velero backups. Notice that **`furyctl` will create this bucket for you**.
@@ -280,12 +274,12 @@ In this section, you will utilize furyctl to automatically provision an EKS Clus
 1. Start by running the furyctl command to create the cluster:
 
 ```bash
-furyctl create cluster
+furyctl create cluster --outdir $PWD
 ```
 > ⏱ The process will take several minutes to complete, you can follow the progress in detail by running the following command:
 >
 > ```bash
-> tail -f /root/.furyctl/furyctl.log | jq
+> tail -f .furyctl/furyctl.log | jq
 > ```
 
 🚀 Success! The distribution is fully deployed. Proceed to the next section to explore the various features it has to offer.
@@ -300,39 +294,13 @@ In the previous section, alongside the distribution, you have deployed Kubernete
 - `gpm.internal.demo.example.dev`
 - `cerebro.internal.demo.example.dev`
 - `grafana.internal.demo.example.dev`
-- `opensearch-dashboards.internal.demo.example.dev`
+- `prometheus.internal.demo.example.dev`
+- `alertmanager.internal.demo.example.dev`
+- TBD
 
-To access the ingresses more easily via the browser, configure your local DNS to resolve the ingresses to the internal load balancer IP:
+These ingresses are reachable from the private network, since we configure nginx to use a dual battery, one exposed to the internet and one private.
 
-1. Get the IP address of the internal load balancer:
-
-```bash
-dig $(kubectl get svc ingress-nginx-internal -n ingress-nginx --no-headers | awk '{print $4}')
-```
-
-Output:
-
-```bash
-...
-
-;; ANSWER SECTION:
-xxx.elb.eu-west-1.amazonaws.com. 77 IN A <FIRST_IP>
-xxx.elb.eu-west-1.amazonaws.com. 77 IN A <SECOND_IP>
-xxx.elb.eu-west-1.amazonaws.com. 77 IN A <THIRD_IP>
-...
-
-```
-
-3. Add the following line to your machine's `/etc/hosts`:
-
-```bash
-<FIRST_IP> directory.internal.demo.example.dev cerebro.internal.demo.example.dev opensearch-dashboards.internal.demo.example.dev grafana.internal.demo.example.dev gpm.internal.demo.example.dev
-```
-
-Now, you can reach the ingresses directly from your browser.
-
-> 💡 **Advanced**: if you have a delegated zone already configured in Route53, you can use a subdomain of that zone instead of `demo.example.dev` and the DNS should just work.
-
+To reach the LoadBalancer that is exposing the services, you need to connect via VPN (check if the dns setting for the VPN is correct) and you should be able to resolve these URLs and reach them.
 
 ### Forecastle
 
@@ -342,57 +310,20 @@ Navigate to <http://directory.internal.demo.example.dev> to see all the other in
 
 ![Forecastle][forecastle-eks-screenshot]
 
-### OpenSearch Dashboards
-
-[OpenSearch Dashboards](https://github.com/opensearch-project/OpenSearch-Dashboards) is an open-source analytics and visualization platform for OpenSearch. OpenSearch Dashboards lets you perform advanced data analysis and visualize data in various charts, tables, and maps. You can use it to search, view, and interact with data stored in OpenSearch indices.
-
-Navigate to <http://opensearch-dashboards.internal.demo.example.dev> or click the OpenSearch Dashboards icon from Forecastle.
-
-#### Manually Create OpenSearch Dashboards Indexes (optional)
-
-If when you access OpenSearch Dashboards you get welcomed with the following message:
-
-![opensearch-dashboards-welcome][opensearch-dashboards-welcome]
-
-this means that the Indexes have not been created yet. This is expected the first time you deploy the logging stack. We deploy a set of cron jobs that take care of creating them but they may not have run yet (they run every hour).
-
-You can trigger them manually with the following commands:
-
-```bash
-kubectl create job -n logging --from cronjob/index-patterns-cronjob manual-indexes
-kubectl create job -n logging --from cronjob/ism-policy-cronjob manual-ism-policy
-```
-
-Wait a moment for the jobs to finish and try refreshing the OpenSearch Dashboard page.
-
-#### Discover the logs
-
-To work with the logs arriving into the system, click on "OpenSearch Dashboards" icon on the main page, and then on the "Discover" option or navigate through the side ("hamburger") menu and select `Discover` (see image below).
-
-![opensearch-dashboards-discover][opensearch-dashboards-discover]
-
-![Opensearch-Dashboards][opensearch-dashboards-screenshot]
-
-Follow the next steps to query the logs collected by the logging stack:
-
-![opensearch-dashboards-index][opensearch-dashboards-index]
-
-You can choose between different index options:
-
-- `audit-*` Kubernetes API server audit logs.
-- `events-*`: Kubernetes events.
-- `infra-*`: logs for infrastructural components deployed as part of KFD
-- `ingress-controller-*`: logs from the NGINX Ingress Controllers running in the cluster.
-- `kubernetes-*`: logs for applications running in the cluster that are not part of KFD. *Notice that this index will most likely be empty until you deploy an application*.
-- `systemd-*` logs collected from a selection of systemd services running in the nodes like containerd and kubelet.
-
-Once you selected your desired index, then you can search them by writing queries in the search box. You can also filter the results by some criteria, like pod name, namespaces, etc.
-
 ### Grafana
 
 [Grafana](https://github.com/grafana/grafana) is an open-source platform for monitoring and observability. Grafana allows you to query, visualize, alert, and understand your metrics.
 
+
 Navigate to <http://grafana.internal.demo.example.dev> or click the Grafana icon from Forecastle.
+
+
+#### Discover the logs
+
+TODO
+
+
+#### Discover dashboards
 
 Fury provides some pre-configured dashboards to visualize the state of the cluster. Examine an example dashboard:
 
@@ -490,8 +421,6 @@ In case you ran into any problems feel free to [open an issue in GitHub](https:/
 
 More tutorials:
 
-- [Fury on GKE][fury-on-gke]
-- [Fury on OVHcloud][fury-on-ovhcloud]
 - [Fury on Minikube][fury-on-minikube]
 
 More about Fury:

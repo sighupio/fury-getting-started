@@ -27,11 +27,25 @@ spec:
             - 10.0.20.0/24
             - 10.0.30.0/24
             - 10.0.40.0/24
+    vpn:
+      instances: 1
+      port: 1194
+      instanceType: t3.micro
+      diskSize: 50
+      operatorName: sighup
+      dhParamsBits: 2048
+      vpnClientsSubnetCidr: 172.16.0.0/16
+      ssh:
+        publicKeys: []
+        githubUsersName:
+          - <YOURGITHUBUSERNAME>
+        allowedFromCidrs:
+          - 0.0.0.0/0
   kubernetes:
     nodePoolsLaunchKind: "launch_templates"
     nodeAllowedSshPublicKey: "{file://~/.ssh/id_rsa.pub}"
     apiServer:
-      privateAccess: false
+      privateAccess: true
       publicAccess: true
       privateAccessCidrs: []
       publicAccessCidrs: ["0.0.0.0/0"]
@@ -89,20 +103,22 @@ spec:
             name: demo.example.dev
             create: true
           private:
-            create: true
             name: internal.demo.example.dev
+            create: true
       logging:
-        type: opensearch
-        opensearch:
-          type: single
-          resources:
-            limits:
-              cpu: 2000m
-              memory: 4G
-            requests:
-              cpu: 300m
-              memory: 1G
+        type: loki
+        minio:
+          storageSize: 50Gi 
       dr:
-        type: none
+        velero:
+          eks:
+            region: eu-west-1
+            bucketName: <S3_VELERO_BUCKET_NAME>
       policy:
-        type: none
+        type: gatekeeper
+      auth:
+        provider: 
+          type: basicAuth
+          basicAuth:
+            username: admin
+            password: password
