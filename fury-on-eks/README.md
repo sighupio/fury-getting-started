@@ -1,33 +1,28 @@
-# Fury on EKS
+# Fury on EKS with furyctl next
 
-This step-by-step tutorial guides you to deploy the **Kubernetes Fury Distribution** (KFD) on an EKS cluster on AWS.
+This step-by-step tutorial guides you to deploy the **Kubernetes Fury Distribution** (KFD) on an EKS cluster on AWS using the furyctl `>=0.25.2`
 
 This tutorial covers the following steps:
 
-1. Deploy an EKS Kubernetes cluster on AWS with `furyctl`
-2. Download the latest version of KFD with `furyctl`
-3. Install the Kubernetes Fury Distribution
-4. Explore some features of the distribution
-5. (optional) Deploy additional modules of the Fury distribution
-6. Teardown of the environment
+1. Configure the EKS cluster with the configuration file `furyctl.yaml`
+2. Deploy an EKS Kubernetes cluster on AWS with `furyctl`
+3. Explore the Kubernetes Fury Distribution
+4. Advanced Distribution usage
+5. Teardown of the environment
 
 > ⚠️ AWS **charges you** to provision the resources used in this tutorial. You should be charged only a few dollars, but we are not responsible for any costs that incur.
 >
-> ❗️ **Remember to stop all the instances by following all the steps listed in the [teardown phase](#step-6---teardown).**
->
-> 💻 If you prefer trying Fury in a local environment, check out the [Fury on Minikube][fury-on-minikube] tutorial.
+> ❗️ **Remember to stop all the instances by following all the steps listed in the [teardown phase](#step-5---teardown).**
 
 ## Prerequisites
 
-This tutorial assumes some basic familiarity with Kubernetes and AWS. Some experience with Terraform is helpful but not required.
+This tutorial assumes some basic familiarity with Kubernetes and AWS.
 
 To follow this tutorial, you need:
 
 - **AWS Access Credentials** of an AWS Account with the following [IAM permissions][terraform-aws-eks-iam-permissions].
-- **Docker** - the tutorial uses a [Docker image][fury-getting-started-dockerfile] containing `furyctl` and all the necessary tools to follow it.
-- **OpenVPN Client** - [Tunnelblick][tunnelblick] (on macOS) or [OpenVPN Connect][openvpn-connect] (for other OS) are recommended.
-- **AWS S3 Bucket** (optional) to store the Terraform state.
-- **GitHub** account with [SSH key configured][github-ssh-key-setup].
+- **AWS S3 Bucket** to store the Terraform state.
+- **AWS CLI** - version 2.8.12 at the time of writing this tutorial. You can check your version by running `aws --version`. If you don't have it installed, follow the [official guide][aws-cli-installation].
 
 ### Setup and initialize the environment
 
@@ -36,30 +31,22 @@ To follow this tutorial, you need:
 2. Clone the [fury getting started repository][fury-getting-started-repository] containing the example code used in this tutorial:
 
 ```bash
-git clone https://github.com/sighupio/fury-getting-started/
-cd fury-getting-started/fury-on-eks
+mkdir -p /tmp/fury-getting-started && git -C /tmp/fury-getting-started clone https://github.com/sighupio/fury-getting-started/ .
+cd /tmp/fury-getting-started/fury-on-eks
 ```
 
-3. Run the `fury-getting-started` docker image:
-
-```bash
-docker run -ti --rm \
-  -v $PWD:/demo \
-  registry.sighup.io/delivery/fury-getting-started
-```
+3. Install `furyctl` binary: https://github.com/sighupio/furyctl#installation
 
 4. Setup your AWS credentials by exporting the following environment variables:
 
 ```bash
-export AWS_ACCESS_KEY_ID=<YOUR_AWS_ACCESS_KEY_ID>
-export AWS_SECRET_ACCESS_KEY=<YOUR_AWS_SECRET_ACCESS_KEY>
-export AWS_DEFAULT_REGION=<YOUR_AWS_REGION>
+export AWS_PROFILE=<YOUR_AWS_PROFILE_NAME>
 ```
 
-Alternatively, authenticate with AWS by running `aws configure` in your terminal. When prompted, enter your AWS Access Key ID, Secret Access Key, region, and output format. Notice that this won't set the environment variable `AWS_DEFAULT_REGION` that is required later. Please set it manually.
+If you don't have an AWS profile configured, you can create one by running the following command:
 
 ```bash
-$ aws configure
+$ aws configure --profile <YOUR_AWS_PROFILE_NAME>
 AWS Access Key ID [None]: <YOUR_AWS_ACCESS_KEY_ID>
 AWS Secret Access Key [None]: <YOUR_AWS_SECRET_ACCESS_KEY>
 Default region name [None]: <YOUR_AWS_REGION>
@@ -68,80 +55,62 @@ Default output format [None]: json
 
 You are all set ✌️.
 
-## Step 1 - Automatic provisioning of an EKS Cluster with furyctl
+## Step 1 - Configure the EKS cluster via `furyctl.yaml` 
 
 `furyctl` is a command-line tool developed by SIGHUP to support:
 
-- the automatic provisioning of Kubernetes clusters in various cloud environments
+- the automatic provisioning of Kubernetes clusters
 - the installation of the Fury distribution
 
-The provisioning process is divided into two phases:
+The configuration of the Fury cluster is governed by the `furyctl.yaml` file, which for the purposes of this tutorial 
+is located at `/tmp/fury-getting-started/fury-on-eks/furyctl.yaml`.
 
-1. **Bootstrap** provisioning phase
-2. **Cluster** provisioning phase
+> ℹ️ You can also create a sample configuration file by running the following command:
+> ```bash
+> furyctl create config --version v1.25.6 -c custom-furyctl.yaml
+> ```
+> and edit the `custom-furyctl.yaml` file to fit your needs, when you are done you can use the `--config` flag to specify the path to the configuration file in the
+> following commands.
+> In this demo we will stick to the `furyctl.yaml` file.
 
-### Boostrap provisioning phase
+This file contains the information needed to set up the cluster and consists of the following sections:
 
-In the bootstrap phase, `furyctl` automatically provisions:
+- **global**: contains the information about cluster metadata, tools configuration, and the region where the cluster will be deployed.
+- **infrastructure**: contains the information related to the infrastructure (VPC and VPN) provisioning phase.
+- **kubernetes**: contains the information related to the provisioning phase of the Kubernetes cluster.
+- **distribution**: contains information related to the provisioning phase of the distribution.
 
-- **Virtual Private Cloud (VPC)** in a specified CIDR range with public and private subnets
-- **EC2 instance** bastion host with an OpenVPN Server
-- All the required networking gateways and routes
+### Global section
 
-More details about the bootstrap provisioner can be found [here][provisioner-bootstrap-aws-reference].
-
-#### Configure the bootstrap provisioner
-
-The bootstrap provisioner takes a `bootstrap.yml` as input. This file, instructs the bootstrap provisioner with all the needed parameters to deploy the networking infrastructure.
-
-For this tutorial, use the `bootstrap.yml` template located at `/demo/infrastructure/bootstrap.yml`:
+The global section of the `furyctl.yaml` file contains the following parameters:
 
 ```yaml
-kind: Bootstrap
+apiVersion: kfd.sighup.io/v1alpha2
+kind: EKSCluster
 metadata:
-  name: fury-eks-demo
+  name: <CLUSTER_NAME>
 spec:
-  networkCIDR: 10.0.0.0/16
-  publicSubnetsCIDRs:
-  - 10.0.1.0/24
-  - 10.0.2.0/24
-  - 10.0.3.0/24
-  privateSubnetsCIDRs:
-  - 10.0.101.0/24
-  - 10.0.102.0/24
-  - 10.0.103.0/24
-  vpn:
-    instances: 1
-    port: 1194
-    instanceType: t3.micro
-    diskSize: 50
-    operatorName: fury
-    dhParamsBits: 2048
-    subnetCIDR: 172.16.0.0/16
-    sshUsers:
-    - <GITHUB_USER>
-executor:
-  # state:
-  #   backend: s3
-  #   config:
-  #     bucket: <S3_BUCKET>
-  #     key: furyctl/boostrap
-  #     region: <S3_BUCKET_REGION>
-provisioner: aws
+  distributionVersion: "v1.25.6"
+  toolsConfiguration:
+    terraform:
+      state:
+        s3:
+          bucketName: <S3_TFSTATE_BUCKET>
+          keyPrefix: <S3_TFSTATE_BUCKET_KEY_PREFIX>
+          region: <S3_TFSTATE_BUCKET_REGION>
+  region: <CLUSTER_REGION>
+  tags:
+    env: "fury-getting-started"
 ```
 
-Open the `/demo/infrastructure/bootstrap.yml` file with a text editor of your choice and replace the field `<GITHUB_USER>` with your actual GitHub username. You can choose different subnet CIDRs should you prefer.
-
-Leave the rest as configured. More details about each field can be found [here][provisioner-bootstrap-aws-reference].
-
-#### (optional) Create an S3 Bucket to hold the Terraform remote
-
-Although this is a tutorial, it is always a good practice to use a remote Terraform state over a local one. In case you are not familiar with Terraform, you can skip this section.
+Open the `/tmp/fury-getting-started/fury-next-on-eks/furyctl.yaml` file with a text editor of your choice and replace the field `<CLUSTER_NAME>` with a name of your choice for the cluster, and the field `<CLUSTER_REGION>` with the AWS region where you want to deploy the cluster. 
+If you already have a S3 bucket to store the Terraform state, replace the field `<S3_TFSTATE_BUCKET>`, `<S3_TFSTATE_BUCKET_KEY_PREFIX>`, `<S3_TFSTATE_BUCKET_REGION>`
+with the data from the bucket, otherwise you can create a new one by following the following steps:
 
 1. Choose a unique name and an AWS region for the S3 Bucket:
 
 ```bash
-export S3_BUCKET=fury-demo-eks              # Use a different name
+export S3_BUCKET=fury-demo-eks-$RANDOM             # Use a different name
 export S3_BUCKET_REGION=$AWS_DEFAULT_REGION # You can use the same region than before.
 ```
 
@@ -154,536 +123,326 @@ aws s3api create-bucket \
   --create-bucket-configuration LocationConstraint=$S3_BUCKET_REGION
 ```
 
-> ℹ️  You might need to give permissions on S3 to the user.
+> ℹ️ You might need to give permissions on S3 to the user.
 
-3. Once created, uncomment the `spec.executor.state` block in the `/demo/infrastructure/bootstrap.yml` file:
+### Infrastructure section
 
-```yaml
-...
-executor:
-  state:
-   backend: s3
-   config:
-     bucket: <S3_BUCKET>
-     key: fury/boostrap
-     region: <S3_BUCKET_REGION>
-```
-
-4. Replace the `<S3_BUCKET>` and `<S3_BUCKET_REGION>` placeholders with the correct values from the previous commands:
+The infrastructure section of the `furyctl.yaml` file contains the following parameters:
 
 ```yaml
-...
-executor:
-  state:
-   backend: s3
-   config:
-     bucket: fury-demo-eks # example value
-     key: fury/boostrap
-     region: eu-central-1  # example value
+  infrastructure:
+    vpc:
+      network:
+        cidr: 10.0.0.0/16
+        subnetsCidrs:
+          private:
+            - 10.0.182.0/24
+            - 10.0.172.0/24
+            - 10.0.162.0/24
+          public:
+            - 10.0.20.0/24
+            - 10.0.30.0/24
+            - 10.0.40.0/24
+    vpn:
+      instances: 1
+      port: 1194
+      instanceType: t3.micro
+      diskSize: 50
+      operatorName: sighup
+      dhParamsBits: 2048
+      vpnClientsSubnetCidr: 172.16.0.0/16
+      ssh:
+        publicKeys: []
+        githubUsersName:
+          - <YOURGITHUBUSERNAME>
+        allowedFromCidrs:
+          - 0.0.0.0/0
 ```
 
-#### Provision networking infrastructure
+You can choose different subnet CIDRs should you prefer.
 
-1. Initialize the bootstrap provisioner:
+From this, `furyctl` will automatically provision:
+
+- **Virtual Private Cloud (VPC)** in a specified CIDR range with public and private subnets
+- **VPN server**, to access the private subnets and load-balancers
+- All the required networking gateways and routes
+
+### Kubernetes section
+
+The Kubernetes section of the `furyctl.yaml` file contains the following parameters:
+
+```yaml
+  kubernetes:
+    nodePoolsLaunchKind: "launch_templates"
+    nodeAllowedSshPublicKey: "{file://~/.ssh/id_rsa.pub}"
+    apiServer:
+      privateAccess: true
+      publicAccess: true
+      privateAccessCidrs: []
+      publicAccessCidrs: []
+    nodePools:
+      - name: infra
+        size:
+          min: 3
+          max: 3
+        instance:
+          type: t3.xlarge
+        labels:
+          nodepool: infra
+          node.kubernetes.io/role: infra
+        taints:
+          - node.kubernetes.io/role=infra:NoSchedule
+        tags:
+          k8s.io/cluster-autoscaler/node-template/label/nodepool: "infra"
+          k8s.io/cluster-autoscaler/node-template/label/node.kubernetes.io/role: "infra"
+          k8s.io/cluster-autoscaler/node-template/taint/node.kubernetes.io/role: "infra:NoSchedule"
+      - name: workers
+        size:
+          min: 1
+          max: 3
+        instance:
+          type: t3.large
+        labels:
+          nodepool: workers
+          node.kubernetes.io/role: workers
+        taints:
+          - node.kubernetes.io/role=workers:NoSchedule
+        tags:
+          k8s.io/cluster-autoscaler/node-template/label/nodepool: "workers"
+          k8s.io/cluster-autoscaler/node-template/label/node.kubernetes.io/role: "workers"
+          k8s.io/cluster-autoscaler/node-template/taint/node.kubernetes.io/role: "workers:NoSchedule"
+```
+
+Replace the field `"{file://~/.ssh/id_rsa.pub}"` with the path to the public key you want to use to access the worker nodes.
+You can add different nodePools, or edit the existing one should you prefer.
+
+From these parameters `furyctl` will automatically deploy a battle-tested **public** EKS Cluster with 3 tainted worker nodes to be used for infrastructural components and a dynamic number of untainted workers nodes.
+
+### Distribution section
+
+The Distribution section of the `furyctl.yaml` file contains the following parameters:
+
+```yaml
+  distribution:
+    common:
+      nodeSelector:
+        node.kubernetes.io/role: infra
+      tolerations:
+        - effect: NoSchedule
+          key: node.kubernetes.io/role
+          value: infra
+    modules:
+      ingress:
+        baseDomain: internal.demo.example.dev
+        nginx:
+          type: dual
+          tls:
+            provider: certManager
+        certManager:
+          clusterIssuer:
+            name: letsencrypt-fury
+            email: admin@example.dev
+            type: dns01
+        dns:
+          public:
+            name: demo.example.dev
+            create: true
+          private:
+            name: internal.demo.example.dev
+            create: true
+      logging:
+        type: loki
+        minio:
+          storageSize: 50Gi 
+      dr:
+        type: eks
+        velero:
+          eks:
+            region: eu-west-1
+            bucketName: <S3_VELERO_BUCKET_NAME>
+      policy:
+        type: gatekeeper
+      auth:
+        provider: 
+          type: basicAuth
+          basicAuth:
+            username: admin
+            password: password
+```
+
+In this example, we are installing the distribution with the following options:
+
+- A dual battery of nginx, one private and one public
+- cert-manager with dns01 setup with route53
+- Loki as storage for the logs
+- Basic Auth on the ingresses
+
+Replace the field `<S3_VELERO_BUCKET_NAME>` with the name of the S3 bucket that will be used to store the Velero backups. Notice that **`furyctl` will create this bucket for you**.
+You can configure the existing modules or add new ones (take a look to the [docs][fury-distribution-eks-reference]) should you prefer.
+
+You should also change the `example.dev` domain with a real one that you own, to be able to leverage the auto-ssl capabilities using cert-manager.
+
+From these parameters, `furyctl` will automatically configure and deploy the battle-tested Kubernetes Fury Distribution.
+
+## Step 2 - Provisioning an EKS Cluster Automatically with furyctl
+
+In this section, you will utilize furyctl to automatically provision an EKS Cluster, making the deployment process streamlined.
+
+1. Start by running the furyctl command to create the cluster:
 
 ```bash
-cd /demo/infrastructure/
-furyctl bootstrap init
+furyctl create cluster --outdir $PWD
 ```
-
-In case you run into errors, you can re-initialize the bootstrap provisioner by adding the  `--reset` flag:
-
-```bash
-furyctl bootstrap init --reset
-```
-
-2. If the initialization succeeds, apply the bootstrap provisioner:
-
-```bash
-furyctl bootstrap apply
-```
-
-> ⏱ This phase may take some minutes.
+> ⏱ The process will take several minutes to complete, you can follow the progress in detail by running the following command:
 >
-> Logs are available at `/demo/infrastructure/bootstrap/logs/terraform.logs`.
-
-3. When the `furyctl bootstrap apply` completes, inspect the output:
-
-```bash
-...
-All the bootstrap components are up to date.
-
-VPC and VPN ready:
-
-VPC: vpc-0d2fd9bcb4f68379e
-Public Subnets: [subnet-0bc905beb6622f446, subnet-0c6856acb42edf8f3, subnet-0272dcf88b2f5d12c]
-Private Subnets: [subnet-072b1e3405f662c70, subnet-0a23db3b19e5a7ed7, subnet-08f4930148ab5223f]
-
-Your VPN instance IPs are: [34.243.133.186]
-...
-```
-
-In particular, take note of:
-
-- **VPC** - `vpc-0d2fd9bcb4f68379e` in the example output above
-- **Private Subnets** - `[subnet-072b1e3405f662c70, subnet-0a23db3b19e5a7ed7, subnet-08f4930148ab5223f]` in the example output above
-
-These values are used in the cluster provisioning phase.
-
-### Cluster provisioning phase
-
-In the cluster provisioning phase, `furyctl` automatically deploys a battle-tested private EKS Cluster. To interact with the private EKS cluster, connect first to the private network via the OpenVPN server in the bastion host.
-
-#### Connect to the private network
-
-1. Create the `fury.ovpn` OpenVPN credentials file with `furyagent`:
-
-```bash
-furyagent configure openvpn-client \
-  --client-name fury \
-  --config /demo/infrastructure/bootstrap/secrets/furyagent.yml > fury.ovpn
-```
-
-> 🕵🏻‍♂️ [Furyagent][furyagent-repository] is a tool developed by SIGHUP to manage OpenVPN and SSH user access to the bastion host.
-
-2. Check that the `fury` user is now listed:
-
-```bash
-furyagent configure openvpn-client \
-  --list \
-  --config /demo/infrastructure/bootstrap/secrets/furyagent.yml
-```
-
-Output:
-
-```bash
-2022-12-09 15:29:02.853807 I | storage.go:146: Item pki/vpn-client/fury.crt found [size: 1094]
-2022-12-09 15:29:02.853961 I | storage.go:147: Saving item pki/vpn-client/fury.crt ...
-2022-12-09 15:29:02.975943 I | storage.go:146: Item pki/vpn/ca.crl found [size: 560]
-2022-12-09 15:29:02.975991 I | storage.go:147: Saving item pki/vpn/ca.crl ...
-+------+------------+------------+---------+--------------------------------+
-| USER | VALID FROM |  VALID TO  | EXPIRED |            REVOKED             |
-+------+------------+------------+---------+--------------------------------+
-| fury | 2022-12-09 | 2023-12-09 | false   | false 0001-01-01 00:00:00      |
-|      |            |            |         | +0000 UTC                      |
-+------+------------+------------+---------+--------------------------------+
-```
-
-3. Open the `fury.ovpn` file with any OpenVPN Client.
-
-4. Connect to the OpenVPN Server via the chosen OpenVPN Client.
-
-#### Configure the cluster provisioner
-
-The cluster provisioner takes a `cluster.yml` as input. This file instructs the provisioner with all the needed parameters to deploy the EKS cluster.
-
-In the repository, you can find a template for this file at `/demo/infrastructure/cluster.yml`:
-
-```yaml
-kind: Cluster
-metadata:
-  name: fury-eks-demo
-spec:
-  version: 1.25
-  network: <VPC_ID>
-  subnetworks:
-  - <PRIVATE_SUBNET1_ID>
-  - <PRIVATE_SUBNET2_ID>
-  - <PRIVATE_SUBNET3_ID>
-  dmzCIDRRange:
-  - 10.0.0.0/16
-  sshPublicKey: example-ssh-key # ⚠️ put your id_rsa.pub file content here
-  nodePoolsLaunchKind: "launch_templates"
-  nodePools:
-  - name: fury
-    version: null
-    minSize: 3
-    maxSize: 3 
-    instanceType: t3.large
-    volumeSize: 50
-executor:
-  # state:
-  #   backend: s3
-  #   config:
-  #     bucket: <S3_BUCKET>
-  #     key: furyctl/cluster
-  #     region: <S3_BUCKET_REGION>
-provisioner: eks
-```
-
-Open the file with a text editor and replace:
-
-- `<VPC_ID>` with the VPC ID (`vpc-0d2fd9bcb4f68379e`) created in the previous phase.
-- `<PRIVATE_SUBNET1_ID>` with ID of the first private subnet ID (`subnet-072b1e3405f662c70`) created in the previous phase.
-- `<PRIVATE_SUBNET2_ID>` with ID of the second private subnet ID (`subnet-subnet-0a23db3b19e5a7ed7`) created in the previous phase.
-- `<PRIVATE_SUBNET3_ID>` with ID of the third private subnet ID (`subnet-08f4930148ab5223f`) created in the previous phase.
-- `sshPublicKey` with the contents of your public SSH key (usually located at `~/.ssh/id_rsa.pub`).
-- (optional) As before, add the details of the S3 Bucket that holds the Terraform remote state.
-
-> ⚠️ if you are using an S3 bucket to store the Terraform state make sure to use a **different key** in `executor.state.config.key` field than the one used in the boorstrap phase.
-
-#### Provision EKS Cluster
-
-1. Initialize the cluster provisioner:
-
-```bash
-furyctl cluster init
-```
-
-2. Create EKS cluster:
-
-> ⏱ The following command takes several minutes to complete.
->
-> Logs are available at `/demo/infrastructure/cluster/logs/terraform.logs`.
-
-```bash
-furyctl cluster apply
-```
-
-3. When the `furyctl cluster apply` completes, test the connection with the cluster:
-
-```bash
-export KUBECONFIG=/demo/infrastructure/cluster/secrets/kubeconfig
-kubectl get nodes
-```
-
-> 💡 **TIP**: the `kubectl` command has been aliased to `k` inside the container.
-
-## Step 2 - Download KFD modules
-
-`furyctl` can do a lot more than deploy infrastructure. In this section, you use `furyctl` to download the monitoring, logging, and ingress modules of KFD.
-
-### Inspect the Furyfile
-
-`furyctl` needs a `Furyfile.yml` to know which modules to download.
-
-For this tutorial, use the `Furyfile.yml` located at `/demo/Furyfile.yaml`:
-
-```yaml
-versions:
-  networking: v1.12.2
-  monitoring: v2.1.0
-  logging: v3.1.3
-  ingress: v1.14.1
-  dr: v1.11.0
-  auth: v0.0.3
-  aws: v2.2.0
-  opa: v1.8.0
-
-bases:
-  - name: networking
-  - name: monitoring
-  - name: logging
-  - name: ingress
-  - name: aws
-  - name: dr
-  - name: opa
-
-modules:
-  - name: aws
-  - name: dr
-```
-
-> 💡 **TIP**: you can also download the `Furyfile.yml` and a sample `kustomization.yaml` for a specific version of the Kubernetes Fury Distribution with the folllowing command:
->
-> ```console
-> furyctl init --version v1.25.0
+> ```bash
+> tail -f .furyctl/furyctl.log | jq
 > ```
+> `--outdir` flag is used to define in which directory to create the hidden `.furyctl` folder that contains all the required files to install the cluster. 
+> If not provided, a `.furyctl` folder will be created in the user home.
 
-### Download Fury modules
-
-1. Download the Fury modules with `furyctl`:
-
-```bash
-cd /demo/
-furyctl vendor -H
-```
-
-2. Inspect the downloaded modules in the `vendor` folder:
+The output should be similar to the following:
 
 ```bash
-tree -d /demo/vendor -L 3
+INFO Downloading distribution...                  
+INFO Validating configuration file...             
+INFO Downloading dependencies...                  
+INFO Validating dependencies...                   
+INFO Creating cluster...                          
+INFO Creating infrastructure...                   
+WARN Creating cloud resources, this could take a while... 
+INFO Creating Kubernetes Fury cluster...          
+WARN Creating cloud resources, this could take a while... 
+INFO Saving furyctl configuration file in the cluster... 
+INFO Saving distribution configuration file in the cluster... 
+INFO Installing Kubernetes Fury Distribution...   
+WARN Creating cloud resources, this could take a while... 
+INFO Checking that the cluster is reachable...    
+INFO Applying manifests...                        
+INFO Saving furyctl configuration file in the cluster... 
+INFO Saving distribution configuration file in the cluster... 
+INFO Kubernetes Fury cluster created successfully 
+INFO Please remember to kill the VPN connection when you finish doing operations on the cluster 
+INFO To connect to the cluster, set the path to your kubeconfig with 'export KUBECONFIG=/private/tmp/fury-getting-started/fury-on-eks/kubeconfig' or use the '--kubeconfig /private/tmp/fury-getting-started/fury-on-eks/kubeconfig' flag in following executions
 ```
 
-Output:
+🚀 Success! The distribution is fully deployed. Proceed to the next section to explore the various features it has to offer.
+
+To interact with the cluster a `kubeconfig` has been created on the folder, make it usable with `kubectl` with:
 
 ```bash
-$ tree -d vendor -L 3
-
-vendor
-├── katalog
-│  ├── aws
-│  │  ├── cluster-autoscaler
-│  │  ├── ebs-csi-driver
-│  │  ├── load-balancer-controller
-│  │  └── node-termination-handler
-│  ├── dr
-│  │  ├── tests
-│  │  └── velero
-│  ├── ingress
-│  │  ├── cert-manager
-│  │  ├── dual-nginx
-│  │  ├── external-dns
-│  │  ├── forecastle
-│  │  ├── nginx
-│  │  └── tests
-│  ├── logging
-│  │  ├── cerebro
-│  │  ├── configs
-│  │  ├── logging-operated
-│  │  ├── logging-operator
-│  │  ├── loki-configs
-│  │  ├── loki-single
-│  │  ├── opensearch-dashboards
-│  │  ├── opensearch-single
-│  │  ├── opensearch-triple
-│  │  └── tests
-│  ├── monitoring
-│  │  ├── aks-sm
-│  │  ├── alertmanager-operated
-│  │  ├── blackbox-exporter
-│  │  ├── configs
-│  │  ├── eks-sm
-│  │  ├── gke-sm
-│  │  ├── grafana
-│  │  ├── kube-proxy-metrics
-│  │  ├── kube-state-metrics
-│  │  ├── kubeadm-sm
-│  │  ├── node-exporter
-│  │  ├── prometheus-adapter
-│  │  ├── prometheus-operated
-│  │  ├── prometheus-operator
-│  │  ├── tests
-│  │  ├── thanos
-│  │  └── x509-exporter
-│  ├── networking
-│  │  ├── calico
-│  │  ├── ip-masq
-│  │  ├── tests
-│  │  └── tigera
-│  └── opa
-│     ├── gatekeeper
-│     └── tests
-└── modules
-   ├── aws
-   │  ├── iam-for-cluster-autoscaler
-   │  ├── iam-for-ebs-csi-driver
-   │  └── iam-for-load-balancer-controller
-   └── dr
-      ├── aws-velero
-      ├── azure-velero
-      └── gcp-velero
+export KUBECONFIG=$PWD/kubeconfig
 ```
 
-## Step 3 - Installation
-
-### Terraform project
-
-Each module can contain Kustomize bases or Terraform modules.
-
-First of all, you need to initialize the additional Terraform project to create resources needed by Velero in the DR module and EBS CSI Driver in the AWS module.
-
-Inside the repository, you can find a Terraform file at `/demo/terraform/main.tf`. Edit this file and change the values for the S3 bucket that will store the Terraform state for the new resources:
-
-```terraform
-terraform {
-#   backend "s3" {
-#     bucket = <S3_BUCKET>
-#     key    = fury/distribution
-#     region = <S3_BUCKET_REGION>
-#   }
-  required_version = ">= 0.15.4"
-
-  required_providers {
-    aws        = "=3.37.0"
-  }
-}
-
-```
-
-Then, create a file `terraform.tfvars` in the `/demo/terraform` folder with the following content (change the values accordingly to your environment):
-
-```terraform
-cluster_name = "fury-eks-demo"
-velero_bucket_name = "velero-demo-sa"
-```
-
-Then apply the terraform project:
-
-```bash
-cd /demo/terraform/
-
-make init
-make plan
-make apply
-```
-
-After everything is applied, extract the kustomize patches we need in the next step with the following command:
-
-```bash
-make generate-output
-```
-
-### Kustomize project
-
-Kustomize allows grouping related Kubernetes resources and combining them to create more complex deployments.
-Moreover, it is flexible, and it enables a simple patching mechanism for additional customization.
-
-To deploy the Fury distribution, use the following root `kustomization.yaml` located at `/demo/manifests/kustomization.yaml`:
-
-```yaml
----
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-resources:
-  - ingress
-  - logging
-  - monitoring
-  - networking
-  - dr
-  - opa
-  - aws
-```
-
-This `kustomization.yaml` wraps other `kustomization.yaml` files present in each module subfolder. For example in `/demo/manifests/logging/kustomization.yaml` you'll find:
-
-```yaml
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-resources:
-  - ../../vendor/katalog/logging/cerebro
-  - ../../vendor/katalog/logging/logging-operator
-  - ../../vendor/katalog/logging/logging-operated
-  - ../../vendor/katalog/logging/configs
-  - ../../vendor/katalog/logging/opensearch-single
-  - ../../vendor/katalog/logging/opensearch-dashboards
-
-  - resources/ingress.yml
-
-patchesStrategicMerge:
-  - patches/opensearch-resources.yml
-  - patches/cerebro-resources.yml
-```
-
-Each `kustomization.yaml` file:
-
-- references the modules downloaded in the previous section
-- patches the upstream modules that we downloaded with a custom configuration for this environment (e.g. `patches/opensearch-resources.yml` limits the resources requested by OpenSearch)
-- deploys some additional custom resources not included in the modules (e.g. `resources/ingress.yml`)
-
-Install the modules:
-
-```bash
-cd /demo/manifests/
-
-make apply
-# Wait a momento for the Kubernetes API server to process the new CRDs and for the nginx-ingress-contorllers to become READY, and then run again the apply command.
-make apply
-```
-
-## Step 4 - Explore the distribution
-
-🚀 The distribution is finally deployed! In this section, you explore some of its features.
+## Step 3 - Explore the Fury Kubernetes Distribution
 
 ### Setup local DNS
 
-In Step 3, alongside the distribution, you have deployed Kubernetes ingresses to expose underlying services at the following HTTP routes:
+In the previous section, alongside the distribution, you have deployed Kubernetes ingresses to expose underlying services at the following HTTP routes:
 
-- `forecastle.fury.info`
-- `gpm.fury.info`
-- `grafana.fury.info`
-- `opensearch-dashboards.fury.info`
+- `directory.internal.demo.example.dev`
+- `gpm.internal.demo.example.dev`
+- `grafana.internal.demo.example.dev`
+- `prometheus.internal.demo.example.dev`
+- `alertmanager.internal.demo.example.dev`
 
-To access the ingresses more easily via the browser, configure your local DNS to resolve the ingresses to the internal load balancer IP:
+These ingresses are only reachable from the private network, since in this example we configured nginx to use a dual battery, one exposed to the internet and one private.
 
-1. Get the IP address of the internal load balancer:
+To reach the LoadBalancer that is exposing the services, you need to connect via VPN and you should be able to resolve these URLs and reach them.
 
-```bash
-dig $(kubectl get svc ingress-nginx -n ingress-nginx --no-headers | awk '{print $4}')
-```
+To connect to the VPN, after the installation, an `<CLUSTER_NAME>-<YOURUSER>.ovpn` file with you username will be created in the folder where `furyctl` was executed. 
+Use an OpenVPN client to connect to the VPN, and check that the DNS is working after the connection. If it's not, you need to set up the VPN to resolve DNS in full-dns mode.
 
-Output:
-
-```bash
-...
-
-;; ANSWER SECTION:
-xxx.elb.eu-west-1.amazonaws.com. 77 IN A <FIRST_IP>
-xxx.elb.eu-west-1.amazonaws.com. 77 IN A <SECOND_IP>
-xxx.elb.eu-west-1.amazonaws.com. 77 IN A <THIRD_IP>
-...
-
-```
-
-3. Add the following line to your machine's `/etc/hosts` (not the container's):
+The HTTPS certificate will not be generated until you correctly delegate the public zone to be authoritative. To get the NS servers of the public zone run the command:
 
 ```bash
-<FIRST_IP> forecastle.fury.info cerebro.fury.info opensearch-dashboards.fury.info grafana.fury.info gpm.fury.info
+aws route53 list-hosted-zones | cat
+{
+    "HostedZones": [
+        {
+            "Id": "/hostedzone/Z0993238TFEEUFQUA7T8",
+            "Name": "demo.example.dev.",
+            "CallerReference": "terraform-20230904104525356400000001",
+            "Config": {
+                "Comment": "Managed by Terraform",
+                "PrivateZone": false
+            },
+            "ResourceRecordSetCount": 8
+        },
+        {
+            "Id": "/hostedzone/Z00537863VMG5BHXEMRYA",
+            "Name": "internal.demo.example.dev.",
+            "CallerReference": "terraform-20230904104525356600000002",
+            "Config": {
+                "Comment": "Managed by Terraform",
+                "PrivateZone": true
+            },
+            "ResourceRecordSetCount": 20
+        }
+    ]
+}
 ```
 
-Now, you can reach the ingresses directly from your browser.
+Get the Id for the public zone, in this example: Z0993238TFEEUFQUA7T8, and proceed to retrieve the NS servers
+
+```bash
+aws route53 list-resource-record-sets --hosted-zone-id Z0993238TFEEUFQUA7T8 | cat                                       
+{
+    "ResourceRecordSets": [
+        {
+            "Name": "demo.example.dev.",
+            "Type": "NS",
+            "TTL": 172800,
+            "ResourceRecords": [
+                {
+                    "Value": "ns-328.awsdns-41.com."
+                },
+                {
+                    "Value": "ns-1277.awsdns-31.org."
+                },
+                {
+                    "Value": "ns-695.awsdns-22.net."
+                },
+                {
+                    "Value": "ns-1745.awsdns-26.co.uk."
+                }
+            ]
+        },
+        ...
+    ]
+}
+```
+
+You can then proceed with the domain delegation from the authoritative zone.
 
 ### Forecastle
 
 [Forecastle](https://github.com/stakater/Forecastle) is an open-source control panel where you can access all exposed applications running on Kubernetes.
 
-Navigate to <http://forecastle.fury.info> to see all the other ingresses deployed, grouped by namespace.
+Navigate to <https://directory.internal.demo.example.dev> to see all the other ingresses deployed, grouped by namespace.
 
 ![Forecastle][forecastle-eks-screenshot]
-
-### OpenSearch Dashboards
-
-[OpenSearch Dashboards](https://github.com/opensearch-project/OpenSearch-Dashboards) is an open-source analytics and visualization platform for OpenSearch. OpenSearch Dashboards lets you perform advanced data analysis and visualize data in various charts, tables, and maps. You can use it to search, view, and interact with data stored in OpenSearch indices.
-
-Navigate to <http://opensearch-dashboards.fury.info> or click the OpenSearch Dashboards icon from Forecastle.
-
-#### Manually Create OpenSearch Dashboards Indeces (optional)
-
-If when you access OpenSearch Dashboards you get welcomed with the following message:
-
-![opensearch-dashboards-welcome][opensearch-dashboards-welcome]
-
-this means that the Indexes have not been created yet. This is expected the first time you deploy the logging stack. We deploy a set of cron jobs that take care of creating them but they may not have run yet (they run every hour).
-
-You can trigger them manually with the following commands:
-
-```bash
-kubectl create job -n logging --from cronjob/index-patterns-cronjob manual-indexes
-kubectl create job -n logging --from cronjob/ism-policy-cronjob manual-ism-policy
-```
-
-Wait a moment for the jobs to finish and try refreshing the OpenSearch Dashboard page.
-
-#### Discover the logs
-
-To work with the logs arriving into the system, click on "OpenSearch Dashboards" icon on the main page, and then on the "Discover" option or navigate through the side ("hamburger") menu and select `Discover` (see image below).
-
-![opensearch-dashboards-discover][opensearch-dashboards-discover]
-
-![Opensearch-Dashboards][opensearch-dashboards-screenshot]
-
-Follow the next steps to query the logs collected by the logging stack:
-
-![opensearch-dashboards-index][opensearch-dashboards-index]
-
-You can choose between different index options:
-
-- `audit-*` Kubernetes API server audit logs.
-- `events-*`: Kubernetes events.
-- `infra-*`: logs for infrastructural components deployed as part of KFD
-- `ingress-controller-*`: logs from the NGINX Ingress Controllers running in the cluster.
-- `kubernetes-*`: logs for applications running in the cluster that are not part of KFD. *Notice that this index will most likely be empty until you deploy an application*.
-- `systemd-*` logs collected from a selection of systemd services running in the nodes like containerd and kubelet.
-
-Once you selected your desired index, then you can search them by writing queries in the search box. You can also filter the results by some criteria, like pod name, namespaces, etc.
 
 ### Grafana
 
 [Grafana](https://github.com/grafana/grafana) is an open-source platform for monitoring and observability. Grafana allows you to query, visualize, alert, and understand your metrics.
 
-Navigate to <http://grafana.fury.info> or click the Grafana icon from Forecastle.
+Navigate to <https://grafana.internal.demo.example.dev> or click the Grafana icon from Forecastle.
+
+
+#### Discover the logs
+
+Navigate to grafana, and:
+
+1. Click on explore
+2. Select Loki datasource
+3. Run your query!
+
+This is what you should see:
+
+![Grafana Logs][grafana-screenshot-logs]
+
+#### Discover dashboards
 
 Fury provides some pre-configured dashboards to visualize the state of the cluster. Examine an example dashboard:
 
@@ -695,7 +454,7 @@ This is what you should see:
 
 ![Grafana][grafana-screenshot]
 
-## Step 5 (optional) - Advanced Distribution usage
+## Step 4 (optional) - Advanced Distribution usage
 
 ### (optional) Create a backup with Velero
 
@@ -744,71 +503,27 @@ Output should be:
 pod/bad-pod created
 ```
 
-> 💡 **TIP** Gatekeeper Policy Manger, a simple readonly web UI to easily see the deployed policies and their status is installed as part of the OPA module. You can access it at <http://gpm.fury.info/>
+> 💡 **TIP** Gatekeeper Policy Manger, a simple readonly web UI to easily see the deployed policies and their status is installed as part of the OPA module. You can access it at <http://gpm.internal.demo.example.dev/>
 
-## Step 6 - Teardown
+## Step 5 - Teardown
 
 Clean up the demo environment:
 
-1. Delete the namespaces containing external resources like volumes and load balancers:
+1. Delete the EKS cluster and all the related aws resources:
 
 ```bash
-kubectl delete namespace logging monitoring ingress-nginx
+furyctl delete cluster --outdir $PWD
 ```
 
-> If the command takes too long to finish you can cancel it with <kbd>⌃ Control</kbd> + <kbd>C</kbd>
+2. Write 'yes' and hit <kbd>⏎ Enter</kbd>, when prompted to confirm the deletion.
 
-Wait until the namespaces are completely deleted, or that:
-
-```bash
-kubectl get pvc -A
-# and 
-kubectl get svc -A
-```
-
-return no result for `pvc` and no LoadBalancer for `svc`.
-
-2. Destroy the additional Terraform resources used by Velero:
-
-```bash
-cd /demo/terraform/
-terraform destroy
-```
-
-3. Destroy EKS cluster:
-
-```bash
-cd /demo/infrastructure/
-furyctl cluster destroy
-```
-
-4. Some resources are created outside Terraform, for example when you create a LoadBalancer service it will create an ELB in AWS. You can find a script to delete the target groups, load balancers, volumes, and snapshots associated with the EKS cluster using AWS CLI:
-
-> ✋🏻 Edit the script and check that the `TAG_KEY` variable has the right value before running the script. It should end with the cluster name.
-
-```bash
-bash cleanup.sh
-```
-
-5. Destroy network infrastructure (remember to disconnect from the VPN before deleting):
-
-```bash
-furyctl bootstrap destroy
-```
-
-5. (Optional) Destroy the S3 bucket holding the Terraform state
+3. (Optional) Destroy the S3 bucket holding the Terraform state
 
 ```bash
 aws s3api delete-objects --bucket $S3_BUCKET \
   --delete "$(aws s3api list-object-versions --bucket $S3_BUCKET --query='{Objects: Versions[].{Key:Key,VersionId:VersionId}}')"
 
 aws s3api delete-bucket --bucket $S3_BUCKET
-```
-
-6. Exit from the docker container:
-
-```bash
-exit
 ```
 
 ## Conclusions
@@ -825,8 +540,6 @@ In case you ran into any problems feel free to [open an issue in GitHub](https:/
 
 More tutorials:
 
-- [Fury on GKE][fury-on-gke]
-- [Fury on OVHcloud][fury-on-ovhcloud]
 - [Fury on Minikube][fury-on-minikube]
 
 More about Fury:
@@ -836,7 +549,6 @@ More about Fury:
 <!-- Links -->
 [terraform-aws-eks-iam-permissions]: https://github.com/terraform-aws-modules/terraform-aws-eks/blob/v17.24.0/docs/iam-permissions.md
 [fury-getting-started-repository]: https://github.com/sighupio/fury-getting-started/
-[fury-getting-started-dockerfile]: https://github.com/sighupio/fury-getting-started/blob/main/utils/docker/Dockerfile
 
 [fury-on-minikube]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-minikube
 [fury-on-gke]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-gke
@@ -844,20 +556,28 @@ More about Fury:
 
 [furyagent-repository]: https://github.com/sighupio/furyagent
 
-[provisioner-bootstrap-aws-reference]: https://github.com/sighupio/fury-eks-installer/tree/master/modules/vpc-and-vpn
+[provisioner-infrastructure-aws-reference-vpc]: https://github.com/sighupio/fury-eks-installer/tree/main/modules/vpc
+[provisioner-infrastructure-aws-reference-vpn]: https://github.com/sighupio/fury-eks-installer/tree/main/modules/vpn
+[provisioner-kubernetes-aws-reference]: https://github.com/sighupio/fury-eks-installer/tree/main/modules/eks
 
 [tunnelblick]: https://tunnelblick.net/downloads.html
 [openvpn-connect]: https://openvpn.net/vpn-client/
+[openvpn-client]: https://openvpn.net/community-downloads/ 
 [github-ssh-key-setup]: https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account
 
 [fury-docs]: https://docs.kubernetesfury.com
 [opa-module-docs]: https://docs.kubernetesfury.com/docs/modules/opa/overview
 
+[aws-cli-installation]: https://docs.aws.amazon.com/cli/latest/userguide/getting-started-version.html
+
+[fury-distribution-eks-reference]: https://github.com/sighupio/fury-distribution/blob/main/templates/config/ekscluster-kfd-v1alpha2.yaml.tpl
+
 <!-- Images -->
 <!-- `media` here is a branch. We used to store all images in that branch and reference them from other branches -->
 [grafana-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/grafana.png?raw=true
+[grafana-screenshot-logs]: https://github.com/sighupio/fury-getting-started/blob/media/grafana-logs.png?raw=true
 [opensearch-dashboards-screenshot]: https://github.com/sighupio/fury-getting-started/blob/main/utils/images/opensearch_dashboards.png?raw=true
 [opensearch-dashboards-welcome]: https://github.com/sighupio/fury-getting-started/blob/main/utils/images/opensearch-dashboards_welcome.png?raw=true
 [opensearch-dashboards-discover]: https://github.com/sighupio/fury-getting-started/blob/main/utils/images/opensearch-dashboards_discover.png?raw=true
 [opensearch-dashboards-index]: https://github.com/sighupio/fury-getting-started/blob/main/utils/images/opensearch-dashboards_index.png?raw=true
-[forecastle-eks-screenshot]: https://github.com/sighupio/fury-getting-started/blob/main/utils/images/forecastle_eks.png?raw=true
+[forecastle-eks-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/forecastle_eks.png?raw=true

@@ -1,5 +1,5 @@
 kubeconfig
 vendor
-fury-on-ovhcloud/infrastructure/ovhrc
+legacy/fury-on-ovhcloud/infrastructure/ovhrc
 .terraform*
 terraform.tfstate*

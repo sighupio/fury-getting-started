@@ -3,7 +3,7 @@ kind: EKSCluster
 metadata:
   name: <CLUSTER_NAME>
 spec:
-  distributionVersion: "v1.25.2"
+  distributionVersion: "v1.25.6"
   toolsConfiguration:
     terraform:
       state:
@@ -28,10 +28,17 @@ spec:
             - 10.0.30.0/24
             - 10.0.40.0/24
     vpn:
-      vpnClientsSubnetCidr: 192.168.200.0/24
+      instances: 1
+      port: 1194
+      instanceType: t3.micro
+      diskSize: 50
+      operatorName: sighup
+      dhParamsBits: 2048
+      vpnClientsSubnetCidr: 172.16.0.0/16
       ssh:
+        publicKeys: []
         githubUsersName:
-          - <GITHUB_USER>
+          - <YOURGITHUBUSERNAME>
         allowedFromCidrs:
           - 0.0.0.0/0
   kubernetes:
@@ -39,9 +46,9 @@ spec:
     nodeAllowedSshPublicKey: "{file://~/.ssh/id_rsa.pub}"
     apiServer:
       privateAccess: true
-      publicAccess: false
+      publicAccess: true
       privateAccessCidrs: []
-      publicAccessCidrs: []
+      publicAccessCidrs: ["0.0.0.0/0"]
     nodePools:
       - name: infra
         size:
@@ -58,7 +65,27 @@ spec:
           k8s.io/cluster-autoscaler/node-template/label/nodepool: "infra"
           k8s.io/cluster-autoscaler/node-template/label/node.kubernetes.io/role: "infra"
           k8s.io/cluster-autoscaler/node-template/taint/node.kubernetes.io/role: "infra:NoSchedule"
+      - name: workers
+        size:
+          min: 1
+          max: 3
+        instance:
+          type: t3.large
+        labels:
+          nodepool: workers
+          node.kubernetes.io/role: workers
+        taints: []
+        tags:
+          k8s.io/cluster-autoscaler/node-template/label/nodepool: "workers"
+          k8s.io/cluster-autoscaler/node-template/label/node.kubernetes.io/role: "workers"
   distribution:
+    common:
+      nodeSelector:
+        node.kubernetes.io/role: infra
+      tolerations:
+        - effect: NoSchedule
+          key: node.kubernetes.io/role
+          value: infra
     modules:
       ingress:
         baseDomain: internal.demo.example.dev
@@ -76,20 +103,23 @@ spec:
             name: demo.example.dev
             create: true
           private:
-            create: true
             name: internal.demo.example.dev
+            create: true
       logging:
-        opensearch:
-          type: single
-          resources:
-            limits:
-              cpu: 2000m
-              memory: 4G
-            requests:
-              cpu: 300m
-              memory: 1G
+        type: loki
+        minio:
+          storageSize: 50Gi 
       dr:
+        type: eks
         velero:
           eks:
             region: eu-west-1
             bucketName: <S3_VELERO_BUCKET_NAME>
+      policy:
+        type: gatekeeper
+      auth:
+        provider: 
+          type: basicAuth
+          basicAuth:
+            username: admin
+            password: password
