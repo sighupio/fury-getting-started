@@ -16,7 +16,7 @@ This tutorial covers the following steps:
 
 ## Prerequisites
 
-This tutorial assumes some basic familiarity with Kubernetes and AWS. Some experience with Terraform is helpful but not required.
+This tutorial assumes some basic familiarity with Kubernetes and AWS.
 
 To follow this tutorial, you need:
 
@@ -273,6 +273,8 @@ The Distribution section of the `furyctl.yaml` file contains the following param
 Replace the field `<S3_VELERO_BUCKET_NAME>` with the name of the S3 bucket that will be used to store the Velero backups. Notice that **`furyctl` will create this bucket for you**.
 You can configure the existing modules or add new ones (take a look to the [docs][fury-distribution-eks-reference]) should you prefer.
 
+You should also change the `example.dev` domain with a real one that you own, to be able to leverage the auto-ssl capabilities using cert-manager.
+
 From these parameters, `furyctl` will automatically configure and deploy the battle-tested Kubernetes Fury Distribution.
 
 ## Step 2 - Provisioning an EKS Cluster Automatically with furyctl
@@ -344,11 +346,15 @@ To reach the LoadBalancer that is exposing the services, you need to connect via
 To connect to the VPN, after the installation, an `<CLUSTER_NAME>-<YOURUSER>.ovpn` file with you username will be created in the folder where `furyctl` was executed. 
 Use an OpenVPN client to connect to the VPN, and check that the DNS is working after the connection. If it's not, you need to set up the VPN to resolve DNS in full-dns mode.
 
+The HTTPS certificate will not be generated until you correctly delegate the public zone to be authoritative. To get the NS servers of the public zone run the command:
+
+
+
 ### Forecastle
 
 [Forecastle](https://github.com/stakater/Forecastle) is an open-source control panel where you can access all exposed applications running on Kubernetes.
 
-Navigate to <http://directory.internal.demo.example.dev> to see all the other ingresses deployed, grouped by namespace.
+Navigate to <https://directory.internal.demo.example.dev> to see all the other ingresses deployed, grouped by namespace.
 
 ![Forecastle][forecastle-eks-screenshot]
 
@@ -356,13 +362,20 @@ Navigate to <http://directory.internal.demo.example.dev> to see all the other in
 
 [Grafana](https://github.com/grafana/grafana) is an open-source platform for monitoring and observability. Grafana allows you to query, visualize, alert, and understand your metrics.
 
-Navigate to <http://grafana.internal.demo.example.dev> or click the Grafana icon from Forecastle.
+Navigate to <https://grafana.internal.demo.example.dev> or click the Grafana icon from Forecastle.
 
 
 #### Discover the logs
 
-TODO
+Navigate to grafana, and:
 
+1. Click on explore
+2. Select Loki datasource
+3. Run your query!
+
+This is what you should see:
+
+![Grafana Logs][grafana-screenshot-logs]
 
 #### Discover dashboards
 
@@ -497,6 +510,7 @@ More about Fury:
 <!-- Images -->
 <!-- `media` here is a branch. We used to store all images in that branch and reference them from other branches -->
 [grafana-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/grafana.png?raw=true
+[grafana-screenshot-logs]: https://github.com/sighupio/fury-getting-started/blob/media/grafana-logs.png?raw=true
 [opensearch-dashboards-screenshot]: https://github.com/sighupio/fury-getting-started/blob/main/utils/images/opensearch_dashboards.png?raw=true
 [opensearch-dashboards-welcome]: https://github.com/sighupio/fury-getting-started/blob/main/utils/images/opensearch-dashboards_welcome.png?raw=true
 [opensearch-dashboards-discover]: https://github.com/sighupio/fury-getting-started/blob/main/utils/images/opensearch-dashboards_discover.png?raw=true
