@@ -13,10 +13,8 @@ Getting started guides to create Fury clusters and deploy the Kubernetes Fury Di
 
 | Guide                                                 | Environment     | Fury Release | Kubernetes Version | Status             |
 | ----------------------------------------------------- | --------------- | ------------ | ------------------ | ------------------ |
-| [Fury on EKS](legacy/fury-on-eks/README.md)           | ☁ AWS          | v1.25.1      | v1.25              | :white_check_mark: |
 | [Fury on GKE](legacy/fury-on-gke/README.md)           | ☁ GCP          | v1.6.0       | v1.18              | :white_check_mark: |
 | [Fury on OVHcloud](legacy/fury-on-ovhcloud/README.md) | ☁ OVHcloud     | v1.25.1      | v1.25              | :white_check_mark: |
-| [Fury on Minikube](legacy/fury-on-minikube/README.md) | 💻 On premises | v1.25.1      | v1.25.8            | :white_check_mark: |
 | [Fury on Talos](legacy/fury-on-talos/README.md)       | 💻 On premises | v1.23.1      | v1.23.6            | :white_check_mark: |
 
 
