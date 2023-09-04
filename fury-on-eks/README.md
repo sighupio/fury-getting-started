@@ -270,6 +270,13 @@ The Distribution section of the `furyctl.yaml` file contains the following param
             password: password
 ```
 
+In this example, we are installing the distribution with the following options:
+
+- A dual battery of nginx, one private and one public
+- cert-manager with dns01 setup with route53
+- Loki as storage for the logs
+- Basic Auth on the ingresses
+
 Replace the field `<S3_VELERO_BUCKET_NAME>` with the name of the S3 bucket that will be used to store the Velero backups. Notice that **`furyctl` will create this bucket for you**.
 You can configure the existing modules or add new ones (take a look to the [docs][fury-distribution-eks-reference]) should you prefer.
 
