@@ -348,7 +348,65 @@ Use an OpenVPN client to connect to the VPN, and check that the DNS is working a
 
 The HTTPS certificate will not be generated until you correctly delegate the public zone to be authoritative. To get the NS servers of the public zone run the command:
 
+```bash
+aws route53 list-hosted-zones | cat
+{
+    "HostedZones": [
+        {
+            "Id": "/hostedzone/Z0993238TFEEUFQUA7T8",
+            "Name": "demo.example.dev.",
+            "CallerReference": "terraform-20230904104525356400000001",
+            "Config": {
+                "Comment": "Managed by Terraform",
+                "PrivateZone": false
+            },
+            "ResourceRecordSetCount": 8
+        },
+        {
+            "Id": "/hostedzone/Z00537863VMG5BHXEMRYA",
+            "Name": "internal.demo.example.dev.",
+            "CallerReference": "terraform-20230904104525356600000002",
+            "Config": {
+                "Comment": "Managed by Terraform",
+                "PrivateZone": true
+            },
+            "ResourceRecordSetCount": 20
+        }
+    ]
+}
+```
 
+Get the Id for the public zone, in this example: Z0993238TFEEUFQUA7T8, and proceed to retrieve the NS servers
+
+```bash
+aws route53 list-resource-record-sets --hosted-zone-id Z0993238TFEEUFQUA7T8 | cat                                       
+{
+    "ResourceRecordSets": [
+        {
+            "Name": "demo.example.dev.",
+            "Type": "NS",
+            "TTL": 172800,
+            "ResourceRecords": [
+                {
+                    "Value": "ns-328.awsdns-41.com."
+                },
+                {
+                    "Value": "ns-1277.awsdns-31.org."
+                },
+                {
+                    "Value": "ns-695.awsdns-22.net."
+                },
+                {
+                    "Value": "ns-1745.awsdns-26.co.uk."
+                }
+            ]
+        },
+        ...
+    ]
+}
+```
+
+You can then proceed with the domain delegation from the authoritative zone.
 
 ### Forecastle
 
