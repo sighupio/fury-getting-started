@@ -2,14 +2,6 @@
 
 This step-by-step tutorial helps you deploy a full Kubernetes Fury Cluster on VMS.
 
-This tutorial covers the following steps:
-
-1. List all the prerequistes
-2. Download the latest `furyctl` CLI.
-3. Install the cluster using `furyctl` CLI.
-4. Explore some features of the distribution.
-5. Teardown the environment.
-
 > ☁️ If you prefer trying Fury in a cloud environment, check out the [Fury on EKS](../fury-on-eks) tutorial.
 
 The goal of this tutorial is to introduce you to the main concepts of KFD and how to work with its tooling.
@@ -31,7 +23,7 @@ To follow this tutorial, you need:
 - Three VMs for the worker nodes (at least 4vcpu and 8GB ram each)
 - `root` ssh access on the VMs
 
-### Setup and initialize the environment
+## Step 0 - Setup and initialize the environment
 
 1. Open a terminal
 
@@ -296,13 +288,130 @@ spec:
       - name: cert-manager-secret
         folder: ./cert-manager-secret/
       - name: storage
-        folder: https://github.com/rancher/local-path-provisioner//deploy?ref=v0.0.24
+        folder: https://github.com/rancher/local-path-provisioner/deploy?ref=v0.0.24
 ```
 
 This section configures additional plugins to be installed in the cluster. There can be two types of plugin, `helm` and `kustomize`, in this example we are installing two kustomize projects.
 
-The first one, under the `cert-manager-secret` folder, installs the secret used by cert-manager to interact with the route53 zone for the dns01 challenge.
+The first one, under the `cert-manager-secret` folder, installs the secret used by cert-manager to interact with the route53 zone for the dns01 challenge. Change the example values in the `./cert-manager-secret` folder with the correct credentials to interact with your route53 zone. 
 The second one, storage, installs the local-path-provisioner that provides a simple dynamic storage for the cluster (not production grade).
+
+
+## Step 5 - Launch the installation with `furyctl`
+
+Now that everything is configured you can proceed with the installation using the `furyctl` CLI. 
+
+Simply execute:
+
+```bash
+furyctl create cluster --outdir $PWD
+```
+
+> ⏱ The process will take some minutes to complete, you can follow the progress in detail by running the following command:
+>
+> ```bash
+> tail -f .furyctl/furyctl.log | jq
+> ```
+> `--outdir` flag is used to define in which directory to create the hidden `.furyctl` folder that contains all the required files to install the cluster. 
+> If not provided, a `.furyctl` folder will be created in the user home.
+
+The output should be similar to the following:
+
+```bash
+INFO Downloading distribution...                  
+INFO Validating configuration file...             
+INFO Downloading dependencies...                  
+INFO Validating dependencies...                   
+INFO Creating Kubernetes Fury cluster...          
+INFO Checking that the hosts are reachable...     
+INFO Running ansible playbook...                  
+INFO Kubernetes cluster created successfully      
+INFO Installing Kubernetes Fury Distribution...   
+INFO Checking that the cluster is reachable...    
+INFO Checking storage classes...                  
+WARN No storage classes found in the cluster. logging module (if enabled), dr module (if enabled) and prometheus-operated package installation will be skipped. You need to install a StorageClass and re-run furyctl to install the missing components. 
+INFO Applying manifests...                        
+INFO Kubernetes Fury Distribution installed successfully 
+INFO Applying plugins...                          
+INFO Plugins installed successfully               
+INFO Saving furyctl configuration file in the cluster... 
+INFO Saving distribution configuration file in the cluster...
+```
+
+🚀 Success! The first deployment step is complete. Run furyctl again to install all the components that needs a working storageClass now, since we installed one using plugins function.
+
+```bash
+furyctl create cluster --outdir $PWD --skip-deps-download
+```
+
+> To speed up the following executions, you can use `--skip-deps-download`. This works only if the `.furyctl` folder has been already initialized.
+
+```bash
+INFO Downloading distribution...                  
+INFO Validating configuration file...             
+INFO Downloading dependencies...                  
+INFO Validating dependencies...                   
+INFO Creating Kubernetes Fury cluster...          
+INFO Checking that the hosts are reachable...     
+INFO Running ansible playbook...                  
+INFO Kubernetes cluster created successfully      
+INFO Installing Kubernetes Fury Distribution...   
+INFO Checking that the cluster is reachable...    
+INFO Checking storage classes...                  
+INFO Applying manifests...                        
+INFO Kubernetes Fury Distribution installed successfully 
+INFO Applying plugins...                          
+INFO Plugins installed successfully               
+INFO Saving furyctl configuration file in the cluster... 
+INFO Saving distribution configuration file in the cluster...
+```
+
+To interact with the cluster a `kubeconfig` has been created on the folder, make it usable with `kubectl` with:
+
+```bash
+export KUBECONFIG=$PWD/kubeconfig
+```
+
+## Step 6 - Explore the distribution
+
+### Forecastle
+
+[Forecastle](https://github.com/stakater/Forecastle) is an open-source control panel where you can access all exposed applications running on Kubernetes.
+
+Navigate to <https://directory.fury.example.tld> to see all the other ingresses deployed, grouped by namespace.
+
+![Forecastle][forecastle-eks-screenshot]
+
+### Grafana
+
+[Grafana](https://github.com/grafana/grafana) is an open-source platform for monitoring and observability. Grafana allows you to query, visualize, alert, and understand your metrics.
+
+Navigate to <https://grafana.fury.example.tld> or click the Grafana icon from Forecastle.
+
+
+#### Discover the logs
+
+Navigate to grafana, and:
+
+1. Click on explore
+2. Select Loki datasource
+3. Run your query!
+
+This is what you should see:
+
+![Grafana Logs][grafana-screenshot-logs]
+
+#### Discover dashboards
+
+Fury provides some pre-configured dashboards to visualize the state of the cluster. Examine an example dashboard:
+
+1. Click on the search icon on the left sidebar.
+2. Write `pods` and click enter.
+3. Select the `Kubernetes/Pods` dashboard.
+
+This is what you should see:
+
+![Grafana][grafana-screenshot]
 
 
 ## Conclusions
