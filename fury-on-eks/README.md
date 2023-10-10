@@ -541,6 +541,7 @@ In case you ran into any problems feel free to [open an issue in GitHub](https:/
 More tutorials:
 
 - [Fury on Minikube][fury-on-minikube]
+- [Fury on VMs][fury-on-vms]
 
 More about Fury:
 
@@ -551,6 +552,7 @@ More about Fury:
 [fury-getting-started-repository]: https://github.com/sighupio/fury-getting-started/
 
 [fury-on-minikube]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-minikube
+[fury-on-vms]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-vms
 [fury-on-gke]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-gke
 [fury-on-ovhcloud]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-ovhcloud
 

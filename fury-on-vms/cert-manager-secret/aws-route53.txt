@@ -1,0 +1,1 @@
+secret-access-key=EXAMPLESECRET
