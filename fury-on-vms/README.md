@@ -429,6 +429,7 @@ In case you ran into any problems feel free to [open an issue in GitHub](https:/
 More tutorials:
 
 - [Fury on EKS][fury-on-eks]
+- [Fury on Minikube][fury-on-minikube]
 
 More about Fury:
 

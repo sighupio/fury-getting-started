@@ -267,6 +267,7 @@ In case you ran into any problems feel free to [open an issue in GitHub](https:/
 More tutorials:
 
 - [Fury on EKS][fury-on-eks]
+- [Fury on VMs][fury-on-vms]
 
 More about Fury:
 
@@ -280,6 +281,7 @@ More about Fury:
 [fury-on-eks]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-eks
 [fury-on-gke]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-gke
 [fury-on-ovhcloud]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-ovhcloud
+[fury-on-vms]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-vms
 
 [furyagent-repository]: https://github.com/sighupio/furyagent
 
