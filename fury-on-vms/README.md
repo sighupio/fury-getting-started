@@ -380,7 +380,7 @@ export KUBECONFIG=$PWD/kubeconfig
 
 Navigate to <https://directory.fury.example.tld> to see all the other ingresses deployed, grouped by namespace.
 
-![Forecastle][forecastle-eks-screenshot]
+![Forecastle][forecastle-screenshot]
 
 ### Grafana
 
