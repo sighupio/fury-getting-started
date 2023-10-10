@@ -1,6 +1,6 @@
 # Fury on VMs
 
-This step-by-step tutorial helps you deploy a full Kubernetes Fury Cluster on VMS.
+This step-by-step tutorial helps you deploy a full Kubernetes Fury Cluster on a set of already existing VMs.
 
 > ☁️ If you prefer trying Fury in a cloud environment, check out the [Fury on EKS](../fury-on-eks) tutorial.
 
@@ -13,15 +13,16 @@ This tutorial assumes some basic familiarity with Kubernetes.
 To follow this tutorial, you need:
 
 - **kubectl** - 1.26.x to interact with the cluster.
-- **furyagent** - to provision initial cluster PKIs, install the latest version following the instructions [here](https://github.com/sighupio/furyagent)
-- **ansible** - used by furyctl to execute the roles from KFD installers
+- **furyagent** - to provision initial cluster PKI, install the latest version following the instructions [here](https://github.com/sighupio/furyagent#installation)
+- **Ansible** - used by furyctl to execute the roles from KFD installers
 - VMs OS: Rocky linux 8, Debian 12, or Ubuntu 20
-- Valid FQDN for all the VMs, with a valid domain: for example, each VMs should have a corresponding DNS like worker1.example.tld, worker2.example.tld, master1.worker.tld, etc.
+- Valid FQDN for all the VMs, with a valid domain: for example, each VM should have a corresponding DNS entry like `worker1.example.tld`, `worker2.example.tld`, `master1.worker.tld`, etc.
+- Static IP address for each VM.
 - Two VMs for the LoadBalancer Nodes (at least 1vcpu 1GB ram each)
 - An additional IP that will be used by keepalived to expose the two loadbalancers in HA, and a DNS record pointed to this IP for the control-plane address.
 - Three VMs for the master nodes (at least 2vcpu and 4GB ram each)
 - Three VMs for the worker nodes (at least 4vcpu and 8GB ram each)
-- `root` ssh access on the VMs
+- `root` SSH access to the VMs
 
 ## Step 0 - Setup and initialize the environment
 
@@ -34,9 +35,9 @@ git clone https://github.com/sighupio/fury-getting-started/
 cd fury-getting-started/fury-on-vms
 ```
 
-## Step 1 - Initialize the PKIs
+## Step 1 - Initialize the PKI
 
-First of all we need to initialize the CA certificates used by kubernetes and etcd. To do that, you need to run the following command:
+To initialize the Publick Key Infrastructure needed by the several components of the cluster to communicate securely, first, we need to initialize the CA certificates used by Kubernetes and the etcd database. To do that, you need to run the following command:
 
 ```bash
 furyagent init master
@@ -45,7 +46,7 @@ furyagent init etcd
 
 > The `furyagent` command needs the file `furyagent.yaml` as a configuration, this file is already present in the getting started directory.
 
-After the initalization of the PKIs, you should have a `pki` folder with the following contents:
+After the initalization of the PKI, you should have a `pki` folder with the following contents:
 
 ```text
 pki
@@ -66,7 +67,7 @@ Install `furyctl` binary: https://github.com/sighupio/furyctl#installation versi
 
 ## Step 3 - Decide the strategy for the SSL certificates
 
-To expose the KFD ingresses, we are using the https protocol. There are two approaches to achieve this:
+We use the HTTPS protocol to expose the KFD ingresses securely. HTTPS relies on certificates that need to be present, there are two approaches to achieve this:
 
 1) Provide a self-signed certificate
 2) Use cert-manager to generate the certificates
@@ -74,8 +75,8 @@ To expose the KFD ingresses, we are using the https protocol. There are two appr
 
 ### Self-signed certificate
 
-If you are using the first approach, you need to have at hand the files tls.key tls.crt and ca.crt.
-If you want to generate these files using openssl, you can run the following commands:
+If you are using the first approach, you need to have at hand the `tls.key`, `tls.crt`, and `ca.crt` files.
+To generate these files using `openssl`, you can run the following commands:
 
 ```bash
 openssl genrsa -out ca-key.pem 2048
@@ -103,9 +104,12 @@ DNS.2 = *.fury.example.tld
 
 Change it accordingly to your environment
 
-### Cert-manager
+### cert-manager
 
-If using cert-manager, you can use the http01 challenge to get certificates from let's encrypt, only if your load-balancer is reachable from the internet, otherwise, we suggest to use a dns01 solvers that can use an authoritative DNS zone to emit certificates. We will use this approach on the tutorial.
+With cert-manager you can get valid certificates automatically created for you. You can use the `http01` challenge to get certificates from Let's Encrypt if your load-balancer is reachable from the Internet, otherwise, we suggest using the `dns01` solvers that use an authoritative DNS zone to emit certificates.
+
+
+KFD includes cert-manager in its core packages and it is fully integrated with the distribution. We will use cert-manager with the `dns01` challenge approach in this tutorial.
 
 ## Step 4 - Write the `furyctl.yaml` configuration file
 
@@ -115,7 +119,7 @@ We will explain in this step, what the important fields are for.
 
 ### `.spec.kubernetes`
 
-#### PKIs and access
+#### PKI and access
 
 ```yaml
 ---
@@ -127,8 +131,8 @@ spec:
       keyPath: ./ssh-key
 ```
 
-This first piece of configuration, defines where to find the PKIs (create on the step 1), and the ssh connection detail for the `root` user.
-On `keyPath`, it's possible to use a relative path or an absolute path
+This first piece of configuration defines where to find the PKI files (created in step 1), and the SSH connection details for the `root` user.
+`keyPath` can be a relative or an absolute path.
 
 #### common DNS zone and networking
 
@@ -141,7 +145,7 @@ spec:
     podCidr: 172.16.128.0/17
     svcCidr: 172.16.0.0/17
 ```
-Next we need to define the dnsZone used by all the nodes, and the control-plane address. Also we need to define the podCidr and svcCidr used in the cluster, and these CIDRs must not collide with the IPs of the nodes.
+Next we need to define the DNS zone used by all the nodes and the control-plane address. Also, we need to define the network CIDR for the Pods and network CIDR for the Kubernetes services used in the cluster. These CIDRs must not collide with the IPs of the nodes.
 
 #### Load Balancers configuration
 
@@ -167,9 +171,9 @@ spec:
       additionalConfig: "{file://./haproxy-additional.cfg}"
 ```
 
-Next we need to define the loadBalancer nodes, each node will have a name and an ip address, additionally we are also enabling keepalived on an additional IP address, in this example `192.168.1.179`. **Important** check which is the main interface that will be used for the keepalive IP, in this example `enp0s8`.
+Next we need to define the load-balancer nodes, each node will have a name and an IP address, additionally, we are also enabling keepalived on an additional floating IP address, in this example `192.168.1.179`. **Important** check which is the main interface that will be used for the keepalive IP, in this example `enp0s8`.
 
-We need also to give the HAproxy stat page an username and a password, and we can also add an additional config to the load balancers. In the example file we are also balancing the ingress battery using the same load balancers as the control plane address.
+We need also to give the HAproxy stat page a username and a password, and we can also add an additional config to the HAproxy running the load balancers. In the example file we are also balancing the ingress battery using the same load balancers as the control plane address.
 
 #### Kubernetes Master and Worker nodes
 
@@ -197,7 +201,7 @@ spec:
 
 Next we need to define the masters node and the worker nodes. The fqdn that will be used for each node will be the concatenation of the name and the `.spec.kubernetes.dnsZone` field.
 
-For example, master1 will become: master1.example.tld.
+For example, `master1` will become `master1.example.tld`.
 
 ### `.spec.distribution`
 
@@ -211,7 +215,7 @@ spec:
         type: calico
 ```
 
-In this piece of configuration, we choosing to install calico as CNI in our cluster from the `fury-kubernetes-networking` core module.
+In this piece of configuration, we are choosing to install calico as CNI in our cluster from the `fury-kubernetes-networking` core module.
 
 #### Ingress core module
 
@@ -240,8 +244,9 @@ spec:
 ```
 
 In this section, on the configuration of the `fury-kubernetes-ingress` core module, we are selecting to install a single battery of nginx ingress controller and configuring cert-manager as the provider to emit SSL certificates for our ingresses.
+`baseDomain` is the suffix hostname used on all the ingresses that will be create for the KFD modules, for example, Grafana will become `grafana.<baseDomain>`.
 
-To correctly configure the cert-manager clusterIssuer we need to put a valid configuration for the dns01 solver. The secret `letsencrypt-production-route53-key` will be installed using the plugins feature.
+To correctly configure the cert-manager clusterIssuer we need to put a valid configuration for the `dns01` challenge solver. The secret `letsencrypt-production-route53-key` will be created using furyctl's plugins feature in the next steps.
 
 > If instead you want to use a self-signed certificate (or a valid one from a file), you need to configure the ingress module like the following:
 > ```yaml
