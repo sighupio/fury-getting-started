@@ -115,6 +115,8 @@ We will explain in this step, what the important fields are for.
 
 ### `.spec.kubernetes`
 
+#### PKIs and access
+
 ```yaml
 ---
 spec:
@@ -128,6 +130,8 @@ spec:
 This first piece of configuration, defines where to find the PKIs (create on the step 1), and the ssh connection detail for the `root` user.
 On `keyPath`, it's possible to use a relative path or an absolute path
 
+#### common DNS zone and networking
+
 ```yaml
 ---
 spec:
@@ -139,6 +143,7 @@ spec:
 ```
 Next we need to define the dnsZone used by all the nodes, and the control-plane address. Also we need to define the podCidr and svcCidr used in the cluster, and these CIDRs must not collide with the IPs of the nodes.
 
+#### Load Balancers configuration
 
 ```yaml
 spec:
@@ -166,6 +171,7 @@ Next we need to define the loadBalancer nodes, each node will have a name and an
 
 We need also to give the HAproxy stat page an username and a password, and we can also add an additional config to the load balancers. In the example file we are also balancing the ingress battery using the same load balancers as the control plane address.
 
+#### Kubernetes Master and Worker nodes
 
 ```yaml
 spec:
@@ -195,6 +201,8 @@ For example, master1 will become: master1.example.tld.
 
 ### `.spec.distribution`
 
+#### Networking core module
+
 ```yaml
 spec:
   distribution:
@@ -204,6 +212,8 @@ spec:
 ```
 
 In this piece of configuration, we choosing to install calico as CNI in our cluster from the `fury-kubernetes-networking` core module.
+
+#### Ingress core module
 
 ```yaml
 spec:
@@ -233,6 +243,30 @@ In this section, on the configuration of the `fury-kubernetes-ingress` core modu
 
 To correctly configure the cert-manager clusterIssuer we need to put a valid configuration for the dns01 solver. The secret `letsencrypt-production-route53-key` will be installed using the plugins feature.
 
+> If instead you want to use a self-signed certificate (or a valid one from a file), you need to configure the ingress module like the following:
+> ```yaml
+>spec:
+>  distribution:
+>    modules:
+>      ingress:
+>        baseDomain: fury.example.tld
+>        nginx:
+>          type: single
+>          tls:
+>            provider: secret
+>            secret:
+>              cert: "{file://./tls.crt}"
+>              key: "{file://./tls.key}"
+>              ca: "{file://./ca.crt}"
+>        certManager:
+>          clusterIssuer:
+>            name: letsencrypt-fury
+>            email: example@sighup.io
+>            type: http01
+> ```
+
+#### Logging core module
+
 ```yaml
 spec:
   distribution:
@@ -247,6 +281,8 @@ This section configures the `fury-kubernetes-logging` module. In this example we
 
 The minio configuration is the S3 bucket used by loki to store logs, the storageSize selected defines the size for each minio disk, in total 6 disk splitted in 2 per 3 minio replicas.
 
+#### Policy (OPA) core module
+
 ```yaml
 spec:
   distribution:
@@ -256,6 +292,8 @@ spec:
 ```
 
 For simplicity, we are not installing gatekeeper in the cluster, from the `fury-kubernetes-opa` module.
+
+#### DR core module
 
 ```yaml
 spec:
@@ -412,7 +450,6 @@ Fury provides some pre-configured dashboards to visualize the state of the clust
 This is what you should see:
 
 ![Grafana][grafana-screenshot]
-
 
 ## Conclusions
 
