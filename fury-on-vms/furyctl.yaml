@@ -1,0 +1,101 @@
+# Copyright (c) 2017-present SIGHUP s.r.l All rights reserved.
+# Use of this source code is governed by a BSD-style
+# license that can be found in the LICENSE file.
+
+---
+apiVersion: kfd.sighup.io/v1alpha2
+kind: OnPremises
+metadata:
+  name: getting-started
+spec:
+  distributionVersion: v1.26.2
+  kubernetes:
+    pkiFolder: ./pki
+    ssh:
+      username: root
+      keyPath: ./ssh-key
+    dnsZone: example.tld
+    controlPlaneAddress: control-plane.example.tld:6443
+    podCidr: 172.16.128.0/17
+    svcCidr: 172.16.0.0/17
+    loadBalancers:
+      enabled: true
+      hosts:
+        - name: haproxy1
+          ip: 192.168.1.177
+        - name: haproxy2
+          ip: 192.168.1.178
+      keepalived:
+        enabled: true
+        interface: enp0s8
+        ip: 192.168.1.179/24
+        virtualRouterId: "201"
+        passphrase: "b16cf069"
+      stats:
+        username: admin
+        password: password
+      additionalConfig: "{file://./haproxy-additional.cfg}"
+    masters:
+      hosts:
+        - name: master1
+          ip: 192.168.1.181
+        - name: master2
+          ip: 192.168.1.182
+        - name: master3
+          ip: 192.168.1.183
+    nodes:
+      - name: worker
+        hosts:
+          - name: worker1
+            ip: 192.168.1.184
+          - name: worker2
+            ip: 192.168.1.185
+          - name: worker3
+            ip: 192.168.1.186
+  distribution:
+    common: {}
+    modules:
+      networking:
+        type: calico
+      # This section contains all the configurations for the ingress module
+      ingress:
+        baseDomain: fury.example.tld
+        nginx:
+          type: single
+          tls:
+            provider: certManager
+        certManager:
+          clusterIssuer:
+            name: letsencrypt-fury
+            email: example@sighup.io
+            solvers:
+              - dns01:
+                  route53:
+                    region: eu-west-1
+                    accessKeyID: AKIAEXAMPLE
+                    secretAccessKeySecretRef:
+                      name: letsencrypt-production-route53-key
+                      key: secret-access-key
+      logging:
+        type: loki
+        minio:
+          storageSize: "20Gi"
+      monitoring:
+        alertmanager:
+          deadManSwitchWebhookUrl: ""
+          slackWebhookUrl: ""
+      policy:
+        type: none
+      dr:
+        type: on-premises
+        velero: {}
+      auth:
+        provider:
+          type: none 
+        
+  plugins:
+    kustomize: 
+      - name: cert-manager-secret
+        folder: ./cert-manager-secret/
+      - name: storage
+        folder: https://github.com/rancher/local-path-provisioner//deploy?ref=v0.0.24

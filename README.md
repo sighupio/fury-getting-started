@@ -8,6 +8,8 @@ Getting started guides to create Fury clusters and deploy the Kubernetes Fury Di
 | --------------------------------------------------------------------------------- | --------------- | ------------ | ------------------ | ------------------ |
 | [Fury on EKS (furyctl EKSCluster provider)](fury-on-eks/README.md)                | ☁ AWS          | v1.25.6      | v1.25              | :white_check_mark: |
 | [Fury on Minikube (furyctl KFDDistribution provider)](fury-on-minikube/README.md) | 💻 On premises | v1.25.6      | v1.25.8            | :white_check_mark: |
+| [Fury on VMs (furyctl OnPremises provider)](fury-on-vms/README.md)                | 💻 On premises | v1.26.7      | v1.26.2            | :white_check_mark: |
+
 
 Getting started guides to create Fury clusters and deploy the Kubernetes Fury Distribution in different environments with furyctl `<= 0.11.1`
 
