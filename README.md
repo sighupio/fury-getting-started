@@ -2,13 +2,13 @@
 
 ![Fury Logo](./utils/images/fury_logo.png)
 
-Getting started guides to create Fury clusters and deploy the Kubernetes Fury Distribution in different environments with furyctl `>= 0.25.2`
+Getting started guides to create Fury clusters and deploy the Kubernetes Fury Distribution in different environments with furyctl `>= 0.26.3`
 
 | Guide                                           | furyctl Provider | Environment     | Fury Release | Kubernetes Version | Status             |
 | ----------------------------------------------- | ---------------- | --------------- | ------------ | ------------------ | ------------------ |
-| [Fury on EKS ](fury-on-eks/README.md)           | EKSCluster       | ☁ AWS          | v1.25.6      | v1.25              | :white_check_mark: |
-| [Fury on Minikube ](fury-on-minikube/README.md) | KFDDistribution  | 💻 On premises | v1.25.6      | v1.25.8            | :white_check_mark: |
-| [Fury on VMs ](fury-on-vms/README.md)           | OnPremises       | 💻 On premises | v1.26.7      | v1.26.2            | :white_check_mark: |
+| [Fury on EKS](fury-on-eks/README.md)            | EKSCluster       | ☁ AWS           | v1.26.3      | v1.26              | :white_check_mark: |
+| [Fury on Minikube](fury-on-minikube/README.md)  | KFDDistribution  | 💻 On premises  | v1.26.3      | v1.26.3            | :white_check_mark: |
+| [Fury on VMs](fury-on-vms/README.md)            | OnPremises       | 💻 On premises  | v1.26.3      | v1.26.3            | :white_check_mark: |
 
 
 Getting started guides to create Fury clusters and deploy the Kubernetes Fury Distribution in different environments with furyctl `<= 0.11.1`

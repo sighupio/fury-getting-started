@@ -39,12 +39,12 @@ cd fury-getting-started/fury-on-minikube
 1. Start minikube cluster:
 
 ```bash
-export REPO_DIR=$PWD 
+export REPO_DIR=$PWD
 export KUBECONFIG=$REPO_DIR/kubeconfig
-minikube start --vm-driver=virtualbox --kubernetes-version v1.25.8 --memory=16384m --cpus=6
+minikube start --vm-driver=virtualbox --kubernetes-version v1.26.3 --memory=16384m --cpus=6
 ```
 
-> ⚠️ This command will spin up by default a single-node Kubernetes v1.25.8 cluster, using VirtualBox driver, with 6 CPUs, 16GB RAM and 20 GB Disk.
+> ⚠️ This command will spin up by default a single-node Kubernetes v1.26.3 cluster, using VirtualBox driver, with 6 CPUs, 16GB RAM and 20 GB Disk.
 
 2. Test the connection to the minikube cluster:
 
@@ -56,12 +56,12 @@ Output:
 
 ```bash
 NAME       STATUS   ROLES           AGE    VERSION
-minikube   Ready    control-plane   104s   v1.25.8
+minikube   Ready    control-plane   104s   v1.26.3
 ```
 
 ## Step 3 - Install furyctl
 
-Install `furyctl` binary: https://github.com/sighupio/furyctl#installation version 0.25.2.
+Install `furyctl` binary: https://github.com/sighupio/furyctl#installation version 0.26.3.
 
 ## Step 3 - Installation
 
@@ -75,10 +75,10 @@ kind: KFDDistribution
 metadata:
   name: fury-local
 spec:
-  distributionVersion: v1.25.6
+  distributionVersion: v1.26.3
   distribution:
     modules:
-      networking: 
+      networking:
         type: none
       ingress:
         baseDomain: internal.demo.example.dev
@@ -121,11 +121,11 @@ spec:
           metadata:
             name: systemd-etcd
             namespace: logging
-        - | 
+        - |
           $patch: delete
           apiVersion: apps/v1
           kind: DaemonSet
-          metadata: 
+          metadata:
             name: x509-certificate-exporter-control-plane
             namespace: monitoring
 ```
@@ -151,24 +151,24 @@ furyctl create cluster --outdir $PWD
 > ```bash
 > tail -f .furyctl/furyctl.log | jq
 > ```
-> `--outdir` flag is used to define in which directory to create the hidden `.furyctl` folder that contains all the required files to install the cluster. 
+> `--outdir` flag is used to define in which directory to create the hidden `.furyctl` folder that contains all the required files to install the cluster.
 > If not provided, a `.furyctl` folder will be created in the user home.
 
 The output should be similar to the following:
 
 ```bash
-INFO Downloading distribution...                  
-INFO Validating configuration file...             
-INFO Downloading dependencies...                  
-INFO Validating dependencies...                   
-INFO Installing Kubernetes Fury Distribution...   
-INFO Checking that the cluster is reachable...    
-INFO Checking if at least one storage class is available... 
-INFO Checking if all nodes are ready...           
-INFO Applying manifests...                        
-INFO Saving furyctl configuration file in the cluster... 
-INFO Saving distribution configuration file in the cluster... 
-INFO Kubernetes Fury Distribution installed successfully 
+INFO Downloading distribution...
+INFO Validating configuration file...
+INFO Downloading dependencies...
+INFO Validating dependencies...
+INFO Installing Kubernetes Fury Distribution...
+INFO Checking that the cluster is reachable...
+INFO Checking if at least one storage class is available...
+INFO Checking if all nodes are ready...
+INFO Applying manifests...
+INFO Saving furyctl configuration file in the cluster...
+INFO Saving distribution configuration file in the cluster...
+INFO Kubernetes Fury Distribution installed successfully
 ```
 
 🚀 The (subset of the) distribution is finally deployed! In this section you will explore some of its features.
@@ -197,7 +197,7 @@ minikube ip
 3. Add the following line to your local `/etc/hosts`:
 
 ```bash
-<SOME_IP> directory.internal.demo.example.dev grafana.internal.demo.example.dev prometheus.internal.demo.example.dev 
+<SOME_IP> directory.internal.demo.example.dev grafana.internal.demo.example.dev prometheus.internal.demo.example.dev
 
 ```
 

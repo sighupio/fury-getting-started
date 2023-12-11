@@ -1,6 +1,6 @@
 # Fury on EKS with furyctl next
 
-This step-by-step tutorial guides you to deploy the **Kubernetes Fury Distribution** (KFD) on an EKS cluster on AWS using the furyctl `>=0.25.2`
+This step-by-step tutorial guides you to deploy the **Kubernetes Fury Distribution** (KFD) on an EKS cluster on AWS using the furyctl `>=0.26.3`
 
 This tutorial covers the following steps:
 
@@ -55,19 +55,19 @@ Default output format [None]: json
 
 You are all set ✌️.
 
-## Step 1 - Configure the EKS cluster via `furyctl.yaml` 
+## Step 1 - Configure the EKS cluster via `furyctl.yaml`
 
 `furyctl` is a command-line tool developed by SIGHUP to support:
 
 - the automatic provisioning of Kubernetes clusters
 - the installation of the Fury distribution
 
-The configuration of the Fury cluster is governed by the `furyctl.yaml` file, which for the purposes of this tutorial 
+The configuration of the Fury cluster is governed by the `furyctl.yaml` file, which for the purposes of this tutorial
 is located at `/tmp/fury-getting-started/fury-on-eks/furyctl.yaml`.
 
 > ℹ️ You can also create a sample configuration file by running the following command:
 > ```bash
-> furyctl create config --version v1.25.6 -c custom-furyctl.yaml
+> furyctl create config --version v1.26.3 -c custom-furyctl.yaml
 > ```
 > and edit the `custom-furyctl.yaml` file to fit your needs, when you are done you can use the `--config` flag to specify the path to the configuration file in the
 > following commands.
@@ -90,7 +90,7 @@ kind: EKSCluster
 metadata:
   name: <CLUSTER_NAME>
 spec:
-  distributionVersion: "v1.25.6"
+  distributionVersion: "v1.26.3"
   toolsConfiguration:
     terraform:
       state:
@@ -103,7 +103,7 @@ spec:
     env: "fury-getting-started"
 ```
 
-Open the `/tmp/fury-getting-started/fury-next-on-eks/furyctl.yaml` file with a text editor of your choice and replace the field `<CLUSTER_NAME>` with a name of your choice for the cluster, and the field `<CLUSTER_REGION>` with the AWS region where you want to deploy the cluster. 
+Open the `/tmp/fury-getting-started/fury-next-on-eks/furyctl.yaml` file with a text editor of your choice and replace the field `<CLUSTER_NAME>` with a name of your choice for the cluster, and the field `<CLUSTER_REGION>` with the AWS region where you want to deploy the cluster.
 If you already have a S3 bucket to store the Terraform state, replace the field `<S3_TFSTATE_BUCKET>`, `<S3_TFSTATE_BUCKET_KEY_PREFIX>`, `<S3_TFSTATE_BUCKET_REGION>`
 with the data from the bucket, otherwise you can create a new one by following the following steps:
 
@@ -253,7 +253,7 @@ The Distribution section of the `furyctl.yaml` file contains the following param
       logging:
         type: loki
         minio:
-          storageSize: 50Gi 
+          storageSize: 50Gi
       dr:
         type: eks
         velero:
@@ -263,7 +263,7 @@ The Distribution section of the `furyctl.yaml` file contains the following param
       policy:
         type: gatekeeper
       auth:
-        provider: 
+        provider:
           type: basicAuth
           basicAuth:
             username: admin
@@ -298,31 +298,31 @@ furyctl create cluster --outdir $PWD
 > ```bash
 > tail -f .furyctl/furyctl.log | jq
 > ```
-> `--outdir` flag is used to define in which directory to create the hidden `.furyctl` folder that contains all the required files to install the cluster. 
+> `--outdir` flag is used to define in which directory to create the hidden `.furyctl` folder that contains all the required files to install the cluster.
 > If not provided, a `.furyctl` folder will be created in the user home.
 
 The output should be similar to the following:
 
 ```bash
-INFO Downloading distribution...                  
-INFO Validating configuration file...             
-INFO Downloading dependencies...                  
-INFO Validating dependencies...                   
-INFO Creating cluster...                          
-INFO Creating infrastructure...                   
-WARN Creating cloud resources, this could take a while... 
-INFO Creating Kubernetes Fury cluster...          
-WARN Creating cloud resources, this could take a while... 
-INFO Saving furyctl configuration file in the cluster... 
-INFO Saving distribution configuration file in the cluster... 
-INFO Installing Kubernetes Fury Distribution...   
-WARN Creating cloud resources, this could take a while... 
-INFO Checking that the cluster is reachable...    
-INFO Applying manifests...                        
-INFO Saving furyctl configuration file in the cluster... 
-INFO Saving distribution configuration file in the cluster... 
-INFO Kubernetes Fury cluster created successfully 
-INFO Please remember to kill the VPN connection when you finish doing operations on the cluster 
+INFO Downloading distribution...
+INFO Validating configuration file...
+INFO Downloading dependencies...
+INFO Validating dependencies...
+INFO Creating cluster...
+INFO Creating infrastructure...
+WARN Creating cloud resources, this could take a while...
+INFO Creating Kubernetes Fury cluster...
+WARN Creating cloud resources, this could take a while...
+INFO Saving furyctl configuration file in the cluster...
+INFO Saving distribution configuration file in the cluster...
+INFO Installing Kubernetes Fury Distribution...
+WARN Creating cloud resources, this could take a while...
+INFO Checking that the cluster is reachable...
+INFO Applying manifests...
+INFO Saving furyctl configuration file in the cluster...
+INFO Saving distribution configuration file in the cluster...
+INFO Kubernetes Fury cluster created successfully
+INFO Please remember to kill the VPN connection when you finish doing operations on the cluster
 INFO To connect to the cluster, set the path to your kubeconfig with 'export KUBECONFIG=/private/tmp/fury-getting-started/fury-on-eks/kubeconfig' or use the '--kubeconfig /private/tmp/fury-getting-started/fury-on-eks/kubeconfig' flag in following executions
 ```
 
@@ -350,7 +350,7 @@ These ingresses are only reachable from the private network, since in this examp
 
 To reach the LoadBalancer that is exposing the services, you need to connect via VPN and you should be able to resolve these URLs and reach them.
 
-To connect to the VPN, after the installation, an `<CLUSTER_NAME>-<YOURUSER>.ovpn` file with you username will be created in the folder where `furyctl` was executed. 
+To connect to the VPN, after the installation, an `<CLUSTER_NAME>-<YOURUSER>.ovpn` file with you username will be created in the folder where `furyctl` was executed.
 Use an OpenVPN client to connect to the VPN, and check that the DNS is working after the connection. If it's not, you need to set up the VPN to resolve DNS in full-dns mode.
 
 The HTTPS certificate will not be generated until you correctly delegate the public zone to be authoritative. To get the NS servers of the public zone run the command:
@@ -386,7 +386,7 @@ aws route53 list-hosted-zones | cat
 Get the Id for the public zone, in this example: Z0993238TFEEUFQUA7T8, and proceed to retrieve the NS servers
 
 ```bash
-aws route53 list-resource-record-sets --hosted-zone-id Z0993238TFEEUFQUA7T8 | cat                                       
+aws route53 list-resource-record-sets --hosted-zone-id Z0993238TFEEUFQUA7T8 | cat
 {
     "ResourceRecordSets": [
         {
@@ -564,7 +564,7 @@ More about Fury:
 
 [tunnelblick]: https://tunnelblick.net/downloads.html
 [openvpn-connect]: https://openvpn.net/vpn-client/
-[openvpn-client]: https://openvpn.net/community-downloads/ 
+[openvpn-client]: https://openvpn.net/community-downloads/
 [github-ssh-key-setup]: https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account
 
 [fury-docs]: https://docs.kubernetesfury.com
