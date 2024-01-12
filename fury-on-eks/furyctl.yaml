@@ -3,7 +3,7 @@ kind: EKSCluster
 metadata:
   name: <CLUSTER_NAME>
 spec:
-  distributionVersion: "v1.25.6"
+  distributionVersion: "v1.26.3"
   toolsConfiguration:
     terraform:
       state:
@@ -44,6 +44,7 @@ spec:
   kubernetes:
     nodePoolsLaunchKind: "launch_templates"
     nodeAllowedSshPublicKey: "{file://~/.ssh/id_rsa.pub}"
+    logRetentionDays: 1
     apiServer:
       privateAccess: true
       publicAccess: true
@@ -108,7 +109,7 @@ spec:
       logging:
         type: loki
         minio:
-          storageSize: 50Gi 
+          storageSize: 50Gi
       dr:
         type: eks
         velero:
@@ -118,7 +119,7 @@ spec:
       policy:
         type: gatekeeper
       auth:
-        provider: 
+        provider:
           type: basicAuth
           basicAuth:
             username: admin

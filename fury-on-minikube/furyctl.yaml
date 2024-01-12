@@ -8,10 +8,10 @@ kind: KFDDistribution
 metadata:
   name: fury-local
 spec:
-  distributionVersion: v1.25.6
+  distributionVersion: v1.26.3
   distribution:
     modules:
-      networking: 
+      networking:
         type: none
       ingress:
         baseDomain: internal.demo.example.dev
@@ -54,10 +54,10 @@ spec:
           metadata:
             name: systemd-etcd
             namespace: logging
-        - | 
+        - |
           $patch: delete
           apiVersion: apps/v1
           kind: DaemonSet
-          metadata: 
+          metadata:
             name: x509-certificate-exporter-control-plane
             namespace: monitoring
