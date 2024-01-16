@@ -8,7 +8,7 @@ kind: KFDDistribution
 metadata:
   name: fury-local
 spec:
-  distributionVersion: v1.26.3
+  distributionVersion: v1.27.1
   distribution:
     modules:
       networking:
