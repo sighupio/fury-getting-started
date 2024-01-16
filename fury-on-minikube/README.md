@@ -61,7 +61,7 @@ minikube   Ready    control-plane   104s   v1.27.1
 
 ## Step 3 - Install furyctl
 
-Install `furyctl` binary: https://github.com/sighupio/furyctl#installation version `>=0.27.0`.
+Install `furyctl` binary: https://github.com/sighupio/furyctl#installation version `>=0.27.1`.
 
 ## Step 3 - Installation
 
