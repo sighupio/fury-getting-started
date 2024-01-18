@@ -149,7 +149,7 @@ furyctl create cluster --outdir $PWD
 > ⏱ The process will take some minutes to complete, you can follow the progress in detail by running the following command:
 >
 > ```bash
-> tail -f .furyctl/furyctl.log | jq
+> tail -f .furyctl/furyctl.<timestamp>-<random-id>.log | jq
 > ```
 > `--outdir` flag is used to define in which directory to create the hidden `.furyctl` folder that contains all the required files to install the cluster.
 > If not provided, a `.furyctl` folder will be created in the user home.
