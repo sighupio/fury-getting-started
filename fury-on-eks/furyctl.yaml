@@ -3,7 +3,7 @@ kind: EKSCluster
 metadata:
   name: <CLUSTER_NAME>
 spec:
-  distributionVersion: "v1.26.3"
+  distributionVersion: "v1.27.1"
   toolsConfiguration:
     terraform:
       state:
@@ -43,7 +43,7 @@ spec:
           - 0.0.0.0/0
   kubernetes:
     nodePoolsLaunchKind: "launch_templates"
-    nodeAllowedSshPublicKey: "{file://~/.ssh/id_rsa.pub}"
+    nodeAllowedSshPublicKey: "{file:///path/to/id_rsa.pub}"
     logRetentionDays: 1
     apiServer:
       privateAccess: true

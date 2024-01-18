@@ -12,7 +12,7 @@ This tutorial assumes some basic familiarity with Kubernetes.
 
 To follow this tutorial, you need:
 
-- **kubectl** - 1.26.x to interact with the cluster.
+- **kubectl** - 1.27.x to interact with the cluster.
 - **furyagent** - to provision initial cluster PKI, install the latest version following the instructions [here](https://github.com/sighupio/furyagent#installation)
 - **Ansible** - used by furyctl to execute the roles from KFD installers
 - VMs OS: Rocky linux 8, Debian 12, or Ubuntu 20
@@ -22,7 +22,7 @@ To follow this tutorial, you need:
 - An additional IP that will be used by keepalived to expose the two loadbalancers in HA, and a DNS record pointed to this IP for the control-plane address.
 - Three VMs for the master nodes (at least 2vcpu and 4GB ram each)
 - Three VMs for the worker nodes (at least 4vcpu and 8GB ram each)
-- `root` SSH access to the VMs
+- `root` or passwordless sudo user SSH access to the VMs
 
 ## Step 0 - Setup and initialize the environment
 
@@ -63,7 +63,7 @@ pki
 ```
 ## Step 2 - Install furyctl
 
-Install `furyctl` binary: https://github.com/sighupio/furyctl#installation version 0.26.2.
+Install `furyctl` binary: https://github.com/sighupio/furyctl#installation version 0.27.1.
 
 ## Step 3 - Decide the strategy for the SSL certificates
 
@@ -197,6 +197,7 @@ spec:
             ip: 192.168.1.185
           - name: worker3
             ip: 192.168.1.186
+        taints: []
 ```
 
 Next we need to define the masters node and the worker nodes. The fqdn that will be used for each node will be the concatenation of the name and the `.spec.kubernetes.dnsZone` field.
@@ -286,7 +287,7 @@ This section configures the `fury-kubernetes-logging` module. In this example we
 
 The minio configuration is the S3 bucket used by loki to store logs, the storageSize selected defines the size for each minio disk, in total 6 disk splitted in 2 per 3 minio replicas.
 
-#### Policy (OPA) core module
+#### Policy (OPA) core module and Tracing core module
 
 ```yaml
 spec:
@@ -294,9 +295,11 @@ spec:
     modules:
       policy:
         type: none
+      tracing:
+        type: none
 ```
 
-For simplicity, we are not installing gatekeeper in the cluster, from the `fury-kubernetes-opa` module.
+For simplicity, we are not installing a policy system (gatekeeper or kyverno) and a tracing solution (tempo) in the cluster.
 
 #### DR core module
 
@@ -353,7 +356,7 @@ furyctl create cluster --outdir $PWD
 > ⏱ The process will take some minutes to complete, you can follow the progress in detail by running the following command:
 >
 > ```bash
-> tail -f .furyctl/furyctl.log | jq
+> tail -f .furyctl/furyctl.<timestamp>-<random-id>.log | jq
 > ```
 > `--outdir` flag is used to define in which directory to create the hidden `.furyctl` folder that contains all the required files to install the cluster. 
 > If not provided, a `.furyctl` folder will be created in the user home.
@@ -362,9 +365,14 @@ The output should be similar to the following:
 
 ```bash
 INFO Downloading distribution...                  
+INFO Compatibility patches applied for v1.27.1    
 INFO Validating configuration file...             
 INFO Downloading dependencies...                  
 INFO Validating dependencies...                   
+INFO Running preflight checks                     
+INFO Preflight checks completed successfully      
+INFO Running preupgrade phase...                  
+INFO Preupgrade phase completed successfully      
 INFO Creating Kubernetes Fury cluster...          
 INFO Checking that the hosts are reachable...     
 INFO Running ansible playbook...                  
@@ -372,7 +380,7 @@ INFO Kubernetes cluster created successfully
 INFO Installing Kubernetes Fury Distribution...   
 INFO Checking that the cluster is reachable...    
 INFO Checking storage classes...                  
-WARN No storage classes found in the cluster. logging module (if enabled), dr module (if enabled) and prometheus-operated package installation will be skipped. You need to install a StorageClass and re-run furyctl to install the missing components. 
+WARN No storage classes found in the cluster. logging module (if enabled), tracing module (if enabled), dr module (if enabled) and prometheus-operated package installation will be skipped. You need to install a StorageClass and re-run furyctl to install the missing components. 
 INFO Applying manifests...                        
 INFO Kubernetes Fury Distribution installed successfully 
 INFO Applying plugins...                          
@@ -391,9 +399,14 @@ furyctl create cluster --outdir $PWD --skip-deps-download
 
 ```bash
 INFO Downloading distribution...                  
+INFO Compatibility patches applied for v1.27.1    
 INFO Validating configuration file...             
-INFO Downloading dependencies...                  
 INFO Validating dependencies...                   
+INFO Running preflight checks                     
+INFO Checking that the cluster is reachable...    
+INFO Preflight checks completed successfully      
+INFO Running preupgrade phase...                  
+INFO Preupgrade phase completed successfully      
 INFO Creating Kubernetes Fury cluster...          
 INFO Checking that the hosts are reachable...     
 INFO Running ansible playbook...                  
@@ -406,7 +419,7 @@ INFO Kubernetes Fury Distribution installed successfully
 INFO Applying plugins...                          
 INFO Plugins installed successfully               
 INFO Saving furyctl configuration file in the cluster... 
-INFO Saving distribution configuration file in the cluster...
+INFO Saving distribution configuration file in the cluster... 
 ```
 
 To interact with the cluster a `kubeconfig` has been created on the folder, make it usable with `kubectl` with:

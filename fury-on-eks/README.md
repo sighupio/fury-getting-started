@@ -1,6 +1,6 @@
 # Fury on EKS with furyctl next
 
-This step-by-step tutorial guides you to deploy the **Kubernetes Fury Distribution** (KFD) on an EKS cluster on AWS using the furyctl `>=0.26.3`
+This step-by-step tutorial guides you to deploy the **Kubernetes Fury Distribution** (KFD) on an EKS cluster on AWS using the furyctl `>=0.27.1`
 
 This tutorial covers the following steps:
 
@@ -21,7 +21,6 @@ This tutorial assumes some basic familiarity with Kubernetes and AWS.
 To follow this tutorial, you need:
 
 - **AWS Access Credentials** of an AWS Account with the following [IAM permissions][terraform-aws-eks-iam-permissions].
-- **AWS S3 Bucket** to store the Terraform state.
 - **AWS CLI** - version 2.8.12 at the time of writing this tutorial. You can check your version by running `aws --version`. If you don't have it installed, follow the [official guide][aws-cli-installation].
 
 ### Setup and initialize the environment
@@ -67,7 +66,7 @@ is located at `/tmp/fury-getting-started/fury-on-eks/furyctl.yaml`.
 
 > ℹ️ You can also create a sample configuration file by running the following command:
 > ```bash
-> furyctl create config --version v1.26.3 -c custom-furyctl.yaml
+> furyctl create config --version v1.27.1 -c custom-furyctl.yaml
 > ```
 > and edit the `custom-furyctl.yaml` file to fit your needs, when you are done you can use the `--config` flag to specify the path to the configuration file in the
 > following commands.
@@ -90,7 +89,7 @@ kind: EKSCluster
 metadata:
   name: <CLUSTER_NAME>
 spec:
-  distributionVersion: "v1.26.3"
+  distributionVersion: "v1.27.1"
   toolsConfiguration:
     terraform:
       state:
@@ -104,26 +103,7 @@ spec:
 ```
 
 Open the `/tmp/fury-getting-started/fury-next-on-eks/furyctl.yaml` file with a text editor of your choice and replace the field `<CLUSTER_NAME>` with a name of your choice for the cluster, and the field `<CLUSTER_REGION>` with the AWS region where you want to deploy the cluster.
-If you already have a S3 bucket to store the Terraform state, replace the field `<S3_TFSTATE_BUCKET>`, `<S3_TFSTATE_BUCKET_KEY_PREFIX>`, `<S3_TFSTATE_BUCKET_REGION>`
-with the data from the bucket, otherwise you can create a new one by following the following steps:
-
-1. Choose a unique name and an AWS region for the S3 Bucket:
-
-```bash
-export S3_BUCKET=fury-demo-eks-$RANDOM             # Use a different name
-export S3_BUCKET_REGION=$AWS_DEFAULT_REGION # You can use the same region than before.
-```
-
-2. Create the S3 bucket using the AWS CLI:
-
-```bash
-aws s3api create-bucket \
-  --bucket $S3_BUCKET \
-  --region $S3_BUCKET_REGION \
-  --create-bucket-configuration LocationConstraint=$S3_BUCKET_REGION
-```
-
-> ℹ️ You might need to give permissions on S3 to the user.
+If you already have a S3 bucket to store the Terraform state, replace the field `<S3_TFSTATE_BUCKET>`, `<S3_TFSTATE_BUCKET_KEY_PREFIX>`, `<S3_TFSTATE_BUCKET_REGION>` with the data from the bucket, otherwise furyctl will create it for you.
 
 ### Infrastructure section
 
@@ -174,7 +154,7 @@ The Kubernetes section of the `furyctl.yaml` file contains the following paramet
 ```yaml
   kubernetes:
     nodePoolsLaunchKind: "launch_templates"
-    nodeAllowedSshPublicKey: "{file://~/.ssh/id_rsa.pub}"
+    nodeAllowedSshPublicKey: "{file:///path/to/id_rsa.pub}"
     apiServer:
       privateAccess: true
       publicAccess: true
@@ -213,7 +193,7 @@ The Kubernetes section of the `furyctl.yaml` file contains the following paramet
           k8s.io/cluster-autoscaler/node-template/taint/node.kubernetes.io/role: "workers:NoSchedule"
 ```
 
-Replace the field `"{file://~/.ssh/id_rsa.pub}"` with the path to the public key you want to use to access the worker nodes.
+Replace the field `"{file:///path/to/id_rsa.pub}"` with the path to the public key you want to use to access the worker nodes.
 You can add different nodePools, or edit the existing one should you prefer.
 
 From these parameters `furyctl` will automatically deploy a battle-tested **public** EKS Cluster with 3 tainted worker nodes to be used for infrastructural components and a dynamic number of untainted workers nodes.
@@ -272,8 +252,8 @@ The Distribution section of the `furyctl.yaml` file contains the following param
 
 In this example, we are installing the distribution with the following options:
 
-- A dual battery of nginx, one private and one public
-- cert-manager with dns01 setup with route53
+- A dual Nginx setup, one private and one public
+- Cert-manager with dns01 setup with route53
 - Loki as storage for the logs
 - Basic Auth on the ingresses
 
@@ -293,10 +273,10 @@ In this section, you will utilize furyctl to automatically provision an EKS Clus
 ```bash
 furyctl create cluster --outdir $PWD
 ```
-> ⏱ The process will take several minutes to complete, you can follow the progress in detail by running the following command:
+> ⏱ The process will take several minutes to complete, you can follow the progress in detail by running the following command on the latest furyctl log file:
 >
 > ```bash
-> tail -f .furyctl/furyctl.log | jq
+> tail -f .furyctl/furyctl.<timestamp>-<random-id>.log | jq
 > ```
 > `--outdir` flag is used to define in which directory to create the hidden `.furyctl` folder that contains all the required files to install the cluster.
 > If not provided, a `.furyctl` folder will be created in the user home.
@@ -346,7 +326,7 @@ In the previous section, alongside the distribution, you have deployed Kubernete
 - `prometheus.internal.demo.example.dev`
 - `alertmanager.internal.demo.example.dev`
 
-These ingresses are only reachable from the private network, since in this example we configured nginx to use a dual battery, one exposed to the internet and one private.
+These ingresses are only reachable from the private network, since in this example we configured nginx to use a dual setup, one exposed to the internet and one private.
 
 To reach the LoadBalancer that is exposing the services, you need to connect via VPN and you should be able to resolve these URLs and reach them.
 
