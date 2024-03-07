@@ -1,6 +1,6 @@
 # Fury on EKS with furyctl next
 
-This step-by-step tutorial guides you to deploy the **Kubernetes Fury Distribution** (KFD) on an EKS cluster on AWS using the furyctl `>=0.27.1`
+This step-by-step tutorial guides you to deploy the **Kubernetes Fury Distribution** (KFD) on an EKS cluster on AWS using the furyctl `>=0.27.5`
 
 This tutorial covers the following steps:
 
@@ -89,7 +89,7 @@ kind: EKSCluster
 metadata:
   name: <CLUSTER_NAME>
 spec:
-  distributionVersion: "v1.27.1"
+  distributionVersion: v1.27.3
   toolsConfiguration:
     terraform:
       state:
@@ -271,7 +271,7 @@ In this section, you will utilize furyctl to automatically provision an EKS Clus
 1. Start by running the furyctl command to create the cluster:
 
 ```bash
-furyctl create cluster --outdir $PWD
+furyctl apply --outdir $PWD
 ```
 > ⏱ The process will take several minutes to complete, you can follow the progress in detail by running the following command on the latest furyctl log file:
 >

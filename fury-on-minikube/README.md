@@ -41,10 +41,10 @@ cd fury-getting-started/fury-on-minikube
 ```bash
 export REPO_DIR=$PWD
 export KUBECONFIG=$REPO_DIR/kubeconfig
-minikube start --vm-driver=virtualbox --kubernetes-version v1.27.1 --memory=16384m --cpus=6
+minikube start --vm-driver=virtualbox --kubernetes-version v1.27.3 --memory=16384m --cpus=6
 ```
 
-> ⚠️ This command will spin up by default a single-node Kubernetes v1.27.1 cluster, using VirtualBox driver, with 6 CPUs, 16GB RAM and 20 GB Disk.
+> ⚠️ This command will spin up by default a single-node Kubernetes v1.27.3 cluster, using VirtualBox driver, with 6 CPUs, 16GB RAM and 20 GB Disk.
 
 2. Test the connection to the minikube cluster:
 
@@ -56,12 +56,12 @@ Output:
 
 ```bash
 NAME       STATUS   ROLES           AGE    VERSION
-minikube   Ready    control-plane   104s   v1.27.1
+minikube   Ready    control-plane   104s   v1.27.3
 ```
 
 ## Step 3 - Install furyctl
 
-Install `furyctl` binary: https://github.com/sighupio/furyctl#installation version `>=0.27.1`.
+Install `furyctl` binary: https://github.com/sighupio/furyctl#installation version `>=0.27.5`.
 
 ## Step 3 - Installation
 
@@ -75,8 +75,9 @@ kind: KFDDistribution
 metadata:
   name: fury-local
 spec:
-  distributionVersion: v1.27.1
+  distributionVersion: v1.27.3
   distribution:
+    kubeconfig: "{env://KUBECONFIG}"
     modules:
       networking:
         type: none
@@ -94,9 +95,7 @@ spec:
       logging:
         type: loki
       monitoring:
-        alertmanager:
-          deadManSwitchWebhookUrl: ""
-          slackWebhookUrl: ""
+        type: prometheus
       policy:
         type: none
       dr:
@@ -144,7 +143,7 @@ In this example, we are installing the distribution with the following options:
 Execute the installation with furyctl:
 
 ```bash
-furyctl create cluster --outdir $PWD
+furyctl apply --outdir $PWD
 ```
 > ⏱ The process will take some minutes to complete, you can follow the progress in detail by running the following command:
 >
