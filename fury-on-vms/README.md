@@ -63,7 +63,7 @@ pki
 ```
 ## Step 2 - Install furyctl
 
-Install `furyctl` binary: https://github.com/sighupio/furyctl#installation version 0.27.1.
+Install `furyctl` binary: https://github.com/sighupio/furyctl#installation version `>=0.27.5`.
 
 ## Step 3 - Decide the strategy for the SSL certificates
 
@@ -350,7 +350,7 @@ Now that everything is configured you can proceed with the installation using th
 Simply execute:
 
 ```bash
-furyctl create cluster --outdir $PWD
+furyctl apply --outdir $PWD
 ```
 
 > ⏱ The process will take some minutes to complete, you can follow the progress in detail by running the following command:
@@ -365,7 +365,7 @@ The output should be similar to the following:
 
 ```bash
 INFO Downloading distribution...                  
-INFO Compatibility patches applied for v1.27.1    
+INFO Compatibility patches applied for v1.27.3    
 INFO Validating configuration file...             
 INFO Downloading dependencies...                  
 INFO Validating dependencies...                   
@@ -392,14 +392,12 @@ INFO Saving distribution configuration file in the cluster...
 🚀 Success! The first deployment step is complete. Run furyctl again to install all the components that needs a working storageClass now, since we installed one using plugins function.
 
 ```bash
-furyctl create cluster --outdir $PWD --skip-deps-download
+furyctl apply --outdir $PWD
 ```
-
-> To speed up the following executions, you can use `--skip-deps-download`. This works only if the `.furyctl` folder has been already initialized.
 
 ```bash
 INFO Downloading distribution...                  
-INFO Compatibility patches applied for v1.27.1    
+INFO Compatibility patches applied for v1.27.3    
 INFO Validating configuration file...             
 INFO Validating dependencies...                   
 INFO Running preflight checks                     

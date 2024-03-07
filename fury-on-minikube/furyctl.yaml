@@ -8,8 +8,9 @@ kind: KFDDistribution
 metadata:
   name: fury-local
 spec:
-  distributionVersion: v1.27.1
+  distributionVersion: v1.27.3
   distribution:
+    kubeconfig: "{env://KUBECONFIG}"
     modules:
       networking:
         type: none
@@ -27,9 +28,7 @@ spec:
       logging:
         type: loki
       monitoring:
-        alertmanager:
-          deadManSwitchWebhookUrl: ""
-          slackWebhookUrl: ""
+        type: prometheus
       policy:
         type: none
       dr:
