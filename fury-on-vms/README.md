@@ -12,7 +12,7 @@ This tutorial assumes some basic familiarity with Kubernetes.
 
 To follow this tutorial, you need:
 
-- **kubectl** - 1.27.x to interact with the cluster.
+- **kubectl** - 1.28.x to interact with the cluster.
 - **furyagent** - to provision initial cluster PKI, install the latest version following the instructions [here](https://github.com/sighupio/furyagent#installation)
 - **Ansible** - used by furyctl to execute the roles from KFD installers
 - VMs OS: Rocky linux 8, Debian 12, or Ubuntu 20
@@ -63,7 +63,7 @@ pki
 ```
 ## Step 2 - Install furyctl
 
-Install `furyctl` binary: https://github.com/sighupio/furyctl#installation version 0.27.1.
+Install `furyctl` binary: https://github.com/sighupio/furyctl#installation version 0.28.0.
 
 ## Step 3 - Decide the strategy for the SSL certificates
 
@@ -287,6 +287,18 @@ This section configures the `fury-kubernetes-logging` module. In this example we
 
 The minio configuration is the S3 bucket used by loki to store logs, the storageSize selected defines the size for each minio disk, in total 6 disk splitted in 2 per 3 minio replicas.
 
+#### Monitoring core module
+
+```yaml
+spec:
+  distribution:
+    modules:
+      monitoring:
+        type: prometheus
+```
+
+This section configures the `fury-kubernetes-monitoring` module. The complete stack with prometheus.
+
 #### Policy (OPA) core module and Tracing core module
 
 ```yaml
@@ -350,7 +362,7 @@ Now that everything is configured you can proceed with the installation using th
 Simply execute:
 
 ```bash
-furyctl create cluster --outdir $PWD
+furyctl apply --outdir $PWD
 ```
 
 > ⏱ The process will take some minutes to complete, you can follow the progress in detail by running the following command:
@@ -364,8 +376,7 @@ furyctl create cluster --outdir $PWD
 The output should be similar to the following:
 
 ```bash
-INFO Downloading distribution...                  
-INFO Compatibility patches applied for v1.27.1    
+INFO Downloading distribution...                   
 INFO Validating configuration file...             
 INFO Downloading dependencies...                  
 INFO Validating dependencies...                   
@@ -399,7 +410,6 @@ furyctl create cluster --outdir $PWD --skip-deps-download
 
 ```bash
 INFO Downloading distribution...                  
-INFO Compatibility patches applied for v1.27.1    
 INFO Validating configuration file...             
 INFO Validating dependencies...                   
 INFO Running preflight checks                     

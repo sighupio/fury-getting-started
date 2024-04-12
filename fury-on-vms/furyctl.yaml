@@ -8,7 +8,7 @@ kind: OnPremises
 metadata:
   name: getting-started
 spec:
-  distributionVersion: v1.26.2
+  distributionVersion: v1.28.0-rc.12
   kubernetes:
     pkiFolder: ./pki
     ssh:
@@ -81,9 +81,7 @@ spec:
         minio:
           storageSize: "20Gi"
       monitoring:
-        alertmanager:
-          deadManSwitchWebhookUrl: ""
-          slackWebhookUrl: ""
+        type: prometheus
       policy:
         type: none
       dr:
