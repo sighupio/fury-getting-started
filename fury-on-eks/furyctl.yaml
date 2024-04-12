@@ -3,7 +3,7 @@ kind: EKSCluster
 metadata:
   name: <CLUSTER_NAME>
 spec:
-  distributionVersion: "v1.27.1"
+  distributionVersion: v1.28.0
   toolsConfiguration:
     terraform:
       state:
@@ -110,6 +110,8 @@ spec:
         type: loki
         minio:
           storageSize: 50Gi
+      monitoring:
+        type: prometheus
       dr:
         type: eks
         velero:
@@ -118,6 +120,9 @@ spec:
             bucketName: <S3_VELERO_BUCKET_NAME>
       policy:
         type: gatekeeper
+        gatekeeper: 
+          enforcementAction: warn
+          installDefaultPolicies: true
       auth:
         provider:
           type: basicAuth
