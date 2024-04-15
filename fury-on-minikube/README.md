@@ -41,10 +41,10 @@ cd fury-getting-started/fury-on-minikube
 ```bash
 export REPO_DIR=$PWD
 export KUBECONFIG=$REPO_DIR/kubeconfig
-minikube start --vm-driver=virtualbox --kubernetes-version v1.27.1 --memory=16384m --cpus=6
+minikube start --vm-driver=virtualbox --kubernetes-version v1.28.3 --memory=16384m --cpus=6
 ```
 
-> ⚠️ This command will spin up by default a single-node Kubernetes v1.27.1 cluster, using VirtualBox driver, with 6 CPUs, 16GB RAM and 20 GB Disk.
+> ⚠️ This command will spin up by default a single-node Kubernetes v1.28.7 cluster, using VirtualBox driver, with 6 CPUs, 16GB RAM and 20 GB Disk.
 
 2. Test the connection to the minikube cluster:
 
@@ -55,13 +55,13 @@ kubectl get nodes
 Output:
 
 ```bash
-NAME       STATUS   ROLES           AGE    VERSION
-minikube   Ready    control-plane   104s   v1.27.1
+NAME       STATUS   ROLES           AGE   VERSION
+minikube   Ready    control-plane   9s    v1.28.3
 ```
 
 ## Step 3 - Install furyctl
 
-Install `furyctl` binary: https://github.com/sighupio/furyctl#installation version `>=0.27.1`.
+Install `furyctl` binary: https://github.com/sighupio/furyctl#installation version `>=0.28.0`.
 
 ## Step 3 - Installation
 
@@ -75,8 +75,9 @@ kind: KFDDistribution
 metadata:
   name: fury-local
 spec:
-  distributionVersion: v1.27.1
+  distributionVersion: v1.28.0
   distribution:
+    kubeconfig: "{env://KUBECONFIG}"
     modules:
       networking:
         type: none
@@ -94,9 +95,7 @@ spec:
       logging:
         type: loki
       monitoring:
-        alertmanager:
-          deadManSwitchWebhookUrl: ""
-          slackWebhookUrl: ""
+        type: prometheus
       policy:
         type: none
       dr:
@@ -144,7 +143,7 @@ In this example, we are installing the distribution with the following options:
 Execute the installation with furyctl:
 
 ```bash
-furyctl create cluster --outdir $PWD
+furyctl apply --outdir $PWD
 ```
 > ⏱ The process will take some minutes to complete, you can follow the progress in detail by running the following command:
 >
@@ -158,17 +157,24 @@ The output should be similar to the following:
 
 ```bash
 INFO Downloading distribution...
-INFO Validating configuration file...
-INFO Downloading dependencies...
-INFO Validating dependencies...
-INFO Installing Kubernetes Fury Distribution...
-INFO Checking that the cluster is reachable...
-INFO Checking if at least one storage class is available...
-INFO Checking if all nodes are ready...
-INFO Applying manifests...
-INFO Saving furyctl configuration file in the cluster...
+INFO Validating configuration file...             
+INFO Downloading dependencies...                  
+INFO Validating dependencies...                   
+INFO Running preflight checks                     
+INFO Checking that the cluster is reachable...    
+INFO Cannot find state in cluster, skipping...    
+INFO Running preupgrade phase...                  
+INFO Preupgrade phase completed successfully      
+INFO Installing Kubernetes Fury Distribution...   
+INFO Checking that the cluster is reachable...    
+INFO Checking storage classes...                  
+INFO Checking if all nodes are ready...           
+INFO Applying manifests...                        
+INFO Kubernetes Fury Distribution installed successfully 
+INFO Applying plugins...                          
+INFO Skipping plugins phase as spec.plugins is not defined 
+INFO Saving furyctl configuration file in the cluster... 
 INFO Saving distribution configuration file in the cluster...
-INFO Kubernetes Fury Distribution installed successfully
 ```
 
 🚀 The (subset of the) distribution is finally deployed! In this section you will explore some of its features.

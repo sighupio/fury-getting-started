@@ -1,6 +1,6 @@
 # Fury on EKS with furyctl next
 
-This step-by-step tutorial guides you to deploy the **Kubernetes Fury Distribution** (KFD) on an EKS cluster on AWS using the furyctl `>=0.27.1`
+This step-by-step tutorial guides you to deploy the **Kubernetes Fury Distribution** (KFD) on an EKS cluster on AWS using the furyctl `>=0.28.0`
 
 This tutorial covers the following steps:
 
@@ -66,7 +66,7 @@ is located at `/tmp/fury-getting-started/fury-on-eks/furyctl.yaml`.
 
 > ℹ️ You can also create a sample configuration file by running the following command:
 > ```bash
-> furyctl create config --version v1.27.1 -c custom-furyctl.yaml
+> furyctl create config --version v1.28.0 -c custom-furyctl.yaml
 > ```
 > and edit the `custom-furyctl.yaml` file to fit your needs, when you are done you can use the `--config` flag to specify the path to the configuration file in the
 > following commands.
@@ -89,7 +89,7 @@ kind: EKSCluster
 metadata:
   name: <CLUSTER_NAME>
 spec:
-  distributionVersion: "v1.27.1"
+  distributionVersion: "v1.28.0"
   toolsConfiguration:
     terraform:
       state:
@@ -155,11 +155,12 @@ The Kubernetes section of the `furyctl.yaml` file contains the following paramet
   kubernetes:
     nodePoolsLaunchKind: "launch_templates"
     nodeAllowedSshPublicKey: "{file:///path/to/id_rsa.pub}"
+    logRetentionDays: 1
     apiServer:
       privateAccess: true
       publicAccess: true
       privateAccessCidrs: []
-      publicAccessCidrs: []
+      publicAccessCidrs: ["0.0.0.0/0"]
     nodePools:
       - name: infra
         size:
@@ -234,6 +235,8 @@ The Distribution section of the `furyctl.yaml` file contains the following param
         type: loki
         minio:
           storageSize: 50Gi
+      monitoring:
+        type: prometheus
       dr:
         type: eks
         velero:
@@ -242,6 +245,9 @@ The Distribution section of the `furyctl.yaml` file contains the following param
             bucketName: <S3_VELERO_BUCKET_NAME>
       policy:
         type: gatekeeper
+        gatekeeper: 
+          enforcementAction: warn
+          installDefaultPolicies: true
       auth:
         provider:
           type: basicAuth
