@@ -41,10 +41,10 @@ cd fury-getting-started/fury-on-minikube
 ```bash
 export REPO_DIR=$PWD
 export KUBECONFIG=$REPO_DIR/kubeconfig
-minikube start --vm-driver=virtualbox --kubernetes-version v1.28.3 --memory=16384m --cpus=6
+minikube start --vm-driver=virtualbox --kubernetes-version v1.29.3 --memory=16384m --cpus=6
 ```
 
-> ⚠️ This command will spin up by default a single-node Kubernetes v1.28.7 cluster, using VirtualBox driver, with 6 CPUs, 16GB RAM and 20 GB Disk.
+> ⚠️ This command will spin up by default a single-node Kubernetes v1.29.3 cluster, using VirtualBox driver, with 6 CPUs, 16GB RAM and 20 GB Disk.
 
 2. Test the connection to the minikube cluster:
 
@@ -56,12 +56,12 @@ Output:
 
 ```bash
 NAME       STATUS   ROLES           AGE   VERSION
-minikube   Ready    control-plane   9s    v1.28.3
+minikube   Ready    control-plane   9s    v1.29.3
 ```
 
 ## Step 3 - Install furyctl
 
-Install `furyctl` binary: https://github.com/sighupio/furyctl#installation version `>=0.28.0`.
+Install `furyctl` binary: https://github.com/sighupio/furyctl#installation version `>=0.29.0`.
 
 ## Step 3 - Installation
 
@@ -75,7 +75,7 @@ kind: KFDDistribution
 metadata:
   name: fury-local
 spec:
-  distributionVersion: v1.28.0
+  distributionVersion: v1.29.0
   distribution:
     kubeconfig: "{env://KUBECONFIG}"
     modules:

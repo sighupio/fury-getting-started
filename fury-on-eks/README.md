@@ -1,6 +1,6 @@
 # Fury on EKS with furyctl next
 
-This step-by-step tutorial guides you to deploy the **Kubernetes Fury Distribution** (KFD) on an EKS cluster on AWS using the furyctl `>=0.28.0`
+This step-by-step tutorial guides you to deploy the **Kubernetes Fury Distribution** (KFD) on an EKS cluster on AWS using the furyctl `>=0.29.0`
 
 This tutorial covers the following steps:
 
@@ -66,7 +66,7 @@ is located at `/tmp/fury-getting-started/fury-on-eks/furyctl.yaml`.
 
 > ℹ️ You can also create a sample configuration file by running the following command:
 > ```bash
-> furyctl create config --version v1.28.0 -c custom-furyctl.yaml
+> furyctl create config --version v1.29.0 -c custom-furyctl.yaml
 > ```
 > and edit the `custom-furyctl.yaml` file to fit your needs, when you are done you can use the `--config` flag to specify the path to the configuration file in the
 > following commands.
@@ -89,7 +89,7 @@ kind: EKSCluster
 metadata:
   name: <CLUSTER_NAME>
 spec:
-  distributionVersion: "v1.28.0"
+  distributionVersion: "v1.29.0"
   toolsConfiguration:
     terraform:
       state:

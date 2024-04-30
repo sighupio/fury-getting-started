@@ -12,7 +12,7 @@ This tutorial assumes some basic familiarity with Kubernetes.
 
 To follow this tutorial, you need:
 
-- **kubectl** - 1.28.x to interact with the cluster.
+- **kubectl** - 1.29.x to interact with the cluster.
 - **furyagent** - to provision initial cluster PKI, install the latest version following the instructions [here](https://github.com/sighupio/furyagent#installation)
 - **Ansible** - used by furyctl to execute the roles from KFD installers
 - VMs OS: Rocky linux 8, Debian 12, or Ubuntu 20
@@ -63,7 +63,7 @@ pki
 ```
 ## Step 2 - Install furyctl
 
-Install `furyctl` binary: https://github.com/sighupio/furyctl#installation version 0.28.0.
+Install `furyctl` binary: https://github.com/sighupio/furyctl#installation version >= 0.29.0.
 
 ## Step 3 - Decide the strategy for the SSL certificates
 
