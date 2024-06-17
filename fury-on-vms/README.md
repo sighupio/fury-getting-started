@@ -63,7 +63,7 @@ pki
 ```
 ## Step 2 - Install furyctl
 
-Install `furyctl` binary: https://github.com/sighupio/furyctl#installation version >= 0.29.0.
+Install `furyctl` binary: https://github.com/sighupio/furyctl#installation version >= 0.29.3.
 
 ## Step 3 - Decide the strategy for the SSL certificates
 
@@ -82,7 +82,7 @@ To generate these files using `openssl`, you can run the following commands:
 openssl genrsa -out ca-key.pem 2048
 openssl req -x509 -new -days 365 -nodes -key ca-key.pem -out ca.crt -subj "/CN=kube-ca"
 openssl genrsa -out tls.key 2048
-openssl req -new -key tls.key -out csr.pem -subj "/CN=kube-ca" -config req-dns.cnf 
+openssl req -new -key tls.key -out csr.pem -subj "/CN=kube-ca" -config req-dns.cnf
 openssl x509 -req -in csr.pem -CA ca.crt -CAkey ca-key.pem -CAcreateserial -out tls.crt -days 365 -extensions v3_req -extfile req-dns.cnf
 ```
 
@@ -134,7 +134,7 @@ spec:
 This first piece of configuration defines where to find the PKI files (created in step 1), and the SSH connection details for the `root` user.
 `keyPath` can be a relative or an absolute path.
 
-#### common DNS zone and networking
+#### Common DNS zone and networking
 
 ```yaml
 ---
@@ -145,6 +145,7 @@ spec:
     podCidr: 172.16.128.0/17
     svcCidr: 172.16.0.0/17
 ```
+
 Next we need to define the DNS zone used by all the nodes and the control-plane address. Also, we need to define the network CIDR for the Pods and network CIDR for the Kubernetes services used in the cluster. These CIDRs must not collide with the IPs of the nodes.
 
 #### Load Balancers configuration
@@ -171,9 +172,9 @@ spec:
       additionalConfig: "{file://./haproxy-additional.cfg}"
 ```
 
-Next we need to define the load-balancer nodes, each node will have a name and an IP address, additionally, we are also enabling keepalived on an additional floating IP address, in this example `192.168.1.179`. **Important** check which is the main interface that will be used for the keepalive IP, in this example `enp0s8`.
+Next we need to define the load-balancer nodes, each node will have a name and an IP address, additionally, we are also enabling keepalived on an additional floating IP address, in this example `192.168.1.179`. **Important** check which is the main interface that will be used for the keepalived IP, in this example `enp0s8`.
 
-We need also to give the HAproxy stat page a username and a password, and we can also add an additional config to the HAproxy running the load balancers. In the example file we are also balancing the ingress battery using the same load balancers as the control plane address.
+We need also to give the HAproxy statistics (stats) page a username and a password, and we can also add an additional config to the HAproxy running the load balancers. In the example file we are also balancing the ingress battery using the same load balancers as the control plane address.
 
 #### Kubernetes Master and Worker nodes
 
@@ -200,7 +201,7 @@ spec:
         taints: []
 ```
 
-Next we need to define the masters node and the worker nodes. The fqdn that will be used for each node will be the concatenation of the name and the `.spec.kubernetes.dnsZone` field.
+Next we need to define the masters node and the worker nodes. The FQDN that will be used for each node will be the concatenation of the name and the `.spec.kubernetes.dnsZone` field.
 
 For example, `master1` will become `master1.example.tld`.
 
@@ -283,9 +284,9 @@ spec:
           storageSize: "20Gi"
 ```
 
-This section configures the `fury-kubernetes-logging` module. In this example we are installing loki as log storage, and configuring the logging operator with all the Flows and Outputs to send logs to loki stack.
+This section configures the `fury-kubernetes-logging` module. In this example we are installing Loki as log storage, and configuring the Logging operator with all the Flows and Outputs to send logs to the Loki stack.
 
-The minio configuration is the S3 bucket used by loki to store logs, the storageSize selected defines the size for each minio disk, in total 6 disk splitted in 2 per 3 minio replicas.
+The minio configuration is the S3 bucket used by Loki to store logs, the storageSize selected defines the size for each minio disk, in total 6 disks splitted in 2 per 3 minio replicas.
 
 #### Monitoring core module
 
@@ -297,7 +298,7 @@ spec:
         type: prometheus
 ```
 
-This section configures the `fury-kubernetes-monitoring` module. The complete stack with prometheus.
+This section configures the `fury-kubernetes-monitoring` module. The complete stack with Prometheus.
 
 #### Policy (OPA) core module and Tracing core module
 
@@ -311,7 +312,7 @@ spec:
         type: none
 ```
 
-For simplicity, we are not installing a policy system (gatekeeper or kyverno) and a tracing solution (tempo) in the cluster.
+For simplicity, we are not installing a policy system (Gatekeeper or Kyverno) and a tracing solution (Tempo) in the cluster.
 
 #### DR core module
 
@@ -326,23 +327,25 @@ spec:
 
 We are also configuring velero for the cluster backups from the `fury-kubernetes-dr` module. Velero will be deployed with a minio instance used to store all the backups.
 
+#### Auth core module
+
 ```yaml
 spec:
   distribution:
     modules:
       auth:
         provider:
-          type: none 
+          type: none
 ```
 
-This section configures the authentication for the ingresses and also the authentication via oidc on the APIServer, for simplicity we are disabling the authentication on the ingresses and not configuring the oidc authentication for the APIserver.
+This section configures the authentication for the ingresses and also the authentication via OIDC on the APIServer, for simplicity we are disabling the authentication on the ingresses and not configuring the OIDC authentication for the APIserver.
 
 ### `.spec.plugins`
 
 ```yaml
 spec:
   plugins:
-    kustomize: 
+    kustomize:
       - name: cert-manager-secret
         folder: ./cert-manager-secret/
       - name: storage
@@ -351,13 +354,14 @@ spec:
 
 This section configures additional plugins to be installed in the cluster. There can be two types of plugin, `helm` and `kustomize`, in this example we are installing two kustomize projects.
 
-The first one, under the `cert-manager-secret` folder, installs the secret used by cert-manager to interact with the route53 zone for the dns01 challenge. Change the example values in the `./cert-manager-secret` folder with the correct credentials to interact with your route53 zone. 
-The second one, storage, installs the local-path-provisioner that provides a simple dynamic storage for the cluster (not production grade).
+The first one, under the `cert-manager-secret` folder, installs the secret used by cert-manager to interact with the route53 zone for the dns01 challenge. Change the example values in the `./cert-manager-secret` folder with the correct credentials to interact with your route53 zone.
+
+The second one, storage, installs the `local-path-provisioner` that provides a simple dynamic storage for the cluster (not production grade).
 
 
 ## Step 5 - Launch the installation with `furyctl`
 
-Now that everything is configured you can proceed with the installation using the `furyctl` CLI. 
+Now that everything is configured you can proceed with the installation using the `furyctl` CLI.
 
 Simply execute:
 
@@ -370,37 +374,37 @@ furyctl apply --outdir $PWD
 > ```bash
 > tail -f .furyctl/furyctl.<timestamp>-<random-id>.log | jq
 > ```
-> `--outdir` flag is used to define in which directory to create the hidden `.furyctl` folder that contains all the required files to install the cluster. 
+> `--outdir` flag is used to define in which directory to create the hidden `.furyctl` folder that contains all the required files to install the cluster.
 > If not provided, a `.furyctl` folder will be created in the user home.
 
 The output should be similar to the following:
 
 ```bash
-INFO Downloading distribution...                   
-INFO Validating configuration file...             
-INFO Downloading dependencies...                  
-INFO Validating dependencies...                   
-INFO Running preflight checks                     
-INFO Preflight checks completed successfully      
-INFO Running preupgrade phase...                  
-INFO Preupgrade phase completed successfully      
-INFO Creating Kubernetes Fury cluster...          
-INFO Checking that the hosts are reachable...     
-INFO Running ansible playbook...                  
-INFO Kubernetes cluster created successfully      
-INFO Installing Kubernetes Fury Distribution...   
-INFO Checking that the cluster is reachable...    
-INFO Checking storage classes...                  
-WARN No storage classes found in the cluster. logging module (if enabled), tracing module (if enabled), dr module (if enabled) and prometheus-operated package installation will be skipped. You need to install a StorageClass and re-run furyctl to install the missing components. 
-INFO Applying manifests...                        
-INFO Kubernetes Fury Distribution installed successfully 
-INFO Applying plugins...                          
-INFO Plugins installed successfully               
-INFO Saving furyctl configuration file in the cluster... 
+INFO Downloading distribution...
+INFO Validating configuration file...
+INFO Downloading dependencies...
+INFO Validating dependencies...
+INFO Running preflight checks
+INFO Preflight checks completed successfully
+INFO Running preupgrade phase...
+INFO Preupgrade phase completed successfully
+INFO Creating Kubernetes Fury cluster...
+INFO Checking that the hosts are reachable...
+INFO Running ansible playbook...
+INFO Kubernetes cluster created successfully
+INFO Installing Kubernetes Fury Distribution...
+INFO Checking that the cluster is reachable...
+INFO Checking storage classes...
+WARN No storage classes found in the cluster. logging module (if enabled), tracing module (if enabled), dr module (if enabled) and prometheus-operated package installation will be skipped. You need to install a StorageClass and re-run furyctl to install the missing components.
+INFO Applying manifests...
+INFO Kubernetes Fury Distribution installed successfully
+INFO Applying plugins...
+INFO Plugins installed successfully
+INFO Saving furyctl configuration file in the cluster...
 INFO Saving distribution configuration file in the cluster...
 ```
 
-🚀 Success! The first deployment step is complete. Run furyctl again to install all the components that needs a working storageClass now, since we installed one using plugins function.
+🚀 Success! The first deployment step is complete. Run `furyctl` again to install all the components that needs a working storageClass now, since we installed one using plugins function.
 
 ```bash
 furyctl create cluster --outdir $PWD --skip-deps-download
@@ -409,27 +413,27 @@ furyctl create cluster --outdir $PWD --skip-deps-download
 > To speed up the following executions, you can use `--skip-deps-download`. This works only if the `.furyctl` folder has been already initialized.
 
 ```bash
-INFO Downloading distribution...                  
-INFO Validating configuration file...             
-INFO Validating dependencies...                   
-INFO Running preflight checks                     
-INFO Checking that the cluster is reachable...    
-INFO Preflight checks completed successfully      
-INFO Running preupgrade phase...                  
-INFO Preupgrade phase completed successfully      
-INFO Creating Kubernetes Fury cluster...          
-INFO Checking that the hosts are reachable...     
-INFO Running ansible playbook...                  
-INFO Kubernetes cluster created successfully      
-INFO Installing Kubernetes Fury Distribution...   
-INFO Checking that the cluster is reachable...    
-INFO Checking storage classes...                  
-INFO Applying manifests...                        
-INFO Kubernetes Fury Distribution installed successfully 
-INFO Applying plugins...                          
-INFO Plugins installed successfully               
-INFO Saving furyctl configuration file in the cluster... 
-INFO Saving distribution configuration file in the cluster... 
+INFO Downloading distribution...
+INFO Validating configuration file...
+INFO Validating dependencies...
+INFO Running preflight checks
+INFO Checking that the cluster is reachable...
+INFO Preflight checks completed successfully
+INFO Running preupgrade phase...
+INFO Preupgrade phase completed successfully
+INFO Creating Kubernetes Fury cluster...
+INFO Checking that the hosts are reachable...
+INFO Running ansible playbook...
+INFO Kubernetes cluster created successfully
+INFO Installing Kubernetes Fury Distribution...
+INFO Checking that the cluster is reachable...
+INFO Checking storage classes...
+INFO Applying manifests...
+INFO Kubernetes Fury Distribution installed successfully
+INFO Applying plugins...
+INFO Plugins installed successfully
+INFO Saving furyctl configuration file in the cluster...
+INFO Saving distribution configuration file in the cluster...
 ```
 
 To interact with the cluster a `kubeconfig` has been created on the folder, make it usable with `kubectl` with:
