@@ -65,17 +65,17 @@ furyctl create pki
 After the initialization of the PKI, you should have a `pki` folder with the following contents:
 
 ```text
- pki
-├──  etcd
-│   ├──  ca.crt
-│   └── 󰌆 ca.key
-└──  master
-    ├──  ca.crt
-    ├── 󰌆 ca.key
-    ├──  front-proxy-ca.crt
-    ├── 󰌆 front-proxy-ca.key
-    ├── 󰌆 sa.key
-    └── 󰌆 sa.pub
+pki
+├── etcd
+│   ├── ca.crt
+│   └── ca.key
+└── master
+    ├── ca.crt
+    ├── ca.key
+    ├── front-proxy-ca.crt
+    ├── front-proxy-ca.key
+    ├── sa.key
+    └── sa.pub
 ```
 
 ## Step 3 - Decide the strategy for the SSL certificates
