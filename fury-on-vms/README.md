@@ -13,15 +13,14 @@ This tutorial assumes some basic familiarity with Kubernetes.
 To follow this tutorial, you need:
 
 - **kubectl** - 1.29.x to interact with the cluster.
-- **furyagent** - to provision initial cluster PKI, install the latest version following the instructions [here](https://github.com/sighupio/furyagent#installation)
 - **Ansible** - used by furyctl to execute the roles from KFD installers
-- VMs OS: Rocky linux 8, Debian 12, or Ubuntu 20
+- VMs OS: Rocky Linux 8, Debian 12, or Ubuntu 20
 - Valid FQDN for all the VMs, with a valid domain: for example, each VM should have a corresponding DNS entry like `worker1.example.tld`, `worker2.example.tld`, `master1.worker.tld`, etc.
 - Static IP address for each VM.
-- Two VMs for the LoadBalancer Nodes (at least 1vcpu 1GB ram each)
-- An additional IP that will be used by keepalived to expose the two loadbalancers in HA, and a DNS record pointed to this IP for the control-plane address.
-- Three VMs for the master nodes (at least 2vcpu and 4GB ram each)
-- Three VMs for the worker nodes (at least 4vcpu and 8GB ram each)
+- Two VMs for the load balancer Nodes (at least 1vCPU 1GB RAM each)
+- An additional IP that will be used by keepalived to expose the two load balancers in HA, and a DNS record pointed to this IP for the control-plane address.
+- Three VMs for the master nodes (at least 2vCPU and 4GB RAM each)
+- Three VMs for the worker nodes (at least 4vCPU and 8GB RAM each)
 - `root` or passwordless sudo user SSH access to the VMs
 
 ## Step 0 - Setup and initialize the environment
@@ -35,35 +34,49 @@ git clone https://github.com/sighupio/fury-getting-started/
 cd fury-getting-started/fury-on-vms
 ```
 
-## Step 1 - Initialize the PKI
+## Step 1 - Install furyctl
 
-To initialize the Publick Key Infrastructure needed by the several components of the cluster to communicate securely, first, we need to initialize the CA certificates used by Kubernetes and the etcd database. To do that, you need to run the following command:
+Install `furyctl` binary following the instructions in [furyctl's GitHub repository][furyctl-installation].
+
+We recommend to always install the latest version available. Latest versions are compatible with previous versions of the distribution. This guide assumes that furyctl version is at least 0.29.5. You can check with the following command:
 
 ```bash
-furyagent init master
-furyagent init etcd
+furyctl version
 ```
 
-> The `furyagent` command needs the file `furyagent.yaml` as a configuration, this file is already present in the getting started directory.
+## Step 2 - Initialize the PKI
 
-After the initalization of the PKI, you should have a `pki` folder with the following contents:
+Kubernetes expects you to configure and use TLS to provide data encryption in transit within the control plane, and between the control plane and its clients. To initialize the Public Key Infrastructure needed to create the TLS certificates for the several components of the cluster, first, we need to initialize the Certificate Authorities for Kubernetes and for the etcd database and then create the certificates for each component. Luckily for us, `furyctl` can create for you all of this by running the following command:
+
+```bash
+furyctl create pki
+```
+
+> 💡 **TIP**
+>
+> See the command's help for advanced options: `furyctl create pki --help`.
+
+<!-- spacer -->
+
+> ℹ️ **INFO**
+>
+> Learn more on [Kubernetes security documentation](https://kubernetes.io/docs/concepts/security/#control-plane-protection).
+
+After the initialization of the PKI, you should have a `pki` folder with the following contents:
 
 ```text
-pki
-├── etcd
-│  ├── ca.crt
-│  └── ca.key
-└── master
-   ├── ca.crt
-   ├── ca.key
-   ├── front-proxy-ca.crt
-   ├── front-proxy-ca.key
-   ├── sa.key
-   └── sa.pub
+ pki
+├──  etcd
+│   ├──  ca.crt
+│   └── 󰌆 ca.key
+└──  master
+    ├──  ca.crt
+    ├── 󰌆 ca.key
+    ├──  front-proxy-ca.crt
+    ├── 󰌆 front-proxy-ca.key
+    ├── 󰌆 sa.key
+    └── 󰌆 sa.pub
 ```
-## Step 2 - Install furyctl
-
-Install `furyctl` binary: https://github.com/sighupio/furyctl#installation version >= 0.29.3.
 
 ## Step 3 - Decide the strategy for the SSL certificates
 
@@ -71,7 +84,6 @@ We use the HTTPS protocol to expose the KFD ingresses securely. HTTPS relies on 
 
 1) Provide a self-signed certificate
 2) Use cert-manager to generate the certificates
-
 
 ### Self-signed certificate
 
@@ -107,7 +119,6 @@ Change it accordingly to your environment
 ### cert-manager
 
 With cert-manager you can get valid certificates automatically created for you. You can use the `http01` challenge to get certificates from Let's Encrypt if your load-balancer is reachable from the Internet, otherwise, we suggest using the `dns01` solvers that use an authoritative DNS zone to emit certificates.
-
 
 KFD includes cert-manager in its core packages and it is fully integrated with the distribution. We will use cert-manager with the `dns01` challenge approach in this tutorial.
 
@@ -246,11 +257,12 @@ spec:
 ```
 
 In this section, on the configuration of the `fury-kubernetes-ingress` core module, we are selecting to install a single battery of nginx ingress controller and configuring cert-manager as the provider to emit SSL certificates for our ingresses.
-`baseDomain` is the suffix hostname used on all the ingresses that will be create for the KFD modules, for example, Grafana will become `grafana.<baseDomain>`.
+`baseDomain` is the suffix hostname used on all the ingresses that will be created for the KFD modules, for example, Grafana will become `grafana.<baseDomain>`.
 
 To correctly configure the cert-manager clusterIssuer we need to put a valid configuration for the `dns01` challenge solver. The secret `letsencrypt-production-route53-key` will be created using furyctl's plugins feature in the next steps.
 
 > If instead you want to use a self-signed certificate (or a valid one from a file), you need to configure the ingress module like the following:
+>
 > ```yaml
 >spec:
 >  distribution:
@@ -286,7 +298,7 @@ spec:
 
 This section configures the `fury-kubernetes-logging` module. In this example we are installing Loki as log storage, and configuring the Logging operator with all the Flows and Outputs to send logs to the Loki stack.
 
-The minio configuration is the S3 bucket used by Loki to store logs, the storageSize selected defines the size for each minio disk, in total 6 disks splitted in 2 per 3 minio replicas.
+The minio configuration is the S3 bucket used by Loki to store logs, the storageSize selected defines the size for each minio disk, in total 6 disks split in 2 per 3 minio replicas.
 
 #### Monitoring core module
 
@@ -325,7 +337,7 @@ spec:
         velero: {}
 ```
 
-We are also configuring velero for the cluster backups from the `fury-kubernetes-dr` module. Velero will be deployed with a minio instance used to store all the backups.
+We are also configuring Velero for the cluster backups from the `fury-kubernetes-dr` module. Velero will be deployed with a minio instance used to store all the backups.
 
 #### Auth core module
 
@@ -352,12 +364,11 @@ spec:
         folder: https://github.com/rancher/local-path-provisioner/deploy?ref=v0.0.24
 ```
 
-This section configures additional plugins to be installed in the cluster. There can be two types of plugin, `helm` and `kustomize`, in this example we are installing two kustomize projects.
+This section configures additional plugins to be installed in the cluster. There can be two types of plugin, `helm` and `kustomize`, in this example we are installing two Kustomize projects.
 
 The first one, under the `cert-manager-secret` folder, installs the secret used by cert-manager to interact with the route53 zone for the dns01 challenge. Change the example values in the `./cert-manager-secret` folder with the correct credentials to interact with your route53 zone.
 
 The second one, storage, installs the `local-path-provisioner` that provides a simple dynamic storage for the cluster (not production grade).
-
 
 ## Step 5 - Launch the installation with `furyctl`
 
@@ -374,8 +385,9 @@ furyctl apply --outdir $PWD
 > ```bash
 > tail -f .furyctl/furyctl.<timestamp>-<random-id>.log | jq
 > ```
+>
 > `--outdir` flag is used to define in which directory to create the hidden `.furyctl` folder that contains all the required files to install the cluster.
-> If not provided, a `.furyctl` folder will be created in the user home.
+> If not provided, a `.furyctl` folder will be created in the user's home directory.
 
 The output should be similar to the following:
 
@@ -448,7 +460,7 @@ export KUBECONFIG=$PWD/kubeconfig
 
 [Forecastle](https://github.com/stakater/Forecastle) is an open-source control panel where you can access all exposed applications running on Kubernetes.
 
-Navigate to <https://directory.fury.example.tld> to see all the other ingresses deployed, grouped by namespace.
+Navigate to https://directory.fury.example.tld to see all the other ingresses deployed, grouped by namespace.
 
 ![Forecastle][forecastle-screenshot]
 
@@ -456,12 +468,11 @@ Navigate to <https://directory.fury.example.tld> to see all the other ingresses 
 
 [Grafana](https://github.com/grafana/grafana) is an open-source platform for monitoring and observability. Grafana allows you to query, visualize, alert, and understand your metrics.
 
-Navigate to <https://grafana.fury.example.tld> or click the Grafana icon from Forecastle.
-
+Navigate to https://grafana.fury.example.tld or click the Grafana icon from Forecastle.
 
 #### Discover the logs
 
-Navigate to grafana, and:
+Navigate to Grafana, and:
 
 1. Click on explore
 2. Select Loki datasource
@@ -505,16 +516,10 @@ More about Fury:
 - [Fury Documentation][fury-docs]
 
 <!-- Links -->
-[fury-getting-started-repository]: https://github.com/sighupio/fury-getting-started/
-[fury-getting-started-dockerfile]: https://github.com/sighupio/fury-getting-started/blob/main/utils/docker/Dockerfile
-
 [fury-on-minikube]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-minikube
 [fury-on-eks]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-eks
-
-[furyagent-repository]: https://github.com/sighupio/furyagent
-
 [fury-docs]: https://docs.kubernetesfury.com
-[fury-docs-modules]: https://docs.kubernetesfury.com/docs/overview/modules/
+[furyctl-installation]: https://github.com/sighupio/furyctl#installation
 
 <!-- Images -->
 [grafana-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/grafana.png?raw=true
