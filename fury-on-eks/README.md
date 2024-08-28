@@ -1,4 +1,4 @@
-# Fury on EKS with furyctl next
+# Fury on EKS
 
 This step-by-step tutorial guides you to deploy the **Kubernetes Fury Distribution** (KFD) on an EKS cluster on AWS using the furyctl `>=0.29.0`
 
