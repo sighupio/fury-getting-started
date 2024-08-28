@@ -1,4 +1,4 @@
-# Fury on EKS with furyctl next
+# Fury on EKS
 
 This step-by-step tutorial guides you to deploy the **Kubernetes Fury Distribution** (KFD) on an EKS cluster on AWS using the furyctl `>=0.29.0`
 
@@ -66,7 +66,7 @@ is located at `/tmp/fury-getting-started/fury-on-eks/furyctl.yaml`.
 
 > ℹ️ You can also create a sample configuration file by running the following command:
 > ```bash
-> furyctl create config --version v1.29.0 -c custom-furyctl.yaml
+> furyctl create config --version v1.29.3 -c custom-furyctl.yaml
 > ```
 > and edit the `custom-furyctl.yaml` file to fit your needs, when you are done you can use the `--config` flag to specify the path to the configuration file in the
 > following commands.
@@ -89,7 +89,7 @@ kind: EKSCluster
 metadata:
   name: <CLUSTER_NAME>
 spec:
-  distributionVersion: "v1.29.0"
+  distributionVersion: "v1.29.3"
   toolsConfiguration:
     terraform:
       state:
@@ -405,7 +405,7 @@ You can then proceed with the domain delegation from the authoritative zone.
 
 [Forecastle](https://github.com/stakater/Forecastle) is an open-source control panel where you can access all exposed applications running on Kubernetes.
 
-Navigate to <https://directory.internal.demo.example.dev> to see all the other ingresses deployed, grouped by namespace.
+Navigate to https://directory.internal.demo.example.dev to see all the other ingresses deployed, grouped by namespace.
 
 ![Forecastle][forecastle-eks-screenshot]
 
@@ -413,7 +413,7 @@ Navigate to <https://directory.internal.demo.example.dev> to see all the other i
 
 [Grafana](https://github.com/grafana/grafana) is an open-source platform for monitoring and observability. Grafana allows you to query, visualize, alert, and understand your metrics.
 
-Navigate to <https://grafana.internal.demo.example.dev> or click the Grafana icon from Forecastle.
+Navigate to https://grafana.internal.demo.example.dev or click the Grafana icon from Forecastle.
 
 
 #### Discover the logs
@@ -489,7 +489,7 @@ Output should be:
 pod/bad-pod created
 ```
 
-> 💡 **TIP** Gatekeeper Policy Manger, a simple readonly web UI to easily see the deployed policies and their status is installed as part of the OPA module. You can access it at <http://gpm.internal.demo.example.dev/>
+> 💡 **TIP** Gatekeeper Policy Manger, a simple readonly web UI to easily see the deployed policies and their status is installed as part of the OPA module. You can access it at http://gpm.internal.demo.example.dev/
 
 ## Step 5 - Teardown
 

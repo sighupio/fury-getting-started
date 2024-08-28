@@ -42,7 +42,8 @@ The tools we need are `furyctl`, `terraform`, `kubectl` and `kustomize`.
 
 Click on the desired tool to see how to install it:
 
-<details><summary>1 - furyctl</summary>
+<details>
+<summary>1 - furyctl</summary>
 
 Install the latest `furyctl` version from its [Github Furyctl Release page](https://github.com/sighupio/furyctl/releases).
 
@@ -58,7 +59,8 @@ wget -q "https://github.com/sighupio/furyctl/releases/download/v0.9.0/furyctl-$(
 
 </details>
 
-<details><summary>2 - terraform CLI</summary>
+<details>
+<summary>2 - terraform CLI</summary>
 
 Install the latest `terraform` CLI from the [Hashicorp official download page](https://developer.hashicorp.com/terraform/downloads).
 
@@ -72,7 +74,8 @@ sudo apt-get update && sudo apt-get install terraform
 
 </details>
 
-<details><summary>3 - kubectl</summary>
+<details>
+<summary>3 - kubectl</summary>
 
 Install the `kubectl` CLI to manage the Managed Kubernetes Cluster, by following the [Official Kubernetes Documentation](https://kubernetes.io/docs/tasks/tools/).
 
@@ -86,7 +89,8 @@ curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stabl
 
 </details>
 
-<details><summary>4 - kustomize v3.5.3</summary>
+<details>
+<summary>4 - kustomize v3.5.3</summary>
 
 Install the `kustomize` v3.5.3 CLI, by following the [Official Kubernetes Documentation](https://kubectl.docs.kubernetes.io/installation/kustomize/).
 
@@ -466,7 +470,7 @@ Now, you can reach the ingresses directly from your browser.
 
 [Forecastle](https://github.com/stakater/Forecastle) is an open-source control panel where you can access all exposed applications running on Kubernetes.
 
-Navigate to <http://forecastle.fury.info> to see all the other ingresses deployed, grouped by namespace.
+Navigate to http://forecastle.fury.info to see all the other ingresses deployed, grouped by namespace.
 
 ![Forecastle][forecastle-eks-screenshot]
 
@@ -474,7 +478,7 @@ Navigate to <http://forecastle.fury.info> to see all the other ingresses deploye
 
 [Grafana](https://github.com/grafana/grafana) is an open-source platform for monitoring and observability. Grafana allows you to query, visualize, alert on and understand your metrics.
 
-Navigate to <http://grafana.fury.info> or click the Grafana icon from Forecastle.
+Navigate to http://grafana.fury.info or click the Grafana icon from Forecastle.
 
 Fury provides some pre-configured dashboards to visualize the state of the cluster. Examine an example dashboard:
 
@@ -490,7 +494,7 @@ This is what you should see:
 
 [OpenSearch Dashboards](https://github.com/opensearch-project/OpenSearch-Dashboards) is an open-source analytics and visualization platform for OpenSearch. OpenSearch Dashboards lets you perform advanced data analysis and visualize data in various charts, tables, and maps. You can use it to search, view, and interact with data stored in OpenSearch indices.
 
-Navigate to <http://opensearch-dashboards.fury.info> or click the OpenSearch Dashboards icon from Forecastle.
+Navigate to http://opensearch-dashboards.fury.info or click the OpenSearch Dashboards icon from Forecastle.
 
 > :warning: please beware that some background jobs need to run to finish OpenSearch configuration. If you get a screen with a "Start by adding your data" title, please wait some minutes and try again.
 

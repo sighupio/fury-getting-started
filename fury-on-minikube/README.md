@@ -75,7 +75,7 @@ kind: KFDDistribution
 metadata:
   name: fury-local
 spec:
-  distributionVersion: v1.29.0
+  distributionVersion: v1.29.3
   distribution:
     kubeconfig: "{env://KUBECONFIG}"
     modules:
@@ -213,7 +213,7 @@ Now, you can reach the ingresses directly from your browser.
 
 [Forecastle](https://github.com/stakater/Forecastle) is an open-source control panel where you can access all exposed applications running on Kubernetes.
 
-Navigate to <https://directory.fury.info:31443> to see all the other ingresses deployed, grouped by namespace.
+Navigate to https://directory.fury.info:31443 to see all the other ingresses deployed, grouped by namespace.
 
 ![Forecastle][forecastle-screenshot]
 
@@ -221,7 +221,7 @@ Navigate to <https://directory.fury.info:31443> to see all the other ingresses d
 
 [Grafana](https://github.com/grafana/grafana) is an open-source platform for monitoring and observability. Grafana allows you to query, visualize, alert, and understand your metrics.
 
-Navigate to <https://grafana.internal.demo.example.dev:31443> or click the Grafana icon from Forecastle (remember to append the port 31443 to the url).
+Navigate to https://grafana.internal.demo.example.dev:31443 or click the Grafana icon from Forecastle (remember to append the port 31443 to the url).
 
 
 #### Discover the logs

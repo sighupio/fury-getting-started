@@ -1,9 +1,15 @@
+# Copyright (c) 2017-present SIGHUP s.r.l All rights reserved.
+# Use of this source code is governed by a BSD-style
+# license that can be found in the LICENSE file.
+# yaml-language-server: $schema=https://raw.githubusercontent.com/sighupio/fury-distribution/v1.29.3/schemas/public/ekscluster-kfd-v1alpha2.json
+
+---
 apiVersion: kfd.sighup.io/v1alpha2
 kind: EKSCluster
 metadata:
   name: <CLUSTER_NAME>
 spec:
-  distributionVersion: v1.29.0
+  distributionVersion: v1.29.3
   toolsConfiguration:
     terraform:
       state:
