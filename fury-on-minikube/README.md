@@ -10,7 +10,7 @@ This tutorial covers the following steps:
 4. Explore some features of the distribution.
 5. Teardown the environment.
 
-> ☁️ If you prefer trying Fury in a cloud environment, check out the [Fury on EKS](../fury-on-eks) tutorial.
+> ☁️ If you prefer trying Fury in a cloud environment, check out the [Fury on EKS][fury-on-eks] tutorial.
 
 The goal of this tutorial is to introduce you to the main concepts of KFD and how to work with its tooling.
 
@@ -38,26 +38,26 @@ cd fury-getting-started/fury-on-minikube
 
 1. Start minikube cluster:
 
-```bash
-export REPO_DIR=$PWD
-export KUBECONFIG=$REPO_DIR/kubeconfig
-minikube start --vm-driver=virtualbox --kubernetes-version v1.29.3 --memory=16384m --cpus=6
-```
+    ```bash
+    export REPO_DIR=$PWD
+    export KUBECONFIG=$REPO_DIR/kubeconfig
+    minikube start --vm-driver=virtualbox --kubernetes-version v1.29.3 --memory=16384m --cpus=6
+    ```
 
-> ⚠️ This command will spin up by default a single-node Kubernetes v1.29.3 cluster, using VirtualBox driver, with 6 CPUs, 16GB RAM and 20 GB Disk.
+    > ⚠️ This command will spin up by default a single-node Kubernetes v1.29.3 cluster, using VirtualBox driver, with 6 CPUs, 16GB RAM and 20 GB Disk.
 
 2. Test the connection to the minikube cluster:
 
-```bash
-kubectl get nodes
-```
+    ```bash
+    kubectl get nodes
+    ```
 
-Output:
+    Output:
 
-```bash
-NAME       STATUS   ROLES           AGE   VERSION
-minikube   Ready    control-plane   9s    v1.29.3
-```
+    ```bash
+    NAME       STATUS   ROLES           AGE   VERSION
+    minikube   Ready    control-plane   9s    v1.29.3
+    ```
 
 ## Step 3 - Install furyctl
 
@@ -145,11 +145,13 @@ Execute the installation with furyctl:
 ```bash
 furyctl apply --outdir $PWD
 ```
+
 > ⏱ The process will take some minutes to complete, you can follow the progress in detail by running the following command:
 >
 > ```bash
 > tail -f .furyctl/furyctl.<timestamp>-<random-id>.log | jq
 > ```
+>
 > `--outdir` flag is used to define in which directory to create the hidden `.furyctl` folder that contains all the required files to install the cluster.
 > If not provided, a `.furyctl` folder will be created in the user home.
 
@@ -157,23 +159,23 @@ The output should be similar to the following:
 
 ```bash
 INFO Downloading distribution...
-INFO Validating configuration file...             
-INFO Downloading dependencies...                  
-INFO Validating dependencies...                   
-INFO Running preflight checks                     
-INFO Checking that the cluster is reachable...    
-INFO Cannot find state in cluster, skipping...    
-INFO Running preupgrade phase...                  
-INFO Preupgrade phase completed successfully      
-INFO Installing Kubernetes Fury Distribution...   
-INFO Checking that the cluster is reachable...    
-INFO Checking storage classes...                  
-INFO Checking if all nodes are ready...           
-INFO Applying manifests...                        
-INFO Kubernetes Fury Distribution installed successfully 
-INFO Applying plugins...                          
-INFO Skipping plugins phase as spec.plugins is not defined 
-INFO Saving furyctl configuration file in the cluster... 
+INFO Validating configuration file...
+INFO Downloading dependencies...
+INFO Validating dependencies...
+INFO Running preflight checks
+INFO Checking that the cluster is reachable...
+INFO Cannot find state in cluster, skipping...
+INFO Running preupgrade phase...
+INFO Preupgrade phase completed successfully
+INFO Installing Kubernetes Fury Distribution...
+INFO Checking that the cluster is reachable...
+INFO Checking storage classes...
+INFO Checking if all nodes are ready...
+INFO Applying manifests...
+INFO Kubernetes Fury Distribution installed successfully
+INFO Applying plugins...
+INFO Skipping plugins phase as spec.plugins is not defined
+INFO Saving furyctl configuration file in the cluster...
 INFO Saving distribution configuration file in the cluster...
 ```
 
@@ -195,17 +197,16 @@ To access the ingresses more easily via the browser, configure your local DNS to
 
 1. Get the address of the cluster IP:
 
-```bash
-minikube ip
-<SOME_IP>
-```
+    ```bash
+    minikube ip
+    <SOME_IP>
+    ```
 
-3. Add the following line to your local `/etc/hosts`:
+2. Add the following line to your local `/etc/hosts`:
 
-```bash
-<SOME_IP> directory.internal.demo.example.dev grafana.internal.demo.example.dev prometheus.internal.demo.example.dev
-
-```
+    ```bash
+    <SOME_IP> directory.internal.demo.example.dev grafana.internal.demo.example.dev prometheus.internal.demo.example.dev
+    ```
 
 Now, you can reach the ingresses directly from your browser.
 
@@ -222,7 +223,6 @@ Navigate to https://directory.fury.info:31443 to see all the other ingresses dep
 [Grafana](https://github.com/grafana/grafana) is an open-source platform for monitoring and observability. Grafana allows you to query, visualize, alert, and understand your metrics.
 
 Navigate to https://grafana.internal.demo.example.dev:31443 or click the Grafana icon from Forecastle (remember to append the port 31443 to the url).
-
 
 #### Discover the logs
 
@@ -254,9 +254,9 @@ Take a look around and test the other dashboards available.
 
 1. Delete the minikube cluster:
 
-```bash
-minikube delete
-```
+    ```bash
+    minikube delete
+    ```
 
 ## Conclusions
 
@@ -280,27 +280,10 @@ More about Fury:
 - [Fury Documentation][fury-docs]
 
 <!-- Links -->
-[fury-getting-started-repository]: https://github.com/sighupio/fury-getting-started/
-[fury-getting-started-dockerfile]: https://github.com/sighupio/fury-getting-started/blob/main/utils/docker/Dockerfile
-
-[fury-on-minikube]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-minikube
 [fury-on-eks]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-eks
-[fury-on-gke]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-gke
-[fury-on-ovhcloud]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-ovhcloud
 [fury-on-vms]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-vms
 
-[furyagent-repository]: https://github.com/sighupio/furyagent
-
-[provisioner-bootstrap-aws-reference]: https://docs.kubernetesfury.com/docs/cli-reference/furyctl/provisioners/aws-bootstrap/
-
-[tunnelblick]: https://tunnelblick.net/downloads.html
-[openvpn-connect]: https://openvpn.net/vpn-client/
-[github-ssh-key-setup]: https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account
-
 [fury-docs]: https://docs.kubernetesfury.com
-[fury-docs-modules]: https://docs.kubernetesfury.com/docs/overview/modules/
-
-[furyctl-docs]: https://docs.kubernetesfury.com/docs/infrastructure/furyctl
 
 <!-- Images -->
 [grafana-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/grafana.png?raw=true

@@ -2,7 +2,7 @@
 
 This step-by-step tutorial helps you deploy a full Kubernetes Fury Cluster on a set of already existing VMs.
 
-> ☁️ If you prefer trying Fury in a cloud environment, check out the [Fury on EKS](../fury-on-eks) tutorial.
+> ☁️ If you prefer trying Fury in a cloud environment, check out the [Fury on EKS][fury-on-eks] tutorial.
 
 The goal of this tutorial is to introduce you to the main concepts of KFD and how to work with its tooling.
 
@@ -29,10 +29,10 @@ To follow this tutorial, you need:
 
 2. Clone the [fury getting started repository](https://github.com/sighupio/fury-getting-started) containing all the example code used in this tutorial:
 
-```bash
-git clone https://github.com/sighupio/fury-getting-started/
-cd fury-getting-started/fury-on-vms
-```
+    ```bash
+    git clone https://github.com/sighupio/fury-getting-started/
+    cd fury-getting-started/fury-on-vms
+    ```
 
 ## Step 1 - Install furyctl
 

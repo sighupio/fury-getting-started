@@ -20,7 +20,7 @@ This tutorial will cover the following topics:
 5. Explore some of the Features
 6. Teardown the environment
 
-> ☁️ If you prefer trying Fury in a cloud environment, check out the [Fury on EKS](../fury-on-eks) tutorial or the [Fury on GKE](../fury-on-gke) tutorial.
+> ☁️ If you prefer trying Fury in a cloud environment, check out the [Fury on EKS][fury-on-eks] tutorial or the [Fury on GKE][fury-on-gke] tutorial.
 
 ## Prerequisites
 
@@ -42,28 +42,28 @@ To follow this tutorial you will need:
 
 2. Clone the [fury getting started repository][fury-getting-started-repository] containing all the example code used in this tutorial:
 
-```bash
-git clone https://github.com/sighupio/fury-getting-started/
-cd fury-getting-started/fury-on-talos
-```
+    ```bash
+    git clone https://github.com/sighupio/fury-getting-started/
+    cd fury-getting-started/fury-on-talos
+    ```
 
 3. Download `talosctl`
 
-For `amd64` architectures:
+    For `amd64` architectures:
 
-```bash
-curl -Lo /usr/local/bin/talosctl https://github.com/siderolabs/talos/releases/download/v1.0.5/talosctl-$(uname -s | tr "[:upper:]" "[:lower:]")-amd64
-chmod +x /usr/local/bin/talosctl
-```
+    ```bash
+    curl -Lo /usr/local/bin/talosctl https://github.com/siderolabs/talos/releases/download/v1.0.5/talosctl-$(uname -s | tr "[:upper:]" "[:lower:]")-amd64
+    chmod +x /usr/local/bin/talosctl
+    ```
 
-For Linux and darwin operating systems `talosctl` is also available for the `arm64` processor architecture:
+    For Linux and darwin operating systems `talosctl` is also available for the `arm64` processor architecture:
 
-```bash
-curl -Lo /usr/local/bin/talosctl https://github.com/siderolabs/talos/releases/download/v1.0.5/talosctl-$(uname -s | tr "[:upper:]" "[:lower:]")-arm64
-chmod +x /usr/local/bin/talosctl
-```
+    ```bash
+    curl -Lo /usr/local/bin/talosctl https://github.com/siderolabs/talos/releases/download/v1.0.5/talosctl-$(uname -s | tr "[:upper:]" "[:lower:]")-arm64
+    chmod +x /usr/local/bin/talosctl
+    ```
 
-> See the [offciial documentation for talosctl][talosctl-docs] for more details.
+    > See the [offcial documentation for talosctl][talosctl-docs] for more details.
 
 You are all set to start the tutorial 🚀
 
@@ -97,107 +97,108 @@ Considering the previous requirements, we can proceed to the first step: the clu
 
 1. Create the Talos Cluster using the flags mentioned before:
 
-```bash
-talosctl cluster create --kubernetes-version 1.23.6 --cpus-workers 4 --memory-workers 4096 --exposed-ports 31080:31080/tcp,31443:31443/tcp --config-patch-worker @infrastructure/talos-worker-patch.yaml
-```
+    ```bash
+    talosctl cluster create --kubernetes-version 1.23.6 --cpus-workers 4 --memory-workers 4096    --exposed-ports 31080:31080/tcp,31443:31443/tcp --config-patch-worker @infrastructure/  talos-worker-patch.yaml
+    ```
 
-Expected output:
-```bash
-validating CIDR and reserving IPs
-generating PKI and tokens
-creating network talos-default
-creating master nodes
-creating worker nodes
-waiting for API
-bootstrapping cluster
-waiting for etcd to be healthy: OK
-waiting for apid to be ready: OK
-waiting for kubelet to be healthy: OK
-waiting for all nodes to finish boot sequence: OK
-waiting for all k8s nodes to report: OK
-waiting for all k8s nodes to report ready: OK
-waiting for all control plane components to be ready: OK
-waiting for kube-proxy to report ready: OK
-waiting for coredns to report ready: OK
-waiting for all k8s nodes to report schedulable: OK
+    Expected output:
 
-merging kubeconfig into "/Users/ralgozino/.kube/config"
-PROVISIONER       docker
-NAME              talos-default
-NETWORK NAME      talos-default
-NETWORK CIDR      10.5.0.0/24
-NETWORK GATEWAY   10.5.0.1
-NETWORK MTU       1500
+    ```bash
+    validating CIDR and reserving IPs
+    generating PKI and tokens
+    creating network talos-default
+    creating master nodes
+    creating worker nodes
+    waiting for API
+    bootstrapping cluster
+    waiting for etcd to be healthy: OK
+    waiting for apid to be ready: OK
+    waiting for kubelet to be healthy: OK
+    waiting for all nodes to finish boot sequence: OK
+    waiting for all k8s nodes to report: OK
+    waiting for all k8s nodes to report ready: OK
+    waiting for all control plane components to be ready: OK
+    waiting for kube-proxy to report ready: OK
+    waiting for coredns to report ready: OK
+    waiting for all k8s nodes to report schedulable: OK
 
-NODES:
+    merging kubeconfig into "/Users/ralgozino/.kube/config"
+    PROVISIONER       docker
+    NAME              talos-default
+    NETWORK NAME      talos-default
+    NETWORK CIDR      10.5.0.0/24
+    NETWORK GATEWAY   10.5.0.1
+    NETWORK MTU       1500
 
-NAME                      TYPE           IP         CPU    RAM      DISK
-/talos-default-master-1   controlplane   10.5.0.2   2.00   2.1 GB   -
-/talos-default-worker-1   worker         10.5.0.3   4.00   4.3 GB   -
-```
+    NODES:
+
+    NAME                      TYPE           IP         CPU    RAM      DISK
+    /talos-default-master-1   controlplane   10.5.0.2   2.00   2.1 GB   -
+    /talos-default-worker-1   worker         10.5.0.3   4.00   4.3 GB   -
+    ```
 
 2. By default `talosctl` will add a new context to your current kubeconfig. For simplicity, let's export the kubeconfig to a file in the `infrastructure` folder:
 
-```bash
-talosctl --nodes 10.5.0.2 kubeconfig infrastructure/
-```
+    ```bash
+    talosctl --nodes 10.5.0.2 kubeconfig infrastructure/
+    ```
 
->⚠️ Make sure to use the master's IP as the --nodes flag value in the previous command
+    >⚠️ Make sure to use the master's IP as the --nodes flag value in the previous command
 
 3. Run the `fury-getting-started` docker image:
 
-```bash
-docker run -ti --rm \
-  -v $PWD:/demo \
-  --env KUBECONFIG=/demo/infrastructure/kubeconfig \
-  --net=host \
-   registry.sighup.io/delivery/fury-getting-started
-```
+    ```bash
+    docker run -ti --rm \
+      -v $PWD:/demo \
+      --env KUBECONFIG=/demo/infrastructure/kubeconfig \
+      --net=host \
+       registry.sighup.io/delivery/fury-getting-started
+    ```
 
->ℹ️ From now on all commands in this guide assume to be run inside this container unless otherwise specified.
+    >ℹ️ From now on all commands in this guide assume to be run inside this container unless otherwise specified.
 
 4. Test the connection to the cluster:
 
-```bash
-kubectl get nodes
-```
+    ```bash
+    kubectl get nodes
+    ```
 
-Output:
+    Output:
 
-```bash
-NAME                     STATUS   ROLES                  AGE   VERSION
-talos-default-master-1   Ready    control-plane,master   96s   v1.23.6
-talos-default-worker-1   Ready    <none>                 92s   v1.23.6
-```
+    ```bash
+    NAME                     STATUS   ROLES                  AGE   VERSION
+    talos-default-master-1   Ready    control-plane,master   96s   v1.23.6
+    talos-default-worker-1   Ready    <none>                 92s   v1.23.6
+    ```
 
 5. Now that we have the cluster up and running, we can install the `local-path` storage. Run the following command to install it:
 
-```bash
-kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/v0.0.22/deploy/local-path-storage.yaml
-```
+    ```bash
+    kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/v0.0.22/deploy/local-path-storage.yaml
+    ```
 
 6. Make the new storage class `local-path` the default one:
 
-```bash
-kubectl patch storageclass local-path -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
-```	
+    ```bash
+    kubectl patch storageclass local-path -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+    ```
 
 7. Check that the `local-path-storage` is working properly.
 
-Check the logs, with the following command:
+    Check the logs, with the following command:
 
-```bash
-kubectl -n local-path-storage logs -f -l app=local-path-provisioner
-```
+    ```bash
+    kubectl -n local-path-storage logs -f -l app=local-path-provisioner
+    ```
 
-you should get something like this:
+    you should get something like this:
 
-```log
-time="2022-05-26T08:46:13Z" level=debug msg="Applied config: {\"nodePathMap\":[{\"node\":\"DEFAULT_PATH_FOR_NON_LISTED_NODES\",\"paths\":[\"/opt/local-path-provisioner\"]}]}" 
-time="2022-05-26T08:46:13Z" level=debug msg="Provisioner started" 
-I0526 08:46:13.142016       1 controller.go:773] Starting provisioner controller rancher.io/local-path_local-path-provisioner-64d5bc6b74-dlqxz_62c217e5-a519-40e5-897b-d82464448012!
-I0526 08:46:13.243167       1 controller.go:822] Started provisioner controller rancher.io/local-path_local-path-provisioner-64d5bc6b74-dlqxz_62c217e5-a519-40e5-897b-d82464448012!
-```
+    ```log
+    time="2022-05-26T08:46:13Z" level=debug msg="Applied config: {\"nodePathMap\":[{\"node\":\"DEFAULT_PATH_FOR_NON_LISTED_NODES\",\"paths\":[\"/opt/local-path-provisioner\"]}]}"
+    time="2022-05-26T08:46:13Z" level=debug msg="Provisioner started"
+    I0526 08:46:13.142016       1 controller.go:773] Starting provisioner controller rancher.io/local-path_local-path-provisioner-64d5bc6b74-dlqxz_62c217e5-a519-40e5-897b-d82464448012!
+    I0526 08:46:13.243167       1 controller.go:822] Started provisioner controller rancher.io/local-path_local-path-provisioner-64d5bc6b74-dlqxz_62c217e5-a519-40e5-897b-d82464448012!
+    ```
 
 ## Step 2 - Getting KFD modules
 
@@ -227,7 +228,7 @@ bases:
   - name: monitoring/configs
   - name: monitoring/kube-state-metrics
   - name: monitoring/node-exporter
-  
+
   - name: logging/elasticsearch-single
   - name: logging/cerebro
   - name: logging/curator
@@ -258,45 +259,45 @@ Now that we have a `Furyfile.yml`, we can proceed to download the modules.
 
 1. Run the following command to download the modules specified by the Furyfile:
 
-```bash
-cd /demo
-furyctl vendor -H
-```
+    ```bash
+    cd /demo
+    furyctl vendor -H
+    ```
 
-> ℹ️ the `-H` flag tells `furyctl` to use HTTP(S) instead of SSH to download the modules from GitHub.
+    > ℹ️ the `-H` flag tells `furyctl` to use HTTP(S) instead of SSH to download the modules from GitHub.
 
 2. Inspect the downloaded modules in the `vendor` folder:
 
-```bash
-tree -d /demo/vendor -L 3
-```
+    ```bash
+    tree -d /demo/vendor -L 3
+    ```
 
-Output:
+    Output:
 
-```bash
-/demo/vendor
-└── katalog
-    ├── ingress
-    │   ├── forecastle
-    │   └── nginx
-    ├── logging
-    │   ├── cerebro
-    │   ├── curator
-    │   ├── elasticsearch-single
-    │   ├── fluentd
-    │   └── kibana
-    └── monitoring
-        ├── alertmanager-operated
-        ├── configs
-        ├── grafana
-        ├── kube-state-metrics
-        ├── kubeadm-sm
-        ├── node-exporter
-        ├── prometheus-operated
-        └── prometheus-operator
+    ```bash
+    /demo/vendor
+    └── katalog
+        ├── ingress
+        │   ├── forecastle
+        │   └── nginx
+        ├── logging
+        │   ├── cerebro
+        │   ├── curator
+        │   ├── elasticsearch-single
+        │   ├── fluentd
+        │   └── kibana
+        └── monitoring
+            ├── alertmanager-operated
+            ├── configs
+            ├── grafana
+            ├── kube-state-metrics
+            ├── kubeadm-sm
+            ├── node-exporter
+            ├── prometheus-operated
+            └── prometheus-operator
 
-19 directories
-```
+    19 directories
+    ```
 
 ## Step 3 - Installation
 
@@ -447,17 +448,17 @@ This is what you should see:
 
 1. Stop the docker container that we've been using to run the commands:
 
-```bash
-# Execute this command inside the Docker container
-exit
-```
+    ```bash
+    # Execute this command inside the Docker container
+    exit
+    ```
 
 2. Delete the talos cluster:
 
-```bash
-# Execute these commands from your local system, outside the Docker container
-talosctl cluster destroy
-```
+    ```bash
+    # Execute these commands from your local system, outside the Docker container
+    talosctl cluster destroy
+    ```
 
 ## Conclusions
 
@@ -488,7 +489,6 @@ More about Fury:
 [talosctl-docs]: https://www.talos.dev/v1.0/reference/cli/
 [fury-getting-started-dockerfile]: https://github.com/sighupio/fury-getting-started/blob/main/utils/docker/Dockerfile
 [rancher-local-path]: https://github.com/rancher/local-path-provisioner
-[furyctl-repo]: https://github.com/sighupio/furyctl
 [furyctl-docs]: https://docs.kubernetesfury.com/docs/infrastructure/furyctl
 
 [kfd-docs-modules]: https://docs.kubernetesfury.com/docs/modules/
@@ -501,10 +501,8 @@ More about Fury:
 [fury-on-eks]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-eks
 [fury-on-gke]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-gke
 [fury-on-ovhcloud]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-ovhcloud
-[furyagent-repository]: https://github.com/sighupio/furyagent
 
 <!-- Images -->
 [kibana-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/kibana.png?raw=true
 [grafana-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/grafana.png?raw=true
-[cerebro-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/cerebro.png?raw=true
 [forecastle-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/forecastle.png?raw=true

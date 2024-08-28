@@ -40,27 +40,27 @@ To follow this tutorial, you need:
 
 2. Clone the [fury getting started repository][fury-on-gke] containing all the example code used in this tutorial:
 
-```bash
-git clone https://github.com/sighupio/fury-getting-started
-cd fury-getting-started/fury-on-gke
-```
+    ```bash
+    git clone https://github.com/sighupio/fury-getting-started
+    cd fury-getting-started/fury-on-gke
+    ```
 
 3. Run the `fury-getting-started` docker image:
 
-```bash
-docker run -ti --rm \
-  -v $PWD:/demo \
-  registry.sighup.io/delivery/fury-getting-started
-```
+    ```bash
+    docker run -ti --rm \
+      -v $PWD:/demo \
+      registry.sighup.io/delivery/fury-getting-started
+    ```
 
 4. Set up your GCP credentials by exporting the following environment variables:
 
-```bash
-export GOOGLE_CREDENTIALS=<PATH_TO_YOUR_CREDENTIALS_JSON>
-export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_CREDENTIALS
-export GOOGLE_PROJECT=<YOUR_PROJECT_NAME>
-export GOOGLE_REGION=<YOUR_REGION>
-```
+    ```bash
+    export GOOGLE_CREDENTIALS=<PATH_TO_YOUR_CREDENTIALS_JSON>
+    export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_CREDENTIALS
+    export GOOGLE_PROJECT=<YOUR_PROJECT_NAME>
+    export GOOGLE_REGION=<YOUR_REGION>
+    ```
 
 💡 by default this guide uses `n1-standard-*` instances. Check that this type is available in the chosen region, for example, `europe-west6` (otherwise you'll have to adjust the various configuration files with a supported instance type).
 
@@ -139,80 +139,80 @@ Although this is a tutorial, it is always a good practice to use a remote Terraf
 
 1. You can manually create it using the `gcloud cli`:
 
-```bash
-gsutil mb gs://<GCS_BUCKET>
+    ```bash
+    gsutil mb gs://<GCS_BUCKET>
 
-# Enable versioning (recommended for terraform state)
-gsutil versioning set on gs://<GCS_BUCKET>
-```
+    # Enable versioning (recommended for terraform state)
+    gsutil versioning set on gs://<GCS_BUCKET>
+    ```
 
 2. Once created, uncomment the `spec.executor.state` block in the `/demo/infrastructure/bootstrap.yml` file:
 
-```yaml
-...
-executor:
-  state:
-    backend: gcs
-    config:
-      bucket: <GCS_BUCKET>
-      prefix: terraform/bootstrap
-```
+    ```yaml
+    ...
+    executor:
+      state:
+        backend: gcs
+        config:
+          bucket: <GCS_BUCKET>
+          prefix: terraform/bootstrap
+    ```
 
 3. Replace the `<GCS_BUCKET>` with the correct values from the previous commands:
 
-```yaml
-...
-executor:
-  state:
-    backend: gcs
-    config:
-      bucket: fury-demo-gke # example value
-      prefix: terraform/bootstrap
-```
+    ```yaml
+    ...
+    executor:
+      state:
+        backend: gcs
+        config:
+          bucket: fury-demo-gke # example value
+          prefix: terraform/bootstrap
+    ```
 
 #### Provision networking infrastructure
 
 1. Initialize the bootstrap provisioner:
 
-```bash
-cd infrastructure
-furyctl bootstrap init
-```
+    ```bash
+    cd infrastructure
+    furyctl bootstrap init
+    ```
 
-In case you run into errors, you can re-initialize the bootstrap provisioner by adding the `--reset` flag:
+    In case you run into errors, you can re-initialize the bootstrap provisioner by adding the `--reset` flag:
 
-```bash
-furyctl bootstrap init --reset
-```
+    ```bash
+    furyctl bootstrap init --reset
+    ```
 
 2. If the initialization succeeds, apply the bootstrap provisioner:
 
-```bash
-furyctl bootstrap apply
-```
+    ```bash
+    furyctl bootstrap apply
+    ```
 
-> 📝 This phase may take some minutes.
->
-> Logs are available at `/demo/infrastructure/bootstrap/logs/terraform.logs`.
+    > 📝 This phase may take some minutes.
+    >
+    > Logs are available at `/demo/infrastructure/bootstrap/logs/terraform.logs`.
 
 3. When the `furyctl bootstrap apply` completes, inspect the output:
 
-```bash
-...
-All the bootstrap components are up to date.
+    ```bash
+    ...
+    All the bootstrap components are up to date.
 
-VPC and VPN ready:
+    VPC and VPN ready:
 
-VPC: fury-gcp-demo
-Public Subnets  : [fury-gcp-demo-public-subnet-1]
-Private Subnets : [fury-gcp-demo-private-subnet-1]
-Cluster Subnet  : fury-gcp-demo-cluster-subnet
-  Pod Subnet    : fury-gcp-demo-cluster-pod-subnet
-  Service Subnet: fury-gcp-demo-cluster-service-subnet
+    VPC: fury-gcp-demo
+    Public Subnets  : [fury-gcp-demo-public-subnet-1]
+    Private Subnets : [fury-gcp-demo-private-subnet-1]
+    Cluster Subnet  : fury-gcp-demo-cluster-subnet
+      Pod Subnet    : fury-gcp-demo-cluster-pod-subnet
+      Service Subnet: fury-gcp-demo-cluster-service-subnet
 
-Your VPN instance IPs are: [35.242.223.13]
-...
-```
+    Your VPN instance IPs are: [35.242.223.13]
+    ...
+    ```
 
 In particular, have a look at VPC and subnets: these values are used in the cluster provisioning phase.
 
@@ -222,36 +222,36 @@ In the cluster provisioning phase, `furyctl` automatically deploys a battle-test
 
 1. Create the OpenVPN credentials with the `furyagent`:
 
-```bash
-furyagent configure openvpn-client \
-  --client-name fury \
-  --config /demo/infrastructure/bootstrap/secrets/furyagent.yml \
-  > fury.ovpn
-```
+    ```bash
+    furyagent configure openvpn-client \
+      --client-name fury \
+      --config /demo/infrastructure/bootstrap/secrets/furyagent.yml \
+      > fury.ovpn
+    ```
 
-> 🕵🏻‍♂️ [Furyagent][furyagent-repository] is a tool developed by SIGHUP to manage OpenVPN and SSH user access to the bastion host.
+    > 🕵🏻‍♂️ [Furyagent][furyagent-repository] is a tool developed by SIGHUP to manage OpenVPN and SSH user access to the bastion host.
 
 2. Check that the `fury` user is now listed:
 
-```bash
-furyagent configure openvpn-client --list \
---config /demo/infrastructure/bootstrap/secrets/furyagent.yml
-```
+    ```bash
+    furyagent configure openvpn-client --list \
+    --config /demo/infrastructure/bootstrap/secrets/furyagent.yml
+    ```
 
-Output:
+    Output:
 
-```console
-2021-06-07 14:37:52.169664 I | storage.go:146: Item pki/vpn-client/fury.crt found [size: 1094]
-2021-06-07 14:37:52.169850 I | storage.go:147: Saving item pki/vpn-client/fury.crt ...
-2021-06-07 14:37:52.265797 I | storage.go:146: Item pki/vpn/ca.crl found [size: 560]
-2021-06-07 14:37:52.265879 I | storage.go:147: Saving item pki/vpn/ca.crl ...
-+------+------------+------------+---------+--------------------------------+
-| USER | VALID FROM |  VALID TO  | EXPIRED |            REVOKED             |
-+------+------------+------------+---------+--------------------------------+
-| fury | 2021-06-07 | 2022-06-07 | false   | false 0001-01-01 00:00:00      |
-|      |            |            |         | +0000 UTC                      |
-+------+------------+------------+---------+--------------------------------+
-```
+    ```bash
+    2021-06-07 14:37:52.169664 I | storage.go:146: Item pki/vpn-client/fury.crt found [size: 1094]
+    2021-06-07 14:37:52.169850 I | storage.go:147: Saving item pki/vpn-client/fury.crt ...
+    2021-06-07 14:37:52.265797 I | storage.go:146: Item pki/vpn/ca.crl found [size: 560]
+    2021-06-07 14:37:52.265879 I | storage.go:147: Saving item pki/vpn/ca.crl ...
+    +------+------------+------------+---------+--------------------------------+
+    | USER | VALID FROM |  VALID TO  | EXPIRED |            REVOKED             |
+    +------+------------+------------+---------+--------------------------------+
+    | fury | 2021-06-07 | 2022-06-07 | false   | false 0001-01-01 00:00:00      |
+    |      |            |            |         | +0000 UTC                      |
+    +------+------------+------------+---------+--------------------------------+
+    ```
 
 3. Open the `fury.ovpn` file with any OpenVPN Client.
 
@@ -307,26 +307,26 @@ Open the file with a text editor and replace:
 
 1. Initialize the cluster provisioner:
 
-```bash
-furyctl cluster init
-```
+    ```bash
+    furyctl cluster init
+    ```
 
 2. Create GKE cluster:
 
-```bash
-furyctl cluster apply
-```
+    ```bash
+    furyctl cluster apply
+    ```
 
-> 📝 This phase may take some minutes.
->
-> Logs are available at `/demo/infrastructure/cluster/logs/terraform.logs`.
+    > 📝 This phase may take some minutes.
+    >
+    > Logs are available at `/demo/infrastructure/cluster/logs/terraform.logs`.
 
 3. When the `furyctl cluster apply` completes, test the connection with the cluster:
 
-```bash
-export KUBECONFIG=/demo/infrastructure/cluster/secrets/kubeconfig
-kubectl get nodes
-```
+    ```bash
+    export KUBECONFIG=/demo/infrastructure/cluster/secrets/kubeconfig
+    kubectl get nodes
+    ```
 
 ## Step 2 - Download Fury modules
 
@@ -363,80 +363,80 @@ modules:
 
 1. Download the Fury modules with `furyctl`:
 
-```bash
-cd /demo/
-furyctl vendor -H
-```
+    ```bash
+    cd /demo/
+    furyctl vendor -H
+    ```
 
 2. Inspect the downloaded modules in the `vendor` folder:
 
-```bash
-tree -d /demo/vendor -L 3
-```
+    ```bash
+    tree -d /demo/vendor -L 3
+    ```
 
-Output:
+    Output:
 
-```bash
-$ tree -d vendor -L 3
+    ```bash
+    $ tree -d vendor -L 3
 
-vendor
-├── katalog
-│   ├── dr
-│   │   ├── tests
-│   │   └── velero
-│   ├── ingress
-│   │   ├── cert-manager
-│   │   ├── dual-nginx
-│   │   ├── external-dns
-│   │   ├── forecastle
-│   │   ├── nginx
-│   │   └── tests
-│   ├── logging
-│   │   ├── cerebro
-│   │   ├── configs
-│   │   ├── logging-operated
-│   │   ├── logging-operator
-│   │   ├── loki-configs
-│   │   ├── loki-distributed
-│   │   ├── minio-ha
-│   │   ├── opensearch-dashboards
-│   │   ├── opensearch-single
-│   │   ├── opensearch-triple
-│   │   └── tests
-│   ├── monitoring
-│   │   ├── aks-sm
-│   │   ├── alertmanager-operated
-│   │   ├── blackbox-exporter
-│   │   ├── configs
-│   │   ├── eks-sm
-│   │   ├── gke-sm
-│   │   ├── grafana
-│   │   ├── karma
-│   │   ├── kube-proxy-metrics
-│   │   ├── kube-state-metrics
-│   │   ├── kubeadm-sm
-│   │   ├── node-exporter
-│   │   ├── prometheus-adapter
-│   │   ├── prometheus-operated
-│   │   ├── prometheus-operator
-│   │   ├── tests
-│   │   ├── thanos
-│   │   └── x509-exporter
-│   ├── networking
-│   │   ├── calico
-│   │   ├── ip-masq
-│   │   ├── tests
-│   │   └── tigera
-│   └── opa
-│       ├── gatekeeper
-│       └── tests
-└── modules
-    └── dr
-        ├── aws-velero
-        ├── azure-velero
-        └── gcp-velero
+    vendor
+    ├── katalog
+    │   ├── dr
+    │   │   ├── tests
+    │   │   └── velero
+    │   ├── ingress
+    │   │   ├── cert-manager
+    │   │   ├── dual-nginx
+    │   │   ├── external-dns
+    │   │   ├── forecastle
+    │   │   ├── nginx
+    │   │   └── tests
+    │   ├── logging
+    │   │   ├── cerebro
+    │   │   ├── configs
+    │   │   ├── logging-operated
+    │   │   ├── logging-operator
+    │   │   ├── loki-configs
+    │   │   ├── loki-distributed
+    │   │   ├── minio-ha
+    │   │   ├── opensearch-dashboards
+    │   │   ├── opensearch-single
+    │   │   ├── opensearch-triple
+    │   │   └── tests
+    │   ├── monitoring
+    │   │   ├── aks-sm
+    │   │   ├── alertmanager-operated
+    │   │   ├── blackbox-exporter
+    │   │   ├── configs
+    │   │   ├── eks-sm
+    │   │   ├── gke-sm
+    │   │   ├── grafana
+    │   │   ├── karma
+    │   │   ├── kube-proxy-metrics
+    │   │   ├── kube-state-metrics
+    │   │   ├── kubeadm-sm
+    │   │   ├── node-exporter
+    │   │   ├── prometheus-adapter
+    │   │   ├── prometheus-operated
+    │   │   ├── prometheus-operator
+    │   │   ├── tests
+    │   │   ├── thanos
+    │   │   └── x509-exporter
+    │   ├── networking
+    │   │   ├── calico
+    │   │   ├── ip-masq
+    │   │   ├── tests
+    │   │   └── tigera
+    │   └── opa
+    │       ├── gatekeeper
+    │       └── tests
+    └── modules
+        └── dr
+            ├── aws-velero
+            ├── azure-velero
+            └── gcp-velero
 
-```
+    ```
 
 ## Step 3 - Installation
 
@@ -448,11 +448,11 @@ First of all, we need to initialize the additional Terraform project to create r
 
 Inside the repository, you can find a Terraform file at `/demo/terraform/main.tf`. Edit this file and change the values for the GCS bucket that will store the Terraform state for the new resources:
 
-```terraform
+```hcl
 terraform {
 #   backend "s3" {
 #     bucket = <GCS_BUCKET>
-#     key    = <MY_KEY> 
+#     key    = <MY_KEY>
 #     region = <GCS_BUCKET_REGION>
 #   }
   required_version = ">= 0.15.4"
@@ -466,7 +466,7 @@ terraform {
 
 Then, create a file `terraform.tfvars` with the following content (change the values accordingly to your environment):
 
-```terraform
+```hcl
 velero_bucket_name = "velero-gke-demo-sa"
 ```
 
@@ -562,21 +562,21 @@ To access the ingresses more easily via the browser, configure your local DNS to
 
 1. Get the address of the internal load balancer:
 
-```bash
-dig $(kubectl get svc ingress-nginx -n ingress-nginx --no-headers | awk '{print $4}')
-```
+    ```bash
+    dig $(kubectl get svc ingress-nginx -n ingress-nginx --no-headers | awk '{print $4}')
+    ```
 
-Output:
+    Output:
 
-```bash
-10.1.0.5
-```
+    ```bash
+    10.1.0.5
+    ```
 
-3. Add the following line to your local `/etc/hosts` (not the container's):
+2. Add the following line to your local `/etc/hosts` (not the container's):
 
-```bash
-<LB-IP-ADDRESS> directory.fury.info prometheus.fury.info alertmanager.fury.info opensearch-dashboards.fury.info grafana.fury.info
-```
+    ```bash
+    <LB-IP-ADDRESS> directory.fury.info prometheus.fury.info alertmanager.fury.info opensearch-dashboards.fury.info grafana.fury.info
+    ```
 
 Now, you can reach the ingresses directly from your browser.
 
@@ -656,15 +656,15 @@ This is what you should see:
 
 1. Create a backup with the `velero` command-line utility:
 
-```bash
-velero backup create --from-schedule manifests test -n kube-system
-```
+    ```bash
+    velero backup create --from-schedule manifests test -n kube-system
+    ```
 
 2. Check the backup status:
 
-```bash
-velero backup get -n kube-system
-```
+    ```bash
+    velero backup get -n kube-system
+    ```
 
 ### (optional) Enforce a Policy with OPA Gatekeeper
 
@@ -682,7 +682,7 @@ Gatekeeper runs as a Validating Admission Webhook, meaning that all the requests
 
 If you list the pods in the `default` namespace, the list it should be empty, confirming that the pod creation was actually rejected:
 
-```console
+```bash
 $ kubectl get pods -n default
 No resources found in default namespace.
 ```
@@ -695,7 +695,7 @@ kubectl run --image busybox bad-pod -n kube-system
 
 Output should be:
 
-```console
+```bash
 pod/bad-pod created
 ```
 
@@ -707,61 +707,61 @@ Clean up the demo environment:
 
 1. Delete the namespaces containing external resources like volumes and load balancers:
 
-```bash
-kubectl delete namespace logging monitoring ingress-nginx
-```
+    ```bash
+    kubectl delete namespace logging monitoring ingress-nginx
+    ```
 
-Wait until the namespaces are completely deleted, or that:
+    Wait until the namespaces are completely deleted, or that:
 
-```bash
-kubectl get pvc -A
-# and 
-kubectl get svc -A
-```
+    ```bash
+    kubectl get pvc -A
+    # and
+    kubectl get svc -A
+    ```
 
-return no result for pvc and no LoadBalancer for svc.
+    return no result for pvc and no LoadBalancer for svc.
 
 2. Destroy the additional Terraform resources used by Velero:
 
-```bash
-cd /demo/terraform/
-terraform destroy
-```
+    ```bash
+    cd /demo/terraform/
+    terraform destroy
+    ```
 
 3. Destroy GKE cluster:
 
-```bash
-# Destroy cluster
-cd /demo/infrastructure
-furyctl cluster destroy
-```
+    ```bash
+    # Destroy cluster
+    cd /demo/infrastructure
+    furyctl cluster destroy
+    ```
 
 4. Destroy the firewall-rules we have made for nginx ingress:
-  
-```bash
-cd /demo/infrastructure
-make delete-firewall-rule FIREWALL_RULE_NAME=allow-nginx-ingress-admission-webhook
-```
+
+    ```bash
+    cd /demo/infrastructure
+    make delete-firewall-rule FIREWALL_RULE_NAME=allow-nginx-ingress-admission-webhook
+    ```
 
 5. Destroy network infrastructure (remember to disconnect from the VPN before deleting):
 
-```bash
-cd /demo/infrastructure
-furyctl bootstrap destroy
-```
+    ```bash
+    cd /demo/infrastructure
+    furyctl bootstrap destroy
+    ```
 
 6. (Optional) Destroy the S3 bucket holding the Terraform state
 
-```bash
-gsutil -m rm -r gs://<GCS_BUCKET>/terraform
-gsutil rb gs://<GCS_BUCKET>
-```
+    ```bash
+    gsutil -m rm -r gs://<GCS_BUCKET>/terraform
+    gsutil rb gs://<GCS_BUCKET>
+    ```
 
 7. Exit from the docker container:
 
-```bash
-exit
-```
+    ```bash
+    exit
+    ```
 
 ## Conclusions
 
@@ -786,13 +786,11 @@ More about Fury:
 
 <!-- Links -->
 
-[fury-getting-started-repository]: https://github.com/sighupio/fury-getting-started/
 [fury-getting-started-dockerfile]: https://github.com/sighupio/fury-getting-started/blob/main/utils/docker/Dockerfile
 
 [fury-on-minikube]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-minikube
 [fury-on-gke]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-gke
 [fury-on-eks]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-eks
-[fury-on-ovhcloud]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-ovhcloud
 
 [fury-docs]: https://docs.kubernetesfury.com
 
