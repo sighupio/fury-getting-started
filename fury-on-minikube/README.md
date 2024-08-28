@@ -75,7 +75,7 @@ kind: KFDDistribution
 metadata:
   name: fury-local
 spec:
-  distributionVersion: v1.29.0
+  distributionVersion: v1.29.3
   distribution:
     kubeconfig: "{env://KUBECONFIG}"
     modules:
