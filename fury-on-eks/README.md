@@ -29,28 +29,28 @@ To follow this tutorial, you need:
 
 2. Clone the [fury getting started repository][fury-getting-started-repository] containing the example code used in this tutorial:
 
-```bash
-mkdir -p /tmp/fury-getting-started && git -C /tmp/fury-getting-started clone https://github.com/sighupio/fury-getting-started/ .
-cd /tmp/fury-getting-started/fury-on-eks
-```
+    ```bash
+    mkdir -p /tmp/fury-getting-started && git -C /tmp/fury-getting-started clone https://github.com/sighupio/fury-getting-started/ .
+    cd /tmp/fury-getting-started/fury-on-eks
+    ```
 
 3. Install `furyctl` binary: https://github.com/sighupio/furyctl#installation
 
 4. Setup your AWS credentials by exporting the following environment variables:
 
-```bash
-export AWS_PROFILE=<YOUR_AWS_PROFILE_NAME>
-```
+    ```bash
+    export AWS_PROFILE=<YOUR_AWS_PROFILE_NAME>
+    ```
 
-If you don't have an AWS profile configured, you can create one by running the following command:
+    If you don't have an AWS profile configured, you can create one by running the following command:
 
-```bash
-$ aws configure --profile <YOUR_AWS_PROFILE_NAME>
-AWS Access Key ID [None]: <YOUR_AWS_ACCESS_KEY_ID>
-AWS Secret Access Key [None]: <YOUR_AWS_SECRET_ACCESS_KEY>
-Default region name [None]: <YOUR_AWS_REGION>
-Default output format [None]: json
-```
+    ```bash
+    $ aws configure --profile <YOUR_AWS_PROFILE_NAME>
+    AWS Access Key ID [None]: <YOUR_AWS_ACCESS_KEY_ID>
+    AWS Secret Access Key [None]: <YOUR_AWS_SECRET_ACCESS_KEY>
+    Default region name [None]: <YOUR_AWS_REGION>
+    Default output format [None]: json
+    ```
 
 You are all set ✌️.
 
@@ -65,9 +65,11 @@ The configuration of the Fury cluster is governed by the `furyctl.yaml` file, wh
 is located at `/tmp/fury-getting-started/fury-on-eks/furyctl.yaml`.
 
 > ℹ️ You can also create a sample configuration file by running the following command:
+>
 > ```bash
 > furyctl create config --version v1.29.3 -c custom-furyctl.yaml
 > ```
+>
 > and edit the `custom-furyctl.yaml` file to fit your needs, when you are done you can use the `--config` flag to specify the path to the configuration file in the
 > following commands.
 > In this demo we will stick to the `furyctl.yaml` file.
@@ -245,7 +247,7 @@ The Distribution section of the `furyctl.yaml` file contains the following param
             bucketName: <S3_VELERO_BUCKET_NAME>
       policy:
         type: gatekeeper
-        gatekeeper: 
+        gatekeeper:
           enforcementAction: warn
           installDefaultPolicies: true
       auth:
@@ -276,41 +278,43 @@ In this section, you will utilize furyctl to automatically provision an EKS Clus
 
 1. Start by running the furyctl command to create the cluster:
 
-```bash
-furyctl create cluster --outdir $PWD
-```
-> ⏱ The process will take several minutes to complete, you can follow the progress in detail by running the following command on the latest furyctl log file:
->
-> ```bash
-> tail -f .furyctl/furyctl.<timestamp>-<random-id>.log | jq
-> ```
-> `--outdir` flag is used to define in which directory to create the hidden `.furyctl` folder that contains all the required files to install the cluster.
-> If not provided, a `.furyctl` folder will be created in the user home.
+    ```bash
+    furyctl create cluster --outdir $PWD
+    ```
 
-The output should be similar to the following:
+    > ⏱ The process will take several minutes to complete, you can follow the progress in detail by running the following command on the latest furyctl log file:
+    >
+    > ```bash
+    > tail -f .furyctl/furyctl.<timestamp>-<random-id>.log | jq
+    > ```
+    >
+    > `--outdir` flag is used to define in which directory to create the hidden `.furyctl` folder that contains all the required files to install the cluster.
+    > If not provided, a `.furyctl` folder will be created in the user home.
 
-```bash
-INFO Downloading distribution...
-INFO Validating configuration file...
-INFO Downloading dependencies...
-INFO Validating dependencies...
-INFO Creating cluster...
-INFO Creating infrastructure...
-WARN Creating cloud resources, this could take a while...
-INFO Creating Kubernetes Fury cluster...
-WARN Creating cloud resources, this could take a while...
-INFO Saving furyctl configuration file in the cluster...
-INFO Saving distribution configuration file in the cluster...
-INFO Installing Kubernetes Fury Distribution...
-WARN Creating cloud resources, this could take a while...
-INFO Checking that the cluster is reachable...
-INFO Applying manifests...
-INFO Saving furyctl configuration file in the cluster...
-INFO Saving distribution configuration file in the cluster...
-INFO Kubernetes Fury cluster created successfully
-INFO Please remember to kill the VPN connection when you finish doing operations on the cluster
-INFO To connect to the cluster, set the path to your kubeconfig with 'export KUBECONFIG=/private/tmp/fury-getting-started/fury-on-eks/kubeconfig' or use the '--kubeconfig /private/tmp/fury-getting-started/fury-on-eks/kubeconfig' flag in following executions
-```
+    The output should be similar to the following:
+
+    ```bash
+    INFO Downloading distribution...
+    INFO Validating configuration file...
+    INFO Downloading dependencies...
+    INFO Validating dependencies...
+    INFO Creating cluster...
+    INFO Creating infrastructure...
+    WARN Creating cloud resources, this could take a while...
+    INFO Creating Kubernetes Fury cluster...
+    WARN Creating cloud resources, this could take a while...
+    INFO Saving furyctl configuration file in the cluster...
+    INFO Saving distribution configuration file in the cluster...
+    INFO Installing Kubernetes Fury Distribution...
+    WARN Creating cloud resources, this could take a while...
+    INFO Checking that the cluster is reachable...
+    INFO Applying manifests...
+    INFO Saving furyctl configuration file in the cluster...
+    INFO Saving distribution configuration file in the cluster...
+    INFO Kubernetes Fury cluster created successfully
+    INFO Please remember to kill the VPN connection when you finish doing operations on the cluster
+    INFO To connect to the cluster, set the path to your kubeconfig with 'export KUBECONFIG=/private/tmp/fury-getting-started/fury-on-eks/kubeconfig' or use the '--kubeconfig /private/tmp/fury-getting-started/fury-on-eks/kubeconfig' flag in following executions
+    ```
 
 🚀 Success! The distribution is fully deployed. Proceed to the next section to explore the various features it has to offer.
 
@@ -415,7 +419,6 @@ Navigate to https://directory.internal.demo.example.dev to see all the other ing
 
 Navigate to https://grafana.internal.demo.example.dev or click the Grafana icon from Forecastle.
 
-
 #### Discover the logs
 
 Navigate to grafana, and:
@@ -446,15 +449,15 @@ This is what you should see:
 
 1. Create a backup with the `velero` command-line utility:
 
-```bash
-velero backup create --from-schedule manifests test -n kube-system
-```
+    ```bash
+    velero backup create --from-schedule manifests test -n kube-system
+    ```
 
 2. Check the backup status:
 
-```bash
-velero backup get -n kube-system
-```
+    ```bash
+    velero backup get -n kube-system
+    ```
 
 ### (optional) Enforce a Policy with OPA Gatekeeper
 
@@ -472,7 +475,7 @@ Gatekeeper runs as a Validating Admission Webhook, meaning that all the requests
 
 If you list the pods in the `default` namespace, the list it should be empty, confirming that the pod creation was actually rejected:
 
-```console
+```bash
 $ kubectl get pods -n default
 No resources found in default namespace.
 ```
@@ -485,7 +488,7 @@ kubectl run --image busybox bad-pod -n kube-system
 
 Output should be:
 
-```console
+```bash
 pod/bad-pod created
 ```
 
@@ -497,20 +500,20 @@ Clean up the demo environment:
 
 1. Delete the EKS cluster and all the related aws resources:
 
-```bash
-furyctl delete cluster --outdir $PWD
-```
+    ```bash
+    furyctl delete cluster --outdir $PWD
+    ```
 
 2. Write 'yes' and hit <kbd>⏎ Enter</kbd>, when prompted to confirm the deletion.
 
 3. (Optional) Destroy the S3 bucket holding the Terraform state
 
-```bash
-aws s3api delete-objects --bucket $S3_BUCKET \
-  --delete "$(aws s3api list-object-versions --bucket $S3_BUCKET --query='{Objects: Versions[].{Key:Key,VersionId:VersionId}}')"
+    ```bash
+    aws s3api delete-objects --bucket $S3_BUCKET \
+      --delete "$(aws s3api list-object-versions --bucket $S3_BUCKET --query='{Objects: Versions[].{Key:Key,VersionId:VersionId}}')"
 
-aws s3api delete-bucket --bucket $S3_BUCKET
-```
+    aws s3api delete-bucket --bucket $S3_BUCKET
+    ```
 
 ## Conclusions
 
@@ -539,19 +542,6 @@ More about Fury:
 
 [fury-on-minikube]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-minikube
 [fury-on-vms]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-vms
-[fury-on-gke]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-gke
-[fury-on-ovhcloud]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-ovhcloud
-
-[furyagent-repository]: https://github.com/sighupio/furyagent
-
-[provisioner-infrastructure-aws-reference-vpc]: https://github.com/sighupio/fury-eks-installer/tree/main/modules/vpc
-[provisioner-infrastructure-aws-reference-vpn]: https://github.com/sighupio/fury-eks-installer/tree/main/modules/vpn
-[provisioner-kubernetes-aws-reference]: https://github.com/sighupio/fury-eks-installer/tree/main/modules/eks
-
-[tunnelblick]: https://tunnelblick.net/downloads.html
-[openvpn-connect]: https://openvpn.net/vpn-client/
-[openvpn-client]: https://openvpn.net/community-downloads/
-[github-ssh-key-setup]: https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account
 
 [fury-docs]: https://docs.kubernetesfury.com
 [opa-module-docs]: https://docs.kubernetesfury.com/docs/modules/opa/overview
@@ -564,8 +554,4 @@ More about Fury:
 <!-- `media` here is a branch. We used to store all images in that branch and reference them from other branches -->
 [grafana-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/grafana.png?raw=true
 [grafana-screenshot-logs]: https://github.com/sighupio/fury-getting-started/blob/media/grafana-logs.png?raw=true
-[opensearch-dashboards-screenshot]: https://github.com/sighupio/fury-getting-started/blob/main/utils/images/opensearch_dashboards.png?raw=true
-[opensearch-dashboards-welcome]: https://github.com/sighupio/fury-getting-started/blob/main/utils/images/opensearch-dashboards_welcome.png?raw=true
-[opensearch-dashboards-discover]: https://github.com/sighupio/fury-getting-started/blob/main/utils/images/opensearch-dashboards_discover.png?raw=true
-[opensearch-dashboards-index]: https://github.com/sighupio/fury-getting-started/blob/main/utils/images/opensearch-dashboards_index.png?raw=true
 [forecastle-eks-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/forecastle_eks.png?raw=true

@@ -224,9 +224,9 @@ source ./ovhrc
 
 We use Terraform to deploy the network and the Managed Kubernetes Cluster. A `variables.tfvars` variable file is present with some default values that you can use as this or change the values if needed:
 
-```terraform
+```hcl
 # Region
-  
+
 region = "GRA7"
 
 # Network - Private Network
@@ -297,7 +297,6 @@ export KUBECONFIG="$PWD/kubeconfig"
 
 Your `kubectl` CLI is ready to use
 
-
 ## Step 2 - Installation
 
 In this section, you use `furyctl` to download the monitoring, logging, and ingress modules of the Fury distribution.
@@ -324,60 +323,60 @@ bases:
 
 1. Download the Fury modules with `furyctl`:
 
-```bash
-furyctl vendor -H
-```
+    ```bash
+    furyctl vendor -H
+    ```
 
 2. Inspect the downloaded modules in the `vendor` folder:
 
-```bash
-tree -d vendor -L 3
-```
+    ```bash
+    tree -d vendor -L 3
+    ```
 
-Output:
+    Output:
 
-```bash
-$ tree -d vendor -L 3
+    ```bash
+    $ tree -d vendor -L 3
 
-vendor
-└── katalog
-    ├── ingress
-    │   ├── cert-manager
-    │   ├── dual-nginx
-    │   ├── external-dns
-    │   ├── forecastle
-    │   ├── nginx
-    │   └── tests
-    ├── logging
-    │   ├── cerebro
-    │   ├── configs
-    │   ├── logging-operated
-    │   ├── logging-operator
-    │   ├── loki-configs
-    │   ├── loki-single
-    │   ├── opensearch-dashboards
-    │   ├── opensearch-single
-    │   ├── opensearch-triple
-    │   └── tests
-    └── monitoring
-        ├── aks-sm
-        ├── alertmanager-operated
-        ├── blackbox-exporter
-        ├── configs
-        ├── eks-sm
-        ├── gke-sm
-        ├── grafana
-        ├── kubeadm-sm
-        ├── kube-proxy-metrics
-        ├── kube-state-metrics
-        ├── node-exporter
-        ├── prometheus-adapter
-        ├── prometheus-operated
-        ├── prometheus-operator
-        ├── tests
-        ├── thanos
-        └── x509-exporter
-```
+    vendor
+    └── katalog
+        ├── ingress
+        │   ├── cert-manager
+        │   ├── dual-nginx
+        │   ├── external-dns
+        │   ├── forecastle
+        │   ├── nginx
+        │   └── tests
+        ├── logging
+        │   ├── cerebro
+        │   ├── configs
+        │   ├── logging-operated
+        │   ├── logging-operator
+        │   ├── loki-configs
+        │   ├── loki-single
+        │   ├── opensearch-dashboards
+        │   ├── opensearch-single
+        │   ├── opensearch-triple
+        │   └── tests
+        └── monitoring
+            ├── aks-sm
+            ├── alertmanager-operated
+            ├── blackbox-exporter
+            ├── configs
+            ├── eks-sm
+            ├── gke-sm
+            ├── grafana
+            ├── kubeadm-sm
+            ├── kube-proxy-metrics
+            ├── kube-state-metrics
+            ├── node-exporter
+            ├── prometheus-adapter
+            ├── prometheus-operated
+            ├── prometheus-operator
+            ├── tests
+            ├── thanos
+            └── x509-exporter
+    ```
 
 ### Kustomize project
 
@@ -452,15 +451,15 @@ To access the ingresses more easily via the browser, configure your local DNS to
 
 1. Get the address of the external load balancer:
 
-```bash
-kubectl get svc -n ingress-nginx ingress-nginx -ojsonpath='{.spec.externalIPs[*]}'
-```
+    ```bash
+    kubectl get svc -n ingress-nginx ingress-nginx -ojsonpath='{.spec.externalIPs[*]}'
+    ```
 
 2. Add the following line to your machine's `/etc/hosts` (not the container's):
 
-```bash
-<EXTERNAL_IP> forecastle.fury.info cerebro.fury.info opensearch-dashboards.fury.info grafana.fury.info
-```
+    ```bash
+    <EXTERNAL_IP> forecastle.fury.info cerebro.fury.info opensearch-dashboards.fury.info grafana.fury.info
+    ```
 
 Now, you can reach the ingresses directly from your browser.
 
@@ -570,20 +569,17 @@ More about Fury:
 - [Fury Documentation][fury-docs]
 
 <!-- Links -->
-[fury-getting-started-repository]: https://github.com/sighupio/fury-getting-started/
-[fury-getting-started-dockerfile]: https://github.com/sighupio/fury-getting-started/blob/main/utils/docker/Dockerfile
-
 [fury-on-minikube]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-minikube
 [fury-on-gke]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-gke
 [fury-on-eks]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-eks
 
-[furyagent-repository]: https://github.com/sighupio/furyagent
-
 [fury-docs]: https://docs.kubernetesfury.com
-[opa-module-docs]: https://docs.kubernetesfury.com/docs/modules/opa/overview
 
 <!-- Images -->
 <!-- `media` here is a branch. We used to store all images in that branch and reference them from other branches -->
 [grafana-screenshot]: https://github.com/sighupio/fury-getting-started/blob/media/grafana.png?raw=true
 [opensearch-dashboards-screenshot]: https://github.com/sighupio/fury-getting-started/blob/main/utils/images/opensearch_dashboards.png?raw=true
 [forecastle-eks-screenshot]: https://github.com/sighupio/fury-getting-started/blob/main/utils/images/forecastle_eks.png?raw=true
+[opensearch-dashboards-welcome]: https://github.com/sighupio/fury-getting-started/blob/main/utils/images/opensearch-dashboards_welcome.png?raw=true
+[opensearch-dashboards-discover]: https://github.com/sighupio/fury-getting-started/blob/main/utils/images/opensearch-dashboards_discover.png?raw=true
+[opensearch-dashboards-index]: https://github.com/sighupio/fury-getting-started/blob/main/utils/images/opensearch-dashboards_index.png?raw=true
