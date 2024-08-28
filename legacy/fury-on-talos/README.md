@@ -397,7 +397,7 @@ Now, you can reach the ingresses directly from your browser **on port `31080`** 
 
 [Forecastle](https://github.com/stakater/Forecastle) is an open-source control panel where you can access all exposed applications running on Kubernetes.
 
-Navigate to <http://forecastle.fury.info:31080> to see all the other ingresses deployed, grouped by namespace.
+Navigate to http://forecastle.fury.info:31080 to see all the other ingresses deployed, grouped by namespace.
 
 ![Forecastle][forecastle-screenshot]
 
@@ -405,7 +405,7 @@ Navigate to <http://forecastle.fury.info:31080> to see all the other ingresses d
 
 [Kibana](https://github.com/elastic/kibana) is an open-source analytics and visualization platform for Elasticsearch. Kibana lets you perform advanced data analysis and visualize data in various charts, tables, and maps. You can use it to search, view, and interact with data stored in Elasticsearch indices.
 
-Navigate to <http://kibana.fury.info:31080> or click the Kibana icon from Forecastle.
+Navigate to http://kibana.fury.info:31080 or click the Kibana icon from Forecastle.
 
 Click on `Explore on my own` to see the main dashboard.
 
@@ -430,7 +430,7 @@ Navigate through the menu again, and select `Discover`.
 
 [Grafana](https://github.com/grafana/grafana) is an open-source platform for monitoring and observability. Grafana allows you to query, visualize, alert on and understand your metrics.
 
-Navigate to <http://grafana.fury.info:31080> or click the Grafana icon from Forecastle.
+Navigate to http://grafana.fury.info:31080 or click the Grafana icon from Forecastle.
 
 Fury provides some pre-configured dashboard to visualize the state of the cluster. Examine an example dashboard:
 

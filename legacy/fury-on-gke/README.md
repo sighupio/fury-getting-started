@@ -584,7 +584,7 @@ Now, you can reach the ingresses directly from your browser.
 
 [Forecastle](https://github.com/stakater/Forecastle) is an open-source control panel where you can access all exposed applications running on Kubernetes.
 
-Navigate to <http://directory.fury.info> to see all the other ingresses deployed, grouped by namespace.
+Navigate to http://directory.fury.info to see all the other ingresses deployed, grouped by namespace.
 
 ![Forecastle][forecastle-screenshot]
 
@@ -592,7 +592,7 @@ Navigate to <http://directory.fury.info> to see all the other ingresses deployed
 
 [OpenSearch Dashboards](https://github.com/opensearch-project/OpenSearch-Dashboards) is an open-source analytics and visualization platform for OpenSearch. OpenSearch Dashboards lets you perform advanced data analysis and visualize data in various charts, tables, and maps. You can use it to search, view, and interact with data stored in OpenSearch indices.
 
-Navigate to <http://opensearch-dashboards.fury.info> or click the OpenSearch Dashboards icon from Forecastle.
+Navigate to http://opensearch-dashboards.fury.info or click the OpenSearch Dashboards icon from Forecastle.
 
 #### Manually Create OpenSearch Dashboards Indices (optional)
 
@@ -638,7 +638,7 @@ Once you selected your desired index, then you can search them by writing querie
 
 [Grafana](https://github.com/grafana/grafana) is an open-source platform for monitoring and observability. Grafana allows you to query, visualize, alert on and understand your metrics.
 
-Navigate to <http://grafana.fury.info> or click the Grafana icon from Forecastle.
+Navigate to http://grafana.fury.info or click the Grafana icon from Forecastle.
 
 Fury provides pre-configured dashboards to visualize the state of the cluster. Examine an example dashboard:
 
@@ -699,7 +699,7 @@ Output should be:
 pod/bad-pod created
 ```
 
-> 💡 **TIP** Gatekeeper Policy Manger, a simple readonly web UI to easily see the deployed policies and their status is installed as part of the OPA module. You can access it at <http://gpm.fury.info/>
+> 💡 **TIP** Gatekeeper Policy Manger, a simple readonly web UI to easily see the deployed policies and their status is installed as part of the OPA module. You can access it at http://gpm.fury.info/
 
 ## Step 6 - Teardown
 
