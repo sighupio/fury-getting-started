@@ -16,7 +16,7 @@ spec:
       networking:
         type: none
       ingress:
-        baseDomain: internal.demo.example.dev
+        baseDomain: internal.demo.example.local
         nginx:
           type: single
           tls:

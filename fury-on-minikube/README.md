@@ -46,6 +46,8 @@ cd fury-getting-started/fury-on-minikube
 
     > ⚠️ This command will spin up by default a single-node Kubernetes v1.29.3 cluster, using VirtualBox driver, with 6 CPUs, 16GB RAM and 20 GB Disk.
 
+    > ⚠️ If you are on macOS 13+ then the VirtualBox driver is currently not supported and you should use the Docker or Hyperkit driver.
+
 2. Test the connection to the minikube cluster:
 
     ```bash
@@ -82,7 +84,7 @@ spec:
       networking:
         type: none
       ingress:
-        baseDomain: internal.demo.example.dev
+        baseDomain: internal.demo.example.local
         nginx:
           type: single
           tls:
