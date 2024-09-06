@@ -84,7 +84,7 @@ spec:
       networking:
         type: none
       ingress:
-        baseDomain: internal.demo.example.local
+        baseDomain: demo.example.internal
         nginx:
           type: single
           tls:
@@ -141,6 +141,10 @@ In this example, we are installing the distribution with the following options:
 - No Auth on the ingresses
 - Disabled some logging extensions due to minikube incompatibilities
 - Disabled master certificate-exporter, due to minikube incompatibilities
+
+> ℹ️ Usually, when using the dual ingress controller, the `internal.<ingress domain>` baseDomain is specified. For this occurence, since there is
+   just a single nginx ingress (for the purposes of this guide), only the ingress base domain is configured. Both, single or dual ingress configuration, are valid. Feel free to modify
+   the furyctl.yaml file accordingly your needs. For more information see [Ingress NGINX Dual](https://docs.kubernetesfury.com/docs/components/modules/ingress/dual-nginx) and [Ingress NGINX Single](https://docs.kubernetesfury.com/docs/components/modules/ingress/nginx) documentation pages.
 
 Execute the installation with furyctl:
 
