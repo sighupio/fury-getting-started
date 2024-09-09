@@ -218,6 +218,7 @@ Now, you can reach the ingresses directly from your browser.
 >
 >If you are running minikube on macOS or Windows using Docker Desktop, you will need to port-forward the NGINX Ingress ports to localhost to enable access to your exposed applications.
 >For example, you can run:
+>
 > ```bash
 >  kubectl port-forward service/ingress-nginx -n ingress-nginx 31080:80 31443:443
 >  # Output:
