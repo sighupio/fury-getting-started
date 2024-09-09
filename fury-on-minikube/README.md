@@ -141,7 +141,7 @@ In this example, we are installing the distribution with the following options:
 - Disabled master certificate-exporter, due to minikube incompatibilities
 
 > ℹ️ Usually, when using the dual ingress controller, the `internal.<ingress domain>` base domain is specified. For this occurence, since there is
-   just a single NGINX ingress (for the purposes of this guide), only the ingress base domain is configured. Both, single or dual ingress configuration, are valid. Feel free to modify
+   just a single NGINX Ingress (for the purposes of this guide), only the ingress base domain is configured. Both, single or dual ingress configuration, are valid. Feel free to modify
    the furyctl.yaml file according to your needs. For more information see [Ingress NGINX Dual](https://docs.kubernetesfury.com/docs/components/modules/ingress/dual-nginx) and [Ingress NGINX Single](https://docs.kubernetesfury.com/docs/components/modules/ingress/nginx) documentation pages.
 
 Execute the installation with furyctl:
