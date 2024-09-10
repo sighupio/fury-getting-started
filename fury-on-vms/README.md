@@ -36,7 +36,7 @@ To follow this tutorial, you need:
 
 ## Step 1 - Install furyctl
 
-Install `furyctl` binary following the instructions in [furyctl's GitHub repository][furyctl-installation].
+Install `furyctl` binary following the instructions in [furyctl's documentation][furyctl-installation].
 
 We recommend to always install the latest version available. Latest versions are compatible with previous versions of the distribution. This guide assumes that furyctl version is at least 0.29.5. You can check with the following command:
 

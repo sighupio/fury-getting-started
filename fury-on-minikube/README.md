@@ -61,7 +61,7 @@ cd fury-getting-started/fury-on-minikube
 
 ## Step 3 - Install furyctl
 
-Install `furyctl` binary: https://github.com/sighupio/furyctl#installation version `>=0.29.0`.
+Install `furyctl` binary following the instructions in [furyctl's documentation][furyctl-installation].
 
 ## Step 3 - Installation
 
@@ -300,7 +300,7 @@ More about Fury:
 <!-- Links -->
 [fury-on-eks]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-eks
 [fury-on-vms]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-vms
-
+[furyctl-installation]: https://github.com/sighupio/furyctl#installation
 [fury-docs]: https://docs.kubernetesfury.com
 
 <!-- Images -->
