@@ -20,7 +20,7 @@ This tutorial assumes some basic familiarity with Kubernetes.
 
 To follow this tutorial, you need:
 
-- **minikube** - follow the [installation guide](https://minikube.sigs.k8s.io/docs/start/). This guide is based on minikube with the VirtualBox driver. You can also run the minikube cluster with other drivers.
+- **minikube** - follow the [installation guide](https://minikube.sigs.k8s.io/docs/start/). You can run the minikube cluster with one of the drivers listed.
 - **kubectl** - to interact with the cluster.
 
 ### Setup and initialize the environment
@@ -41,10 +41,10 @@ cd fury-getting-started/fury-on-minikube
     ```bash
     export REPO_DIR=$PWD
     export KUBECONFIG=$REPO_DIR/kubeconfig
-    minikube start --vm-driver=virtualbox --kubernetes-version v1.29.3 --memory=16384m --cpus=6
+    minikube start --kubernetes-version v1.29.3 --memory=16384m --cpus=6
     ```
 
-    > ⚠️ This command will spin up by default a single-node Kubernetes v1.29.3 cluster, using VirtualBox driver, with 6 CPUs, 16GB RAM and 20 GB Disk.
+    > ⚠️ This command will spin up by default a single-node Kubernetes v1.29.3 cluster, using the default driver, with 6 CPUs, 16GB RAM and 20 GB Disk.
 
 2. Test the connection to the minikube cluster:
 
@@ -82,7 +82,7 @@ spec:
       networking:
         type: none
       ingress:
-        baseDomain: internal.demo.example.dev
+        baseDomain: demo.example.internal
         nginx:
           type: single
           tls:
@@ -140,6 +140,10 @@ In this example, we are installing the distribution with the following options:
 - Disabled some logging extensions due to minikube incompatibilities
 - Disabled master certificate-exporter, due to minikube incompatibilities
 
+> ℹ️ Usually, when using the dual ingress controller, the `internal.<ingress domain>` base domain is specified. For this occurence, since there is
+   just a single NGINX Ingress (for the purposes of this guide), only the ingress base domain is configured. Both, single or dual ingress configuration, are valid. Feel free to modify
+   the furyctl.yaml file according to your needs. For more information see [Ingress NGINX Dual](https://docs.kubernetesfury.com/docs/components/modules/ingress/dual-nginx) and [Ingress NGINX Single](https://docs.kubernetesfury.com/docs/components/modules/ingress/nginx) documentation pages.
+
 Execute the installation with furyctl:
 
 ```bash
@@ -187,9 +191,9 @@ INFO Saving distribution configuration file in the cluster...
 
 In Step 3, alongside the distribution, you have deployed Kubernetes ingresses to expose underlying services at the following HTTP routes:
 
-- `directory.internal.demo.example.dev`
-- `grafana.internal.demo.example.dev`
-- `prometheus.internal.demo.example.dev`
+- `directory.demo.example.internal`
+- `grafana.demo.example.internal`
+- `prometheus.demo.example.internal`
 
 To access the ingresses more easily via the browser, configure your local DNS to resolve the ingresses to the external minikube IP:
 
@@ -205,16 +209,30 @@ To access the ingresses more easily via the browser, configure your local DNS to
 2. Add the following line to your local `/etc/hosts`:
 
     ```bash
-    <SOME_IP> directory.internal.demo.example.dev grafana.internal.demo.example.dev prometheus.internal.demo.example.dev
+    <SOME_IP> directory.demo.example.internal grafana.demo.example.internal prometheus.demo.example.internal
     ```
 
 Now, you can reach the ingresses directly from your browser.
+
+> ℹ️ Note
+>
+>If you are running minikube on macOS or Windows using Docker Desktop, you will need to port-forward the NGINX Ingress ports to localhost to enable access to your exposed applications.
+>For example, you can run:
+>
+> ```bash
+>  kubectl port-forward service/ingress-nginx -n ingress-nginx 31080:80 31443:443
+>  # Output:
+>  Forwarding from 127.0.0.1:31080 -> 8080
+>  Forwarding from 127.0.0.1:31443 -> 8443
+>```
+>
+>This command will forward both HTTP and HTTPS ports of the NGINX Ingress Controller to your localhost on ports 31080 and 31443 respectively. Leave that terminal window open while you need access to your applications. Inside your /etc/hosts file you can put 127.0.0.1 in place of minikube's IP.
 
 ### Forecastle
 
 [Forecastle](https://github.com/stakater/Forecastle) is an open-source control panel where you can access all exposed applications running on Kubernetes.
 
-Navigate to https://directory.fury.info:31443 to see all the other ingresses deployed, grouped by namespace.
+Navigate to https://directory.demo.example.internal:31443 to see all the other ingresses deployed, grouped by namespace.
 
 ![Forecastle][forecastle-screenshot]
 
@@ -222,7 +240,7 @@ Navigate to https://directory.fury.info:31443 to see all the other ingresses dep
 
 [Grafana](https://github.com/grafana/grafana) is an open-source platform for monitoring and observability. Grafana allows you to query, visualize, alert, and understand your metrics.
 
-Navigate to https://grafana.internal.demo.example.dev:31443 or click the Grafana icon from Forecastle (remember to append the port 31443 to the url).
+Navigate to https://grafana.demo.example.internal:31443 or click the Grafana icon from Forecastle (remember to append the port 31443 to the url).
 
 #### Discover the logs
 
