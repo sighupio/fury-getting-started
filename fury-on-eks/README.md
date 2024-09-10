@@ -34,7 +34,7 @@ To follow this tutorial, you need:
     cd /tmp/fury-getting-started/fury-on-eks
     ```
 
-3. Install `furyctl` binary: https://github.com/sighupio/furyctl#installation
+3. Install `furyctl` binary following the instructions in [furyctl's documentation][furyctl-installation].
 
 4. Setup your AWS credentials by exporting the following environment variables:
 
@@ -542,7 +542,7 @@ More about Fury:
 
 [fury-on-minikube]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-minikube
 [fury-on-vms]: https://github.com/sighupio/fury-getting-started/tree/main/fury-on-vms
-
+[furyctl-installation]: https://github.com/sighupio/furyctl#installation
 [fury-docs]: https://docs.kubernetesfury.com
 [opa-module-docs]: https://docs.kubernetesfury.com/docs/modules/opa/overview
 
