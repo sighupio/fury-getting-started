@@ -67,7 +67,7 @@ is located at `/tmp/fury-getting-started/fury-on-eks/furyctl.yaml`.
 > ℹ️ You can also create a sample configuration file by running the following command:
 >
 > ```bash
-> furyctl create config --version v1.29.3 -c custom-furyctl.yaml
+> furyctl create config --version v1.29.4 -c custom-furyctl.yaml
 > ```
 >
 > and edit the `custom-furyctl.yaml` file to fit your needs, when you are done you can use the `--config` flag to specify the path to the configuration file in the
@@ -91,7 +91,7 @@ kind: EKSCluster
 metadata:
   name: <CLUSTER_NAME>
 spec:
-  distributionVersion: "v1.29.3"
+  distributionVersion: "v1.29.4"
   toolsConfiguration:
     terraform:
       state:
