@@ -220,7 +220,6 @@ For example, `master1` will become `master1.example.tld`.
 
 We can override the URL of the registry where to pull images from for the Kubernetes core components (kube-apiserver, kube-controller-manager, kube-scheduler, kube-proxy, coredns). The host is mandatory, while the port is optional. Always append `/fury/on-premises` at the end (the default value is `registry.sighup.io/fury/on-premises`).
 
-
 ```yaml
 spec:
   kubernetes:
@@ -368,11 +367,10 @@ This section configures the authentication for the ingresses and also the authen
 
 We can override the URL of the registry where to pull images from for the KFD core modules. The host is mandatory, while the port is optional. Always append `/fury` at the end (the default value is `registry.sighup.io/fury`).
 
-
 ```yaml
 spec:
   distribution:
-    advanced:
+    common:
       registry: <registry-host>[:<registry-port>]/fury
 ```
 
