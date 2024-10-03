@@ -218,13 +218,13 @@ For example, `master1` will become `master1.example.tld`.
 
 #### Custom registry for Kubernetes core components images
 
-We can override the URL of the registry where to pull images from for the Kubernetes core components (kube-apiserver, kube-controller-manager, kube-scheduler, kube-proxy, coredns). The host is mandatory, while the port is optional. Always append `/fury/on-premises` at the end (the default value is `registry.sighup.io/fury/on-premises`).
+We can override the URL of the registry where to pull images from for the Kubernetes core components (kube-apiserver, kube-controller-manager, kube-scheduler, kube-proxy, coredns). The host is mandatory, while the port is optional. For mirrors of the official registry, append `/fury/on-premises` at the end (the default value is `registry.sighup.io/fury/on-premises`).
 
 ```yaml
 spec:
   kubernetes:
     advanced:
-      registry: <registry-host>[:<registry-port>]/fury/on-premises
+      registry: <registry-host>[:<registry-port>]
 ```
 
 ### `.spec.distribution`
@@ -365,13 +365,13 @@ This section configures the authentication for the ingresses and also the authen
 
 #### Custom registry for distribution phase
 
-We can override the URL of the registry where to pull images from for the KFD core modules. The host is mandatory, while the port is optional. Always append `/fury` at the end (the default value is `registry.sighup.io/fury`).
+We can override the URL of the registry where to pull images from for the KFD core modules. The host is mandatory, while the port is optional. For mirrors of the official registry, append `/fury` at the end (the default value is `registry.sighup.io/fury`).
 
 ```yaml
 spec:
   distribution:
     common:
-      registry: <registry-host>[:<registry-port>]/fury
+      registry: <registry-host>[:<registry-port>]
 ```
 
 NOTE: If plugins are pulling from the default registry, the registry will be replaced for the plugins phase too.
