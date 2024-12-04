@@ -1,6 +1,6 @@
 # Fury on EKS
 
-This step-by-step tutorial guides you to deploy the **Kubernetes Fury Distribution** (KFD) on an EKS cluster on AWS using the furyctl `>=0.29.0`
+This step-by-step tutorial guides you to deploy the **Kubernetes Fury Distribution** (KFD) on an EKS cluster on AWS using the furyctl `>=0.30.0`
 
 This tutorial covers the following steps:
 
@@ -21,7 +21,7 @@ This tutorial assumes some basic familiarity with Kubernetes and AWS.
 To follow this tutorial, you need:
 
 - **AWS Access Credentials** of an AWS Account with the following [IAM permissions][terraform-aws-eks-iam-permissions].
-- **AWS CLI** - version 2.8.12 at the time of writing this tutorial. You can check your version by running `aws --version`. If you don't have it installed, follow the [official guide][aws-cli-installation].
+- **AWS CLI** - version 2.22.8 at the time of writing this tutorial. You can check your version by running `aws --version`. If you don't have it installed, follow the [official guide][aws-cli-installation].
 
 ### Setup and initialize the environment
 
@@ -67,7 +67,7 @@ is located at `/tmp/fury-getting-started/fury-on-eks/furyctl.yaml`.
 > ℹ️ You can also create a sample configuration file by running the following command:
 >
 > ```bash
-> furyctl create config --version v1.29.4 -c custom-furyctl.yaml
+> furyctl create config --version v1.30.0 -c custom-furyctl.yaml
 > ```
 >
 > and edit the `custom-furyctl.yaml` file to fit your needs, when you are done you can use the `--config` flag to specify the path to the configuration file in the
@@ -91,7 +91,7 @@ kind: EKSCluster
 metadata:
   name: <CLUSTER_NAME>
 spec:
-  distributionVersion: "v1.29.4"
+  distributionVersion: "v1.30.0"
   toolsConfiguration:
     terraform:
       state:
@@ -155,6 +155,7 @@ The Kubernetes section of the `furyctl.yaml` file contains the following paramet
 
 ```yaml
   kubernetes:
+    nodePoolGlobalAmiType: alinux2023
     nodePoolsLaunchKind: "launch_templates"
     nodeAllowedSshPublicKey: "{file:///path/to/id_rsa.pub}"
     logRetentionDays: 1
@@ -165,6 +166,7 @@ The Kubernetes section of the `furyctl.yaml` file contains the following paramet
       publicAccessCidrs: ["0.0.0.0/0"]
     nodePools:
       - name: infra
+        type: self-managed
         size:
           min: 3
           max: 3
@@ -180,6 +182,7 @@ The Kubernetes section of the `furyctl.yaml` file contains the following paramet
           k8s.io/cluster-autoscaler/node-template/label/node.kubernetes.io/role: "infra"
           k8s.io/cluster-autoscaler/node-template/taint/node.kubernetes.io/role: "infra:NoSchedule"
       - name: workers
+        type: self-managed
         size:
           min: 1
           max: 3
@@ -188,12 +191,10 @@ The Kubernetes section of the `furyctl.yaml` file contains the following paramet
         labels:
           nodepool: workers
           node.kubernetes.io/role: workers
-        taints:
-          - node.kubernetes.io/role=workers:NoSchedule
+        taints: []
         tags:
           k8s.io/cluster-autoscaler/node-template/label/nodepool: "workers"
           k8s.io/cluster-autoscaler/node-template/label/node.kubernetes.io/role: "workers"
-          k8s.io/cluster-autoscaler/node-template/taint/node.kubernetes.io/role: "workers:NoSchedule"
 ```
 
 Replace the field `"{file:///path/to/id_rsa.pub}"` with the path to the public key you want to use to access the worker nodes.
@@ -235,6 +236,8 @@ The Distribution section of the `furyctl.yaml` file contains the following param
             create: true
       logging:
         type: loki
+        loki:
+          tsdbStartDate: "2024-12-03"
         minio:
           storageSize: 50Gi
       monitoring:

@@ -1,7 +1,7 @@
 # Copyright (c) 2017-present SIGHUP s.r.l All rights reserved.
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
-# yaml-language-server: $schema=https://raw.githubusercontent.com/sighupio/fury-distribution/v1.29.4/schemas/public/ekscluster-kfd-v1alpha2.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/sighupio/fury-distribution/v1.30.0/schemas/public/ekscluster-kfd-v1alpha2.json
 
 ---
 apiVersion: kfd.sighup.io/v1alpha2
@@ -9,7 +9,7 @@ kind: EKSCluster
 metadata:
   name: <CLUSTER_NAME>
 spec:
-  distributionVersion: v1.29.4
+  distributionVersion: v1.30.0
   toolsConfiguration:
     terraform:
       state:
@@ -48,6 +48,7 @@ spec:
         allowedFromCidrs:
           - 0.0.0.0/0
   kubernetes:
+    nodePoolGlobalAmiType: alinux2023
     nodePoolsLaunchKind: "launch_templates"
     nodeAllowedSshPublicKey: "{file:///path/to/id_rsa.pub}"
     logRetentionDays: 1
@@ -58,6 +59,7 @@ spec:
       publicAccessCidrs: ["0.0.0.0/0"]
     nodePools:
       - name: infra
+        type: self-managed
         size:
           min: 3
           max: 3
@@ -73,6 +75,7 @@ spec:
           k8s.io/cluster-autoscaler/node-template/label/node.kubernetes.io/role: "infra"
           k8s.io/cluster-autoscaler/node-template/taint/node.kubernetes.io/role: "infra:NoSchedule"
       - name: workers
+        type: self-managed
         size:
           min: 1
           max: 3
@@ -114,6 +117,8 @@ spec:
             create: true
       logging:
         type: loki
+        loki:
+          tsdbStartDate: "2024-12-03"
         minio:
           storageSize: 50Gi
       monitoring:

@@ -41,7 +41,7 @@ cd fury-getting-started/fury-on-minikube
     ```bash
     export REPO_DIR=$PWD
     export KUBECONFIG=$REPO_DIR/kubeconfig
-    minikube start --kubernetes-version v1.29.3 --memory=16384m --cpus=6
+    minikube start --kubernetes-version v1.30.6 --memory=16384m --cpus=6
     ```
 
     > ⚠️ This command will spin up by default a single-node Kubernetes v1.29.3 cluster, using the default driver, with 6 CPUs, 16GB RAM and 20 GB Disk.
@@ -56,7 +56,7 @@ cd fury-getting-started/fury-on-minikube
 
     ```bash
     NAME       STATUS   ROLES           AGE   VERSION
-    minikube   Ready    control-plane   9s    v1.29.3
+    minikube   Ready    control-plane   9s    v1.30.6
     ```
 
 ## Step 3 - Install furyctl
@@ -75,7 +75,7 @@ kind: KFDDistribution
 metadata:
   name: fury-local
 spec:
-  distributionVersion: v1.29.4
+  distributionVersion: v1.30.6
   distribution:
     kubeconfig: "{env://KUBECONFIG}"
     modules:
@@ -94,6 +94,8 @@ spec:
             type: http01
       logging:
         type: loki
+        loki:
+          tsdbStartDate: "2024-12-03"
       monitoring:
         type: prometheus
       policy:
@@ -141,8 +143,10 @@ In this example, we are installing the distribution with the following options:
 - Disabled master certificate-exporter, due to minikube incompatibilities
 
 > ℹ️ Usually, when using the dual ingress controller, the `internal.<ingress domain>` base domain is specified. For this occurence, since there is
-   just a single NGINX Ingress (for the purposes of this guide), only the ingress base domain is configured. Both, single or dual ingress configuration, are valid. Feel free to modify
-   the furyctl.yaml file according to your needs. For more information see [Ingress NGINX Dual](https://docs.kubernetesfury.com/docs/components/modules/ingress/dual-nginx) and [Ingress NGINX Single](https://docs.kubernetesfury.com/docs/components/modules/ingress/nginx) documentation pages.
+> just a single NGINX Ingress (for the purposes of this guide), only the ingress base domain is configured. Both, single or dual ingress configuration, are valid.
+> Feel free to edit the furyctl.yaml file according to your needs. For more information see
+> [Ingress NGINX Dual](https://docs.kubernetesfury.com/docs/components/modules/ingress/dual-nginx) and
+> [Ingress NGINX Single](https://docs.kubernetesfury.com/docs/components/modules/ingress/nginx) documentation pages.
 
 Execute the installation with furyctl:
 
@@ -226,7 +230,8 @@ Now, you can reach the ingresses directly from your browser.
 >  Forwarding from 127.0.0.1:31443 -> 8443
 >```
 >
->This command will forward both HTTP and HTTPS ports of the NGINX Ingress Controller to your localhost on ports 31080 and 31443 respectively. Leave that terminal window open while you need access to your applications. Inside your /etc/hosts file you can put 127.0.0.1 in place of minikube's IP.
+>This command will forward both HTTP and HTTPS ports of the NGINX Ingress Controller to your localhost on ports 31080 and 31443 respectively.
+>Leave that terminal window open while you need access to your applications. Inside your /etc/hosts file you can put 127.0.0.1 in place of minikube's IP.
 
 ### Forecastle
 
