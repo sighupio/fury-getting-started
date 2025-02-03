@@ -23,6 +23,12 @@ To follow this tutorial, you need:
 - Three VMs for the worker nodes (at least 4vCPU and 8GB RAM each)
 - `root` or passwordless sudo user SSH access to the VMs
 
+:::warning
+Since ARM support is still in *beta*, at the moment there
+is no support for HAProxy 3.0 in RHEL/RHEL-derivatives running
+on ARM hardware. HAProxy 3.0 on ARM is available on Ubuntu and Debian
+hosts.
+:::
 ## Step 0 - Setup and initialize the environment
 
 1. Open a terminal
