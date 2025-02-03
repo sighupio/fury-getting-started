@@ -12,7 +12,7 @@ This tutorial assumes some basic familiarity with Kubernetes.
 
 To follow this tutorial, you need:
 
-- **kubectl** - 1.30.x to interact with the cluster.
+- **kubectl** - 1.31.x to interact with the cluster.
 - **Ansible** - used by furyctl to execute the roles from KFD installers
 - VMs OS: Rocky Linux 8, Debian 12, or Ubuntu 20
 - Valid FQDN for all the VMs, with a valid domain: for example, each VM should have a corresponding DNS entry like `worker1.example.tld`, `worker2.example.tld`, `master1.worker.tld`, etc.
