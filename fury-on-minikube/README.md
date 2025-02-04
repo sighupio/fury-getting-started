@@ -44,7 +44,7 @@ cd fury-getting-started/fury-on-minikube
     minikube start --kubernetes-version v1.31.5 --memory=16384m --cpus=6
     ```
 
-    > ⚠️ This command will spin up by default a single-node Kubernetes v1.29.3 cluster, using the default driver, with 6 CPUs, 16GB RAM and 20 GB Disk.
+    > ⚠️ This command will spin up by default a single-node Kubernetes v1.31.5 cluster, using the default driver, with 6 CPUs, 16GB RAM and 20 GB Disk.
 
 2. Test the connection to the minikube cluster:
 
