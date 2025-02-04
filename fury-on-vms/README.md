@@ -12,7 +12,7 @@ This tutorial assumes some basic familiarity with Kubernetes.
 
 To follow this tutorial, you need:
 
-- **kubectl** - 1.30.x to interact with the cluster.
+- **kubectl** - 1.31.x to interact with the cluster.
 - **Ansible** - used by furyctl to execute the roles from KFD installers
 - VMs OS: Rocky Linux 8, Debian 12, or Ubuntu 20
 - Valid FQDN for all the VMs, with a valid domain: for example, each VM should have a corresponding DNS entry like `worker1.example.tld`, `worker2.example.tld`, `master1.worker.tld`, etc.
@@ -23,6 +23,12 @@ To follow this tutorial, you need:
 - Three VMs for the worker nodes (at least 4vCPU and 8GB RAM each)
 - `root` or passwordless sudo user SSH access to the VMs
 
+:::warning
+Since ARM support is still in *beta*, at the moment there
+is no support for HAProxy 3.0 in RHEL/RHEL-derivatives running
+on ARM hardware. HAProxy 3.0 on ARM is available on Ubuntu and Debian
+hosts.
+:::
 ## Step 0 - Setup and initialize the environment
 
 1. Open a terminal
