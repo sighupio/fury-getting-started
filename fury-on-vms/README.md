@@ -24,11 +24,11 @@ To follow this tutorial, you need:
 - `root` or passwordless sudo user SSH access to the VMs
 
 :::warning
-Since ARM support is still in *beta*, at the moment there
-is no support for HAProxy 3.0 in RHEL/RHEL-derivatives running
-on ARM hardware. HAProxy 3.0 on ARM is available on Ubuntu and Debian
-hosts.
+Support for the ARM platform is still in *beta* status, the Load Balancers managed by `furyctl` are not currently supported for **RHEL and RHEL derivatives** running on ARM.
+
+Please use a different OS for the Load Balancers VMs (or disable them and create your own load balancer) to be able to follow the tutorial.
 :::
+
 ## Step 0 - Setup and initialize the environment
 
 1. Open a terminal
